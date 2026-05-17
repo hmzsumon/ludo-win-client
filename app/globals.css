@@ -1,0 +1,3588 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "react-alice-carousel/lib/alice-carousel.css";
+
+@import "~slick-carousel/slick/slick.css";
+@import "~slick-carousel/slick/slick-theme.css";
+
+/* Hide scrollbar but still scrollable */
+body::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari and Opera */
+}
+
+/* Hide scrollbar but allow scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+:root {
+  /* Colores base para el board */
+  --game-red: #e02a29;
+  --game-blue: #0b92fe;
+  --game-yellow: #fbc620;
+  --game-green: #84c525;
+
+  /* Para el patrón del fondo del juego */
+  --bg-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='152' height='152' viewBox='0 0 152 152'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='temple' fill='%23013f88' fill-opacity='0.4'%3E%3Cpath d='M152 150v2H0v-2h28v-8H8v-20H0v-2h8V80h42v20h20v42H30v8h90v-8H80v-42h20V80h42v40h8V30h-8v40h-42V50H80V8h40V0h2v8h20v20h8V0h2v150zm-2 0v-28h-8v20h-20v8h28zM82 30v18h18V30H82zm20 18h20v20h18V30h-20V10H82v18h20v20zm0 2v18h18V50h-18zm20-22h18V10h-18v18zm-54 92v-18H50v18h18zm-20-18H28V82H10v38h20v20h38v-18H48v-20zm0-2V82H30v18h18zm-20 22H10v18h18v-18zm54 0v18h38v-20h20V82h-18v20h-20v20H82zm18-20H82v18h18v-18zm2-2h18V82h-18v18zm20 40v-18h18v18h-18zM30 0h-2v8H8v20H0v2h8v40h42V50h20V8H30V0zm20 48h18V30H50v18zm18-20H48v20H28v20H10V30h20V10h38v18zM30 50h18v18H30V50zm-2-40H10v18h18V10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+#__next {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
+}
+
+#root {
+  align-items: center;
+  display: flex;
+  height: auto;
+  min-height: 100vh;
+  justify-content: center;
+  width: 100%;
+}
+
+html {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+html,
+body {
+  background-color: #14041f;
+  font-family: Arial, Helvetica, sans-serif;
+  height: auto;
+  min-height: 100vh;
+  position: static;
+  padding-bottom: env(safe-area-inset-bottom);
+  width: 100%;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.app-default-bg {
+  background: url("/main_bg.webp");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: #14041f;
+}
+
+.brand-panel {
+  background: linear-gradient(
+    180deg,
+    rgba(67, 11, 88, 0.84) 0%,
+    rgba(34, 7, 54, 0.92) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(10px);
+}
+
+.brand-highlight-text_1 {
+  background: linear-gradient(180deg, #ffd8ff 0%, #ffa8ef 45%, #ff7ddf 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-highlight-text_2 {
+  background: linear-gradient(
+    90deg,
+    #ff2a1f 0%,
+    /* L - red */ #ff8a00 16%,
+    /* u - orange */ #ffd000 30%,
+    /* yellow */ #65e600 45%,
+    /* d - green */ #00a8ff 60%,
+    /* o - blue */ #9b22ff 76%,
+    /* W - purple */ #ff2f9d 100% /* in - pink */
+  );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  font-weight: 900;
+  text-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.35),
+    0 4px 8px rgba(0, 0, 0, 0.25);
+}
+
+.brand-highlight-text {
+  background: linear-gradient(
+    90deg,
+    #ff7a00 0%,
+    #ffd000 25%,
+    #52e600 45%,
+    #00b7ff 62%,
+    #9b35ff 78%,
+    #ff3aa8 100%
+  );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  font-weight: 900;
+  letter-spacing: 0.4px;
+
+  /* readable shadow */
+  filter: drop-shadow(1px 0 0 #ffffff) drop-shadow(-1px 0 0 #ffffff)
+    drop-shadow(0 1px 0 #ffffff) drop-shadow(0 -1px 0 #ffffff)
+    drop-shadow(0 3px 3px rgba(0, 0, 0, 0.55));
+}
+
+.reward-slogan {
+  color: #ffffff;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+
+  text-shadow:
+    0 2px 0 rgba(0, 42, 90, 0.75),
+    0 4px 8px rgba(0, 0, 0, 0.45);
+}
+
+.brand-bg-shell {
+  background: url("/main_bg.webp");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+div {
+  box-sizing: border-box;
+}
+
+/* Estilos globales para los botones */
+.button {
+  border-radius: 20px;
+  border: 2px solid #010f20;
+  border: none;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.3) 0px -5px 0px inset;
+  cursor: pointer;
+}
+
+.button:active {
+  box-shadow: none;
+  transform: translateY(2px);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.button.yellow {
+  background-color: #f5d41f;
+  color: #8b5f00;
+}
+
+.button.blue {
+  background-color: #216ed0;
+  color: white;
+}
+
+.button:disabled,
+.button[disabled] {
+  cursor: auto;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* From https://css.glass */
+.glass-effect {
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Para las animaciones globales... */
+@keyframes bounceIn {
+  from,
+  20%,
+  40%,
+  60%,
+  80%,
+  to {
+    -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+
+  0% {
+    opacity: 0;
+    -webkit-transform: scale3d(0.3, 0.3, 0.3);
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+
+  20% {
+    -webkit-transform: scale3d(1.1, 1.1, 1.1);
+    transform: scale3d(1.1, 1.1, 1.1);
+  }
+
+  40% {
+    -webkit-transform: scale3d(0.9, 0.9, 0.9);
+    transform: scale3d(0.9, 0.9, 0.9);
+  }
+
+  60% {
+    opacity: 1;
+    -webkit-transform: scale3d(1.03, 1.03, 1.03);
+    transform: scale3d(1.03, 1.03, 1.03);
+  }
+
+  80% {
+    -webkit-transform: scale3d(0.97, 0.97, 0.97);
+    transform: scale3d(0.97, 0.97, 0.97);
+  }
+
+  to {
+    opacity: 1;
+    -webkit-transform: scale3d(1, 1, 1);
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+@keyframes bounceOut {
+  20% {
+    -webkit-transform: scale3d(0.9, 0.9, 0.9);
+    transform: scale3d(0.9, 0.9, 0.9);
+  }
+
+  50%,
+  55% {
+    opacity: 1;
+    -webkit-transform: scale3d(1.1, 1.1, 1.1);
+    transform: scale3d(1.1, 1.1, 1.1);
+  }
+
+  to {
+    opacity: 0;
+    -webkit-transform: scale3d(0.3, 0.3, 0.3);
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    -webkit-transform: translate3d(-100%, 0, 0);
+    transform: translate3d(-100%, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    -webkit-transform: translate3d(0, 100%, 0);
+    transform: translate3d(0, 100%, 0);
+  }
+
+  to {
+    opacity: 1;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeOutDown {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    -webkit-transform: translate3d(0, 100%, 0);
+    transform: translate3d(0, 100%, 0);
+  }
+}
+
+/* ────────── Ludo: container styles ────────── */
+.container {
+  width: 100vw;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* .screen {
+  align-items: center;
+  background-color: #00a6df;
+  background-image: var(--bg-image);
+  display: flex;
+  height: var(--base-height);
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  width: var(--base-width);
+  transform-origin: center center;
+} */
+
+.screen {
+  align-items: center;
+  background-color: #00a6df;
+  background-image: var(--bg-image);
+  display: flex;
+  height: var(--base-height);
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  width: var(--base-width);
+  transform-origin: center center;
+}
+
+@media only screen and (max-width: 420px) {
+  .screen {
+    background-color: unset;
+    background-image: unset;
+  }
+
+  body {
+    background-color: #00a6df;
+    background-image: var(--bg-image);
+  }
+}
+
+/* ────────── auth: start Registration css ────────── */
+
+/* ────────── auth: End Registration css ────────── */
+/* ────────── Ludo: page styles ────────── */
+/* ────────── Ludo: page styles ────────── */
+.page-wrapper {
+  align-items: center;
+  display: flex;
+  height: auto;
+  min-height: 100vh;
+  justify-content: center;
+  width: 100%;
+  flex-direction: column;
+}
+
+.page-wrapper-options {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+/* ────────── Ludo: board styles ────────── */ /*
+  Para crear el board se ha realizado los siguiente:
+  * En la clase principal game-board se establece las
+  celdas de salida y las seguras, por defecto estás quedan detras de la grilla.
+  * En el before de la clase game-board se crea la grilla, que queda encima de las celdas de llegada.
+  * En el after de la clase game-board se crea los 4 elementos de salida,
+  los elementos de llegada y las estrellas, que quedan por encima de la grilla.
+  Es decir que existen tres capas.
+
+  Los valores de -size-tile y --size-board son calculados en JS y pasados a CSS,
+  los valores son calculados en relacioón a estos valores, permitiendo que sea responsive.
+*/
+.game-board {
+  /* Color de fondo de la base del punto de inicio */
+  --nest-grid-bg: white;
+  --nest-grid-color: black;
+  --nest-start-bg: #c4c3c2;
+  --nest-bottom-left-bg: var(--game-red);
+  --nest-top-left-bg: var(--game-green);
+  --nest-top-right-bg: var(--game-yellow);
+  --nest-bottom-right-bg: var(--game-blue);
+  /* Tamaño del contenedor principal del punto de inicio */
+  --nest-size: calc(var(--size-tile) * 6);
+  /* Para el tamaño de los circulos del punto de inicio */
+  --nest-size-circle: calc(var(--size-tile) * 3);
+  /* Color del container del punto de inicio */
+  --nest-container-bg: rgba(0, 0, 0, 0.3);
+  /* Color de los círculos en el punto de inicio */
+  --nest-circle-bg: rgba(0, 0, 0, 0.5);
+  --start-bg: white;
+  /* Tamaño para el contaner del punto de inicio */
+  --nest-size-container: calc(var(--size-tile) * 4.5);
+  /* Posición del container del punto de inicio */
+  --nest-container-pos: calc(var(--size-tile) / 1.4);
+  /* Para los posiciones de los circulos en el punto de inicio */
+  --nest-circle-position-1-x: calc(var(--size-tile) / 2);
+  --nest-circle-position-1-y: calc(var(--size-tile) / 2);
+
+  --nest-circle-position-2-x: calc(calc(var(--size-tile) / 2) * 5);
+  --nest-circle-position-2-y: calc(var(--size-tile) / 2);
+
+  --nest-circle-position-3-x: calc(var(--size-tile) / 2);
+  --nest-circle-position-3-y: calc(calc(var(--size-tile) / 2) * 5);
+
+  --nest-circle-position-4-x: calc(calc(var(--size-tile) / 2) * 5);
+  --nest-circle-position-4-y: calc(calc(var(--size-tile) / 2) * 5);
+  /* Los valores que se pondrá en el background-size para los circulos de inicio */
+  --nest-size-elements:
+    var(--nest-size-circle) var(--nest-size-circle),
+    var(--nest-size-circle) var(--nest-size-circle),
+    var(--nest-size-circle) var(--nest-size-circle),
+    var(--nest-size-circle) var(--nest-size-circle),
+    var(--nest-size-container) var(--nest-size-container),
+    var(--nest-size) var(--nest-size);
+
+  /* Incremento de posición para los demás puntos de salida. */
+  /* Se cálculo en primer punto de salida (top-left (0, 0)), con este valor se 
+  hace la posición de los demás multiplcando el valor cunando se requeire */
+  --nest-increase-position: calc(var(--size-tile) * 9);
+
+  /* Para el punto de salida de la parte superior izquierda */
+  --nest-top-left:
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    linear-gradient(var(--nest-container-bg), var(--nest-container-bg)),
+    linear-gradient(var(--nest-top-left-bg), var(--nest-top-left-bg));
+
+  /* Valor que se pone en el background-position para las posiciones de cada elemento */
+  --nest-top-left-position:
+    var(--nest-circle-position-1-x) var(--nest-circle-position-1-y),
+    var(--nest-circle-position-2-x) var(--nest-circle-position-2-y),
+    var(--nest-circle-position-3-x) var(--nest-circle-position-3-y),
+    var(--nest-circle-position-4-x) var(--nest-circle-position-4-y),
+    var(--nest-container-pos) var(--nest-container-pos), 0 0;
+
+  /* Para el punto de salida de la parte superior derecha */
+  --nest-top-right:
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    linear-gradient(var(--nest-container-bg), var(--nest-container-bg)),
+    linear-gradient(var(--nest-top-right-bg), var(--nest-top-right-bg));
+
+  --nest-top-right-position:
+    calc(var(--nest-circle-position-1-x) + var(--nest-increase-position))
+      var(--nest-circle-position-1-y),
+    calc(var(--nest-circle-position-2-x) + var(--nest-increase-position))
+      var(--nest-circle-position-2-y),
+    calc(var(--nest-circle-position-3-x) + var(--nest-increase-position))
+      var(--nest-circle-position-3-y),
+    calc(var(--nest-circle-position-4-x) + var(--nest-increase-position))
+      var(--nest-circle-position-4-y),
+    calc(var(--nest-container-pos) + var(--nest-increase-position))
+      var(--nest-container-pos),
+    var(--nest-increase-position) 0;
+
+  /* Para el punto de salida de la parte abajo izquierda */
+  --nest-bottom-left:
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    linear-gradient(var(--nest-container-bg), var(--nest-container-bg)),
+    linear-gradient(var(--nest-bottom-left-bg), var(--nest-bottom-left-bg));
+
+  --nest-bottom-left-position:
+    var(--nest-circle-position-1-x)
+      calc(var(--nest-circle-position-1-y) + var(--nest-increase-position)),
+    var(--nest-circle-position-2-x)
+      calc(var(--nest-circle-position-2-y) + var(--nest-increase-position)),
+    var(--nest-circle-position-3-x)
+      calc(var(--nest-circle-position-3-y) + var(--nest-increase-position)),
+    var(--nest-circle-position-4-x)
+      calc(var(--nest-circle-position-4-y) + var(--nest-increase-position)),
+    var(--nest-container-pos)
+      calc(var(--nest-container-pos) + var(--nest-increase-position)),
+    0 var(--nest-increase-position);
+
+  /* Para el punto de salida de la parte abajo derecha */
+  --nest-bottom-right:
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    radial-gradient(circle, var(--nest-circle-bg) 30%, rgba(0, 0, 0, 0) 0),
+    linear-gradient(var(--nest-container-bg), var(--nest-container-bg)),
+    linear-gradient(var(--nest-bottom-right-bg), var(--nest-bottom-right-bg));
+
+  --nest-bottom-right-position:
+    calc(var(--nest-circle-position-1-x) + var(--nest-increase-position))
+      calc(var(--nest-circle-position-1-y) + var(--nest-increase-position)),
+    calc(var(--nest-circle-position-2-x) + var(--nest-increase-position))
+      calc(var(--nest-circle-position-2-y) + var(--nest-increase-position)),
+    calc(var(--nest-circle-position-3-x) + var(--nest-increase-position))
+      calc(var(--nest-circle-position-3-y) + var(--nest-increase-position)),
+    calc(var(--nest-circle-position-4-x) + var(--nest-increase-position))
+      calc(var(--nest-circle-position-4-y) + var(--nest-increase-position)),
+    calc(var(--nest-container-pos) + var(--nest-increase-position))
+      calc(var(--nest-container-pos) + var(--nest-increase-position)),
+    var(--nest-increase-position) var(--nest-increase-position);
+
+  /* Para los elementos de la meta */
+  /* Correponde a los triángulos a donde llegan los tokens al final */
+  --finish-elements-size-value: calc(var(--size-tile) * 3);
+  --finish-elements-size-value-half: calc(
+    var(--finish-elements-size-value) / 2
+  );
+
+  --finish-elements-position-value: calc(var(--size-tile) * 6);
+
+  --finish-elements-position-value-half: calc(
+    var(--finish-elements-position-value) +
+      var(--finish-elements-size-value-half)
+  );
+
+  /*
+    Los dos primeros linear-gradient corresponden al triangulo de abajo, en este
+    caso se crean dos triangulos...
+    El tercer linear-gradient correspnde al triángulo de la izquierda
+    El cuarto linear-gradient es el tringulo de arriba
+    Y el último corresponde al de la derecha
+    */
+  --finish-elements:
+    linear-gradient(
+      to left bottom,
+      transparent 50%,
+      var(--nest-bottom-left-bg) 0
+    ),
+    linear-gradient(
+      to right bottom,
+      transparent 50%,
+      var(--nest-bottom-left-bg) 0
+    ),
+    linear-gradient(to left bottom, transparent 50%, var(--nest-top-left-bg) 0),
+    linear-gradient(
+      to right bottom,
+      var(--nest-top-right-bg) 50%,
+      transparent 0
+    ),
+    linear-gradient(var(--nest-bottom-right-bg), var(--nest-bottom-right-bg));
+
+  /*
+    El valor correspondiente al tamaño de cada triángulo,
+    debido a que para el primer triangulo son dos se establece la mitad para cada uno,
+    este valor siempre es en par (ancho, alto), por ello para el primero existen 4 valores,
+    para los demás son dos, por ello existen 10 valores.
+  */
+  --finish-elements-size:
+    var(--finish-elements-size-value-half)
+      var(--finish-elements-size-value-half),
+    var(--finish-elements-size-value-half)
+      var(--finish-elements-size-value-half),
+    var(--finish-elements-size-value) var(--finish-elements-size-value),
+    var(--finish-elements-size-value) var(--finish-elements-size-value),
+    var(--finish-elements-size-value) var(--finish-elements-size-value);
+
+  /*
+    Para la posición de los trinagulos, son coordenadas (x,y) en pixeles, 
+    al igual que el size se tienen 10 por que el primero triangulo es la combinación de 
+    trinagulos.
+  */
+  --finish-elements-position:
+    var(--finish-elements-position-value-half)
+      var(--finish-elements-position-value-half),
+    var(--finish-elements-position-value)
+      var(--finish-elements-position-value-half),
+    var(--finish-elements-position-value) var(--finish-elements-position-value),
+    var(--finish-elements-position-value) var(--finish-elements-position-value),
+    var(--finish-elements-position-value) var(--finish-elements-position-value);
+
+  /* Para los ítems finales superior */
+  /*
+    ítems reacionados a la celdas de salida la priumera celda,
+    tiene un color diferente en este caso determinado que es una zona segura,
+    los demás colores dependen del giro del tablero...
+  */
+  --finish-row-base: calc(var(--size-tile) * 7);
+  --finish-row-top:
+    linear-gradient(var(--nest-start-bg), var(--nest-start-bg)),
+    linear-gradient(var(--nest-top-right-bg), var(--nest-top-right-bg)),
+    linear-gradient(var(--nest-top-right-bg), var(--nest-top-right-bg)),
+    linear-gradient(var(--nest-top-right-bg), var(--nest-top-right-bg)),
+    linear-gradient(var(--nest-top-right-bg), var(--nest-top-right-bg)),
+    linear-gradient(var(--nest-top-right-bg), var(--nest-top-right-bg));
+
+  --finish-row-top-position:
+    var(--finish-row-base) 0, var(--finish-row-base) var(--size-tile),
+    var(--finish-row-base) calc(var(--size-tile) * 2),
+    var(--finish-row-base) calc(var(--size-tile) * 3),
+    var(--finish-row-base) calc(var(--size-tile) * 4),
+    var(--finish-row-base) calc(var(--size-tile) * 5);
+
+  /* Para las celdas de salida de la izquierda... */
+  --finish-row-left:
+    linear-gradient(var(--nest-start-bg), var(--nest-start-bg)),
+    linear-gradient(var(--nest-top-left-bg), var(--nest-top-left-bg)),
+    linear-gradient(var(--nest-top-left-bg), var(--nest-top-left-bg)),
+    linear-gradient(var(--nest-top-left-bg), var(--nest-top-left-bg)),
+    linear-gradient(var(--nest-top-left-bg), var(--nest-top-left-bg)),
+    linear-gradient(var(--nest-top-left-bg), var(--nest-top-left-bg));
+
+  --finish-row-left-position:
+    0 var(--finish-row-base), var(--size-tile) var(--finish-row-base),
+    calc(var(--size-tile) * 2) var(--finish-row-base),
+    calc(var(--size-tile) * 3) var(--finish-row-base),
+    calc(var(--size-tile) * 4) var(--finish-row-base),
+    calc(var(--size-tile) * 5) var(--finish-row-base);
+
+  /* Para las celdas de salida de la derecha... */
+  --finish-row-right:
+    linear-gradient(var(--nest-bottom-right-bg), var(--nest-bottom-right-bg)),
+    linear-gradient(var(--nest-bottom-right-bg), var(--nest-bottom-right-bg)),
+    linear-gradient(var(--nest-bottom-right-bg), var(--nest-bottom-right-bg)),
+    linear-gradient(var(--nest-bottom-right-bg), var(--nest-bottom-right-bg)),
+    linear-gradient(var(--nest-bottom-right-bg), var(--nest-bottom-right-bg)),
+    linear-gradient(var(--nest-start-bg), var(--nest-start-bg));
+
+  --finish-row-right-position:
+    calc(var(--size-tile) * 9) var(--finish-row-base),
+    calc(var(--size-tile) * 10) var(--finish-row-base),
+    calc(var(--size-tile) * 11) var(--finish-row-base),
+    calc(var(--size-tile) * 12) var(--finish-row-base),
+    calc(var(--size-tile) * 13) var(--finish-row-base),
+    calc(var(--size-tile) * 14) var(--finish-row-base);
+
+  /* Para las celdas de salida de abajo... */
+  --finish-bottom-right:
+    linear-gradient(var(--nest-bottom-left-bg), var(--nest-bottom-left-bg)),
+    linear-gradient(var(--nest-bottom-left-bg), var(--nest-bottom-left-bg)),
+    linear-gradient(var(--nest-bottom-left-bg), var(--nest-bottom-left-bg)),
+    linear-gradient(var(--nest-bottom-left-bg), var(--nest-bottom-left-bg)),
+    linear-gradient(var(--nest-bottom-left-bg), var(--nest-bottom-left-bg)),
+    linear-gradient(var(--nest-start-bg), var(--nest-start-bg));
+
+  --finish-bottom-right-position:
+    var(--finish-row-base) calc(var(--size-tile) * 9),
+    var(--finish-row-base) calc(var(--size-tile) * 10),
+    var(--finish-row-base) calc(var(--size-tile) * 11),
+    var(--finish-row-base) calc(var(--size-tile) * 12),
+    var(--finish-row-base) calc(var(--size-tile) * 13),
+    var(--finish-row-base) calc(var(--size-tile) * 14);
+
+  /* Para las zonas seguras */
+  /* Mostrará  las celdas que son seguras */
+  --safe-points:
+    linear-gradient(var(--nest-start-bg), var(--nest-start-bg)),
+    linear-gradient(var(--nest-top-right-bg), var(--nest-top-right-bg)),
+    linear-gradient(var(--nest-start-bg), var(--nest-start-bg)),
+    linear-gradient(var(--nest-bottom-right-bg), var(--nest-bottom-right-bg)),
+    linear-gradient(var(--nest-start-bg), var(--nest-start-bg)),
+    linear-gradient(var(--nest-bottom-left-bg), var(--nest-bottom-left-bg)),
+    linear-gradient(var(--nest-start-bg), var(--nest-start-bg)),
+    linear-gradient(var(--nest-top-left-bg), var(--nest-top-left-bg));
+
+  --safe-points-position:
+    calc(var(--size-tile) * 6) calc(var(--size-tile) * 2),
+    calc(var(--size-tile) * 8) var(--size-tile),
+    calc(var(--size-tile) * 12) calc(var(--size-tile) * 6),
+    calc(var(--size-tile) * 13) calc(var(--size-tile) * 8),
+    calc(var(--size-tile) * 8) calc(var(--size-tile) * 12),
+    calc(var(--size-tile) * 6) calc(var(--size-tile) * 13),
+    calc(var(--size-tile) * 2) calc(var(--size-tile) * 8),
+    var(--size-tile) calc(var(--size-tile) * 6);
+
+  /* Para las estrellas... */
+  /* Para crear las estrellas que se mostrarán en las celdas seguras */
+  --start:
+    linear-gradient(to left bottom, transparent 50%, var(--start-bg) 0),
+    linear-gradient(to right bottom, transparent 50%, var(--start-bg) 0),
+    linear-gradient(to left top, transparent 50%, var(--start-bg) 0),
+    linear-gradient(to right top, transparent 50%, var(--start-bg) 0);
+
+  --start-center-x-1: calc(var(--size-tile) * 0.46);
+  --start-center-x-2: calc(var(--size-tile) * 0.16);
+
+  --start-center-y-1: calc(var(--size-tile) * 0.2);
+  --start-center-y-2: calc(var(--size-tile) * 0.35);
+
+  --start-size-x: calc(var(--size-tile) * 0.3);
+  --start-size-y: calc(var(--size-tile) * 0.4);
+
+  --safe-stars-base-size:
+    var(--start-size-x) var(--start-size-y),
+    var(--start-size-x) var(--start-size-y),
+    var(--start-size-x) var(--start-size-y),
+    var(--start-size-x) var(--start-size-y);
+
+  --safe-starts:
+    var(--start), var(--start), var(--start), var(--start), var(--start),
+    var(--start), var(--start), var(--start);
+
+  /*
+    Se tienen tienen en total 12 estrellas para 12 celdas seguras,
+    en este caso se calcula la posición para cada estrella...
+  */
+  --safe-starts-position-1:
+    calc(calc(var(--size-tile) * 6) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 2) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 6) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 2) + var(--start-center-y-1)),
+    /* nuevos */ calc(calc(var(--size-tile) * 6) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 2) + var(--start-center-y-2)),
+    calc(calc(var(--size-tile) * 6) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 2) + var(--start-center-y-2));
+
+  --safe-starts-position-2:
+    calc(calc(var(--size-tile) * 8) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 1) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 8) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 1) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 8) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 1) + var(--start-center-y-2)),
+    calc(calc(var(--size-tile) * 8) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 1) + var(--start-center-y-2));
+
+  --safe-starts-position-3:
+    calc(calc(var(--size-tile) * 12) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 6) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 12) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 6) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 12) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 6) + var(--start-center-y-2)),
+    calc(calc(var(--size-tile) * 12) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 6) + var(--start-center-y-2));
+
+  --safe-starts-position-4:
+    calc(calc(var(--size-tile) * 13) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 8) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 13) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 8) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 13) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 8) + var(--start-center-y-2)),
+    calc(calc(var(--size-tile) * 13) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 8) + var(--start-center-y-2));
+
+  --safe-starts-position-5:
+    calc(calc(var(--size-tile) * 8) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 12) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 8) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 12) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 8) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 12) + var(--start-center-y-2)),
+    calc(calc(var(--size-tile) * 8) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 12) + var(--start-center-y-2));
+
+  --safe-starts-position-6:
+    calc(calc(var(--size-tile) * 6) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 13) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 6) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 13) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 6) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 13) + var(--start-center-y-2)),
+    calc(calc(var(--size-tile) * 6) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 13) + var(--start-center-y-2));
+
+  --safe-starts-position-7:
+    calc(calc(var(--size-tile) * 2) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 8) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 2) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 8) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 2) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 8) + var(--start-center-y-2)),
+    calc(calc(var(--size-tile) * 2) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 8) + var(--start-center-y-2));
+
+  --safe-starts-position-8:
+    calc(calc(var(--size-tile) * 1) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 6) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 1) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 6) + var(--start-center-y-1)),
+    calc(calc(var(--size-tile) * 1) + var(--start-center-x-1))
+      calc(calc(var(--size-tile) * 6) + var(--start-center-y-2)),
+    calc(calc(var(--size-tile) * 1) + var(--start-center-x-2))
+      calc(calc(var(--size-tile) * 6) + var(--start-center-y-2));
+
+  --safe-starts-position:
+    var(--safe-starts-position-1), var(--safe-starts-position-2),
+    var(--safe-starts-position-3), var(--safe-starts-position-4),
+    var(--safe-starts-position-5), var(--safe-starts-position-6),
+    var(--safe-starts-position-7), var(--safe-starts-position-8);
+
+  --safe-stars-size:
+    var(--safe-stars-base-size), var(--safe-stars-base-size),
+    var(--safe-stars-base-size), var(--safe-stars-base-size),
+    var(--safe-stars-base-size), var(--safe-stars-base-size),
+    var(--safe-stars-base-size), var(--safe-stars-base-size);
+}
+
+.game-board {
+  background-color: var(--nest-grid-bg);
+  border-radius: 10px;
+  box-shadow:
+    var(--nest-grid-color) 0px 0px 0px 3px,
+    #be835d 0px 0px 0px 6px,
+    rgb(255, 217, 19) 0px 0px 0px 9px;
+  height: var(--size-board);
+  position: relative;
+  width: var(--size-board);
+
+  /* Mestra las celdas de salida y las celda seguras */
+  background-image:
+    var(--finish-row-top), var(--finish-row-left), var(--finish-row-right),
+    var(--finish-bottom-right), var(--safe-points);
+
+  background-size: var(--size-tile) var(--size-tile);
+
+  background-position:
+    var(--finish-row-top-position), var(--finish-row-left-position),
+    var(--finish-row-right-position), var(--finish-bottom-right-position),
+    var(--safe-points-position);
+
+  background-repeat: no-repeat;
+}
+
+.game-board::before {
+  content: "";
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  position: absolute;
+  border-radius: 10px;
+  background:
+    repeating-linear-gradient(
+      to right,
+      transparent,
+      transparent calc(var(--size-tile) - 1px),
+      var(--nest-grid-color) calc(var(--size-tile) - 1px),
+      var(--nest-grid-color) var(--size-tile)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent calc(var(--size-tile) - 1px),
+      var(--nest-grid-color) calc(var(--size-tile) - 1px),
+      var(--nest-grid-color) var(--size-tile)
+    );
+}
+
+.game-board::after {
+  content: "";
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  position: absolute;
+  border-radius: 10px;
+
+  /*
+    * Muestra los 4 elementos de salida.
+    * Los 4 elementos de llegada (puntos finales).
+    * Las estrellas.
+  */
+  background-image:
+    var(--safe-starts), var(--finish-elements), var(--nest-top-left),
+    var(--nest-top-right), var(--nest-bottom-left), var(--nest-bottom-right);
+
+  background-size:
+    var(--safe-stars-size), var(--finish-elements-size),
+    var(--nest-size-elements), var(--nest-size-elements),
+    var(--nest-size-elements), var(--nest-size-elements);
+
+  background-position:
+    var(--safe-starts-position), var(--finish-elements-position),
+    var(--nest-top-left-position), var(--nest-top-right-position),
+    var(--nest-bottom-left-position), var(--nest-bottom-right-position);
+
+  background-repeat: no-repeat;
+}
+
+/*
+  Clases que cambian los colores del tablero, lo rotan.
+  Se toma desde el punto de salida de la parte inferior abajo,
+  sigue con el de la derecha de abajo, derecha arriba y izquieda arriba.
+  el valor por defecto del tablero es:
+  rbyg -> Rojo, azul, amarillo y verde, no es necesaria la clase ya que
+  las variables de css tienen esos valores inicialmemte
+  Los demás son:
+
+  * RGYB -> Rojo, verde, amarillo y azul, color por defecto...
+  * BRGY -> Azul, Rojom verde y amarillo. *
+  * YBRG -> Amarillo, azul, rojo y verde *
+  * GYBR -> Verde, amarillo, azul y rojo...
+*/
+.game-board.BRGY {
+  --nest-bottom-left-bg: var(--game-blue);
+  --nest-top-left-bg: var(--game-red);
+  --nest-top-right-bg: var(--game-green);
+  --nest-bottom-right-bg: var(--game-yellow);
+}
+
+.game-board.YBRG {
+  --nest-bottom-left-bg: var(--game-yellow);
+  --nest-top-left-bg: var(--game-blue);
+  --nest-top-right-bg: var(--game-red);
+  --nest-bottom-right-bg: var(--game-green);
+}
+
+.game-board.GYBR {
+  --nest-bottom-left-bg: var(--game-green);
+  --nest-top-left-bg: var(--game-yellow);
+  --nest-top-right-bg: var(--game-blue);
+  --nest-bottom-right-bg: var(--game-red);
+}
+
+/* ────────── Ludo: board wrapper styles ────────── */
+.game-board-wrapper {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+}
+
+/* ────────── Ludo: game-debug styles ────────── */
+.game-debug-tile {
+  align-items: center;
+  display: flex;
+  font-size: 11px;
+  font-weight: bold;
+  justify-content: center;
+  position: absolute;
+  text-shadow: white 0px 0px 2px;
+  z-index: 1;
+}
+
+.game-debug-tokens {
+  position: absolute;
+  bottom: 15px;
+}
+
+.game-debug-dice {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.game-debug-dice button {
+  cursor: pointer;
+  font-weight: bold;
+  height: 25px;
+  width: 25px;
+}
+
+.game-debug-selects {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.game-debug-copy {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.game-debug-copy button {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* ────────── Ludo: game-dice styles ────────── */
+.game-dice {
+  --point: radial-gradient(circle, black 35%, rgba(255, 255, 255, 0) 50%);
+}
+
+.game-dice {
+  background-color: white;
+  border-radius: 2px;
+  position: relative;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -1px 0px inset;
+}
+
+.game-dice.animate {
+  animation: bounceIn 1s both;
+}
+
+.game-dice::after {
+  background-repeat: no-repeat;
+  background-size: 30% 30%;
+  content: "";
+  filter: drop-shadow(0 0 1px black);
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+.game-dice.dice-1::after {
+  background-image: var(--point);
+  background-position: 50% 50%;
+}
+
+.game-dice.dice-2::after {
+  background-image: var(--point), var(--point);
+  background-position:
+    90% 10%,
+    10% 90%;
+}
+
+.game-dice.dice-3::after {
+  background-image: var(--point), var(--point), var(--point);
+  background-position:
+    90% 10%,
+    50% 50%,
+    10% 90%;
+}
+
+.game-dice.dice-4::after {
+  background-image: var(--point), var(--point), var(--point), var(--point);
+  background-position:
+    10% 90%,
+    10% 10%,
+    90% 10%,
+    90% 90%;
+}
+
+.game-dice.dice-5::after {
+  background-image:
+    var(--point), var(--point), var(--point), var(--point), var(--point);
+  background-position:
+    10% 90%,
+    10% 10%,
+    50% 50%,
+    90% 10%,
+    90% 90%;
+}
+
+.game-dice.dice-6::after {
+  background-image:
+    var(--point), var(--point), var(--point), var(--point), var(--point),
+    var(--point);
+  background-position:
+    10% 90%,
+    10% 10%,
+    10% 50%,
+    90% 10%,
+    90% 90%,
+    90% 50%;
+}
+
+/* ────────── Ludo: backButton styles ────────── */
+/* ────────── Ludo: backButton styles ────────── */
+/* ────────── Ludo: backButton styles ────────── */
+.game-back-button {
+  align-items: center;
+  border-radius: 5px;
+  display: flex;
+  height: 35px;
+  justify-content: center;
+  width: 35px;
+}
+
+.game-back-button .icon-wrapper {
+  width: 80%;
+}
+
+/* ────────── Ludo: options styles ────────── */
+.lobby-options {
+  align-items: center;
+  animation: fadeInLeft 250ms ease both;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  justify-content: baseline;
+  margin: 40px 0;
+  width: 80%;
+}
+
+.lobby-options .button {
+  align-items: center;
+  border-radius: 10px;
+  display: flex;
+  font-size: 23px;
+  font-weight: bold;
+  justify-content: space-between;
+  padding: 15px;
+  text-decoration: none;
+  text-transform: uppercase;
+  width: 70%;
+}
+
+.lobby-options .button .icon-wrapper {
+  width: 30px;
+}
+
+/* ────────── Ludo: toolbar styles ────────── */
+.lobby-options-toolbar {
+  align-items: center;
+  animation: bounceIn 800ms ease both;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 30px;
+  width: 50%;
+}
+
+.lobby-options-toolbar .button {
+  align-items: center;
+  border-radius: 5px;
+  display: flex;
+  height: 50px;
+  justify-content: center;
+  width: 50px;
+}
+
+.lobby-options-toolbar .button .icon-wrapper {
+  width: 30px;
+}
+
+/* ────────── Ludo: game-over-wrapper styles ────────── */
+.game-over-wrapper {
+  background: rgb(0 0 0 / 80%);
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.game-over-wrapper img {
+  background-color: #e4e4e4;
+}
+
+.game-over-options {
+  animation: fadeInLeft 500ms ease both;
+  width: 75%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.game-over-container .ribbon {
+  top: -50px;
+  position: absolute;
+}
+
+.game-over-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  padding: 35px 0 15px 0;
+  border-radius: 5px;
+  background: rgb(160, 34, 107);
+  background: radial-gradient(
+    circle,
+    rgba(160, 34, 107, 1) 16%,
+    rgba(95, 8, 98, 1) 100%
+  );
+  box-shadow:
+    black 0px 0px 0px 3px,
+    #be835d 0px 0px 0px 6px,
+    rgb(255, 217, 19) 0px 0px 0px 9px;
+}
+
+.game-over-container-others {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  width: 85%;
+}
+
+.game-over-container-winner {
+  align-items: center;
+  background-color: #90367c;
+  border-radius: 5px;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 13px 27px -5px,
+    rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom: 15px;
+  padding: 20px 0;
+  width: 85%;
+}
+
+.game-over-container-winner-photo {
+  position: relative;
+}
+
+.game-over-container-winner-photo svg {
+  position: absolute;
+  width: 45px;
+  height: 45px;
+  top: -36px;
+  left: 5px;
+  z-index: 1;
+}
+
+.game-over-container-winner-photo img {
+  border-radius: 50%;
+  box-shadow:
+    rgba(0, 0, 0, 0.16) 0px 1px 4px,
+    rgb(51, 51, 51) 0px 0px 0px 3px;
+  height: 55px;
+  width: 55px;
+}
+
+.game-over-container-winner-photo span {
+  position: absolute;
+  color: yellow;
+  font-size: 18px;
+  right: -30px;
+}
+
+.game-over-container-winner-name {
+  font-size: 13px;
+  font-weight: bold;
+  margin-top: 5px;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-shadow: 0px 0px 1px black;
+  text-transform: uppercase;
+  white-space: nowrap;
+  width: 200px;
+}
+
+.game-over-container-player {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100px;
+}
+
+.game-over-container-player img {
+  border-radius: 50%;
+  box-shadow:
+    rgba(0, 0, 0, 0.16) 0px 1px 4px,
+    rgb(51, 51, 51) 0px 0px 0px 3px;
+  height: 35px;
+  width: 35px;
+}
+
+.game-over-container-player span {
+  color: white;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.game-over-container-player div {
+  font-size: 12px;
+  margin-top: 5px;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-shadow: 0px 0px 1px black;
+  white-space: nowrap;
+  font-weight: bold;
+  width: 80px;
+}
+
+.game-over-color.red {
+  color: var(--game-red);
+}
+
+.game-over-color.blue {
+  color: var(--game-blue);
+}
+
+.game-over-color.yellow {
+  color: var(--game-yellow);
+}
+
+.game-over-color.green {
+  color: var(--game-green);
+}
+
+.game-over-buttons {
+  width: 100%;
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.game-over-buttons .button {
+  align-items: center;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  height: 50px;
+  justify-content: center;
+  width: 50px;
+}
+
+.game-over-buttons .icon-wrapper {
+  width: 60%;
+}
+
+/* ────────── Ludo: game-profile styles ────────── */
+.game-profile-section {
+  display: flex;
+  margin: 10px;
+  width: 100%;
+}
+
+.game-profile-section-container {
+  padding: 5px 10px;
+  width: 50%;
+}
+
+/* ────────── Ludo: profile styles ────────── */
+.game-profile {
+  position: relative;
+  width: 100%;
+}
+
+.game-profile-dice-name {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.game-profile.bottom .game-profile-dice-name {
+  flex-direction: column-reverse;
+}
+
+.game-profile.right .game-profile-dice-name {
+  align-items: flex-end;
+}
+
+.game-profile.right .game-profile-dices {
+  flex-direction: row-reverse;
+}
+
+.game-profile.right .game-profile-name-dice {
+  justify-content: flex-end;
+}
+
+.game-profile.right .game-profile-name {
+  text-align: right;
+}
+
+.game-profile.bottom .game-profile-dice {
+  top: 30px;
+}
+
+.game-profile.bottom .game-profile-ranking {
+  top: 36px;
+}
+
+.game-profile.top .game-profile-ranking {
+  top: 0;
+}
+
+.game-profile.left .game-profile-ranking {
+  left: 55px;
+}
+
+.game-profile.right .game-profile-ranking {
+  right: 55px;
+}
+
+/* ────────── Ludo: image profile styles ────────── */
+.game-profile-image {
+  background-color: black;
+  height: 50px;
+  position: relative;
+  width: 50px;
+}
+
+.game-profile-image-avatar {
+  background-color: #e4e4e4;
+  border-radius: 5px;
+  box-shadow:
+    rgba(0, 0, 0, 0.16) 0px 1px 4px,
+    rgb(51, 51, 51) 0px 0px 0px 3px;
+  height: 100%;
+  width: 100%;
+}
+
+.game-profile-image-progress {
+  background: conic-gradient(transparent var(--progress), #5ab340cc 0deg);
+  border-radius: 5px;
+  height: 50px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 50px;
+}
+
+/* Estilos para el contenedor que indica que el usuario esta offline */
+.game-profile-image-ofline {
+  align-items: center;
+  animation: bounceIn 1s both;
+  background-color: #ff0000b3;
+  border-radius: 5px;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  color: white;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  left: 0;
+  position: absolute;
+  text-shadow: 1px 1px 1px black;
+  text-transform: uppercase;
+  top: 0;
+  width: 100%;
+  z-index: 2;
+}
+
+/* Clase para el botón mute chat */
+.game-profile-mute-chat {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  height: 50px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 50px;
+  z-index: 2;
+}
+
+.game-profile-mute-chat .icon-wrapper {
+  align-items: center;
+  border-radius: 50%;
+  border: 1px solid white;
+  display: flex;
+  height: 20px;
+  justify-content: center;
+  position: absolute;
+  right: -5px;
+  top: -5px;
+  width: 20px;
+  background-color: #009688;
+  box-shadow:
+    rgba(0, 0, 0, 0.12) 0px 1px 3px,
+    rgba(0, 0, 0, 0.24) 0px 1px 2px;
+}
+
+.game-profile-mute-chat.right .icon-wrapper {
+  left: -5px;
+}
+
+.game-profile-mute-chat.left .icon-wrapper {
+  transform: scaleX(-1);
+}
+
+.game-profile-mute-chat.mute .icon-wrapper {
+  background-color: #e91e63;
+}
+
+.game-profile-mute-chat .icon-wrapper svg {
+  width: 65%;
+}
+
+/* ────────── Ludo: profile dice styles ────────── */
+.game-profile-dice {
+  animation: bounceIn 1s both;
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  left: 62px;
+  top: -5px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #00487f;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
+.game-profile-dice::after {
+  border-style: solid;
+  border-width: 10px;
+  content: "";
+  height: 0;
+  position: absolute;
+  width: 0;
+  border-color: #00487f transparent transparent transparent;
+  transform: rotate(90deg);
+  left: -30%;
+  top: 35%;
+}
+
+.game-profile-dice.hide {
+  animation: bounceOut 0.6s both;
+}
+
+/* CSS Especial para firefox ya que tiene un issue con las animaciones */
+@-moz-document url-prefix() {
+  @supports (animation: calc(0s)) {
+    .game-profile-dice,
+    .game-profile-dice.hide {
+      animation: none;
+    }
+
+    .game-profile-dice {
+      opacity: 1;
+      transition: all 500ms ease;
+    }
+
+    .game-profile-dice.hide {
+      opacity: 0;
+    }
+  }
+}
+
+.game-profile.right .game-profile-dice::after {
+  transform: rotate(-90deg);
+  left: auto;
+  right: -30%;
+}
+
+.game-profile-dice-button {
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  background: transparent;
+  /* border: none; */
+  cursor: pointer;
+  height: 45px;
+  width: 45px;
+}
+
+.game-profile-dice-button .dice {
+  position: absolute;
+  left: -7px;
+  top: -8px;
+  z-index: 10;
+}
+
+.game-profile-dice .icon-arrow {
+  animation: move-arrow 0.5s infinite alternate;
+  filter: drop-shadow(0px -2px 1px black);
+  height: 50px;
+  position: absolute;
+  top: -40px;
+  width: 50px;
+  z-index: 1;
+}
+
+@keyframes move-arrow {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-10px);
+  }
+}
+
+/* ────────── Ludo: profile ranking styles ────────── */
+.game-profile-ranking {
+  align-items: center;
+  animation: bounceIn 1s both;
+  display: flex;
+  height: 50px;
+  justify-content: center;
+  position: absolute;
+  width: 50px;
+}
+
+.game-profile-ranking-value {
+  font-size: 25px;
+  color: #f8ea55;
+  font-family: "Arial Black", Gadget, sans-serif;
+  text-shadow:
+    0px 0px 0 rgb(235, 221, 72),
+    0px 1px 0 rgb(222, 208, 59),
+    0px 2px 0 rgb(209, 195, 46),
+    0px 3px 0 rgb(196, 182, 33),
+    0px 4px 3px rgba(171, 99, 37, 0.27),
+    0px 4px 1px rgba(171, 99, 37, 0.5),
+    0px 0px 3px rgba(171, 99, 37, 0.2);
+}
+
+.game-profile-name-dice {
+  margin: 8px 0;
+  width: 100%;
+  display: flex;
+  height: 20px;
+}
+
+.game-profile-name {
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  opacity: 0.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 1px 0px 3px black;
+  transition: all 500ms ease;
+  white-space: nowrap;
+  width: 150px;
+}
+
+.game-profile-name.has-turn {
+  opacity: 1;
+}
+
+.game-profile-dices {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ────────── Ludo: game-total-tokens styles ────────── */
+.game-total-tokens {
+  animation: bounceIn 1s both;
+  height: var(--size-tile);
+  position: absolute;
+  width: var(--size-tile);
+  z-index: 6;
+}
+
+.game-total-tokens-value {
+  align-items: center;
+  background-color: #dfdfdf;
+  border-radius: 50%;
+  box-shadow:
+    rgba(0, 0, 0, 0.16) 1px 7px 3px,
+    rgb(51, 51, 51) 0px 0px 0px 1px;
+  display: flex;
+  filter: drop-shadow(0px -2px 2px black);
+  font-size: 12px;
+  font-weight: bold;
+  height: 60%;
+  justify-content: center;
+  position: relative;
+  transform: translate(35%, 120%);
+  width: 60%;
+}
+
+.game-total-tokens-value::after {
+  border-color: #dfdfdf transparent transparent transparent;
+  border-style: solid;
+  border-width: 6px;
+  content: "";
+  height: 0;
+  left: 11%;
+  position: absolute;
+  top: -58%;
+  transform: scale(-1);
+  width: 0;
+}
+
+/* ────────── Ludo: game-token styles ────────── */
+.game-token {
+  position: absolute;
+}
+
+.game-token.animated {
+  transition: all 100ms ease;
+}
+
+.game-token.moving {
+  animation: heartBeat 1s infinite;
+}
+
+.game-token-button {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  left: -10%;
+  top: -10%;
+  z-index: 1;
+  cursor: pointer;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(1.4px);
+  border: 2px dashed rgba(255, 255, 255, 1);
+  animation: rotation 5s normal linear infinite;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+
+  14% {
+    transform: scale(1.3);
+  }
+
+  28% {
+    transform: scale(1);
+  }
+
+  42% {
+    transform: scale(1.3);
+  }
+
+  70% {
+    transform: scale(1);
+  }
+}
+
+/* ────────── Ludo: game-token-piece styles ────────── */
+.game-token-piece {
+  transition: all 150ms ease;
+  left: 0;
+  top: 0;
+  position: absolute;
+  border-radius: 50%;
+  z-index: 2;
+  pointer-events: none;
+  /* Para forzar el repintado en safari */
+  transform: translateZ(0);
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset,
+    rgba(6, 24, 44, 0.4) 0px 0px 0px 1px,
+    rgba(6, 24, 44, 0.65) 0px 4px 4px -1px,
+    rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
+}
+
+/* Rendriza la parte blanca del token */
+.game-token-piece::before {
+  content: "";
+  border-radius: 50%;
+  background-color: white;
+  height: 60%;
+  left: 18%;
+  position: absolute;
+  top: 13%;
+  width: 65%;
+  box-shadow:
+    rgba(0, 0, 0, 0.16) 0px 3px 6px,
+    rgba(0, 0, 0, 0.23) 0px 3px 6px;
+}
+
+.game-token-piece::after {
+  content: "\2605";
+  width: 50%;
+  height: 50%;
+  position: absolute;
+  font-size: 12px;
+  left: 25%;
+  top: 15%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Establece los colores para cada token */
+.game-token-piece.red {
+  background-color: var(--game-red);
+}
+
+.game-token-piece.red::after {
+  color: var(--game-red);
+}
+
+.game-token-piece.blue {
+  background-color: var(--game-blue);
+}
+
+.game-token-piece.blue::after {
+  color: var(--game-blue);
+}
+
+.game-token-piece.green {
+  background-color: var(--game-green);
+}
+
+.game-token-piece.green::after {
+  color: var(--game-green);
+}
+
+.game-token-piece.yellow {
+  background-color: var(--game-yellow);
+}
+
+.game-token-piece.yellow::after {
+  color: var(--game-yellow);
+}
+
+/* Estilo para ver el index del token no saldrá en producción */
+.game-token-piece span {
+  align-items: center;
+  background: black;
+  border-radius: 10px;
+  color: white;
+  display: flex;
+  font-weight: bold;
+  justify-content: center;
+  opacity: 0.7;
+  position: absolute;
+  top: -20px;
+}
+
+/* ────────── Ludo: game-tooltip styles ────────── */
+.game-tooltip {
+  animation: bounceIn 0.5s both;
+  border-radius: 5px;
+  box-shadow: -2px 4px 14px 0px #090909;
+  display: flex;
+  gap: 5px;
+  padding: 8px;
+  position: absolute;
+  z-index: 10;
+}
+
+.game-tooltip.blue {
+  background-color: var(--game-blue);
+}
+
+.game-tooltip.red {
+  background-color: var(--game-red);
+}
+
+.game-tooltip.green {
+  background-color: var(--game-green);
+}
+
+.game-tooltip.yellow {
+  background-color: var(--game-yellow);
+}
+
+.game-tooltip button {
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.game-tooltip::after {
+  content: "";
+  border-style: solid;
+  border-width: 10px;
+  height: 0;
+  left: 40%;
+  position: absolute;
+  top: 100%;
+  width: 0;
+}
+
+.game-tooltip.left:after {
+  left: 2%;
+}
+
+.game-tooltip.top:after {
+  top: -40%;
+  transform: scale(-1);
+}
+
+.game-tooltip.right:after {
+  left: 73%;
+}
+
+.game-tooltip.red:after {
+  border-color: var(--game-red) transparent transparent transparent;
+}
+
+.game-tooltip.blue:after {
+  border-color: var(--game-blue) transparent transparent transparent;
+}
+
+.game-tooltip.yellow:after {
+  border-color: var(--game-yellow) transparent transparent transparent;
+}
+
+.game-tooltip.green:after {
+  border-color: var(--game-green) transparent transparent transparent;
+}
+
+/* ────────── Ludo: offline game-offline-name styles ────────── */
+.game-offline-name {
+  border-radius: 5px;
+  border: 1px solid white;
+  font-size: 20px;
+  padding: 5px;
+  width: 55%;
+  box-shadow:
+    rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em,
+    rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em,
+    rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset;
+}
+
+.game-offline {
+  align-items: center;
+  animation: fadeInLeft 500ms ease both;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 40px;
+  width: 80%;
+}
+
+.game-offline-players {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+}
+
+.game-offline-player {
+  align-items: center;
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 15px;
+  width: 90%;
+}
+
+.game-offline-play {
+  align-items: center;
+  border-radius: 10px;
+  display: flex;
+  font-size: 25px;
+  font-weight: bold;
+  justify-content: center;
+  margin-bottom: 30px;
+  margin-top: 20px;
+  padding: 10px 15px;
+  text-transform: uppercase;
+}
+
+.game-offline-play span {
+  height: 30px;
+  width: 30px;
+}
+
+.game-offline-player-bot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 12px;
+}
+
+/* ────────── Ludo: loading lds-ring  styles ────────── */
+.lds-ring {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  border: 8px solid white;
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: white transparent transparent transparent;
+}
+
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ────────── Ludo: game-logo  styles ────────── */
+.game-logo {
+  animation: bounceIn 0.8s both;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.game-logo-name {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 5px;
+  position: relative;
+}
+
+.game-logo-dice {
+  position: absolute;
+  width: 100%;
+}
+
+.game-logo-dice .game-dice {
+  position: absolute;
+  top: -30px;
+}
+
+.game-logo-dice .game-dice:first-child {
+  left: -20px;
+  transform: rotate(-20deg);
+}
+
+.game-logo-dice .game-dice:nth-child(2) {
+  right: -20px;
+  transform: rotate(20deg);
+}
+
+.game-logo-letters {
+  align-items: center;
+  display: flex;
+  height: 30px;
+  justify-content: center;
+  position: relative;
+  width: 30px;
+}
+
+.game-logo-letter {
+  font-size: 40px;
+  position: absolute;
+  top: -23px;
+  z-index: 10;
+  font-weight: bold;
+  color: white;
+  text-shadow:
+    0 1px 0 #cccccc,
+    0 2px 0 #c9c9c9,
+    0 3px 0 #bbb,
+    0 4px 0 #b9b9b9,
+    0 5px 0 #aaa,
+    0 6px 1px rgba(0, 0, 0, 0.1),
+    0 0 5px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 3px 5px rgba(0, 0, 0, 0.2),
+    0 5px 10px rgba(0, 0, 0, 0.25),
+    0 10px 10px rgba(0, 0, 0, 0.2),
+    0 20px 20px rgba(0, 0, 0, 0.15);
+}
+
+.game-logo-footer {
+  text-transform: uppercase;
+  font-size: 25px;
+  color: #fdf182;
+  font-weight: bold;
+  background: #e6b31e;
+  background: linear-gradient(to top, #e6b31e 34%, #fdf182 57%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: #7f580d;
+}
+
+/* ────────── Ludo: game-options-button styles ────────── */
+.game-options-button {
+  align-items: center;
+  border-radius: 5px;
+  display: flex;
+  height: 35px;
+  justify-content: center;
+  width: 35px;
+}
+
+.game-options-button .icon-wrapper {
+  width: 60%;
+}
+
+/* ────────── Ludo: model options-game styles ────────── */
+.options-game {
+  align-items: center;
+  background: rgb(0 0 0 / 85%);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 20;
+}
+
+.options-game-container {
+  animation: fadeInLeft 400ms ease both;
+  width: 80%;
+  background-color: #312938;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
+.options-game-header {
+  align-items: center;
+  background-color: #4d4658;
+  border-radius: 5px;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  color: white;
+  display: flex;
+  font-size: 25px;
+  font-weight: bold;
+  justify-content: center;
+  padding: 18px;
+  position: relative;
+  width: 100%;
+}
+
+.options-game-close {
+  align-items: center;
+  background-color: #a7051d;
+  border-radius: 5px;
+  display: flex;
+  height: 35px;
+  justify-content: center;
+  position: absolute;
+  right: 10px;
+  width: 35px;
+}
+
+.options-game-close .icon-wrapper {
+  height: 60%;
+  transform: translateY(-2px);
+  width: 60%;
+}
+
+.options-game-close:active .icon-wrapper {
+  transform: translateY(0);
+}
+
+.options-game-options {
+  padding: 20px;
+  width: 100%;
+}
+
+.options-game-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #8c8792;
+}
+
+.options-game-option:not(:first-child) {
+  margin-top: 20px;
+}
+
+.options-game-option .icon-wrapper {
+  width: 40px;
+  height: 40px;
+}
+
+.options-game-option-label {
+  color: white;
+  font-size: 30px;
+  font-weight: bold;
+  margin: 0 15px;
+  text-transform: capitalize;
+  width: 60%;
+}
+
+/* ────────── Ludo: radio form-controlstyles ────────── */
+/* https://moderncss.dev/pure-css-custom-styled-radio-buttons/ */
+.form-control {
+  color: white;
+  cursor: pointer;
+  display: grid;
+  font-family: system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  gap: 0.5em;
+  grid-template-columns: 1em auto;
+  line-height: 1.1;
+}
+
+.form-control:not(:last-child) {
+  margin-right: 20px;
+}
+
+.form-control:focus-within {
+  color: rebeccapurple;
+}
+
+input[type="radio"] {
+  /* Add if not using autoprefixer */
+  -webkit-appearance: none;
+  /* Remove most all native input styles */
+  appearance: none;
+  /* For iOS < 15 */
+  background-color: var(--form-background);
+  /* Not removed via appearance */
+  margin: 0;
+
+  font: inherit;
+  color: currentColor;
+  width: 1.15em;
+  height: 1.15em;
+  border: 0.15em solid currentColor;
+  border-radius: 50%;
+  transform: translateY(-0.075em);
+
+  display: grid;
+  place-content: center;
+}
+
+input[type="radio"]::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em rebeccapurple;
+  /* Windows High Contrast Mode */
+  /* background-color: CanvasText; */
+}
+
+input[type="radio"]:checked::before {
+  transform: scale(1);
+}
+
+input[type="radio"]:focus {
+  /* outline: max(2px, 0.15em) solid currentColor; */
+  outline-offset: max(2px, 0.15em);
+}
+
+/* ────────── Ludo: game-select-number-players  styles ────────── */
+.game-select-number-players {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  padding: 10px;
+  width: 100%;
+}
+
+/* ────────── Ludo: game-offline-token-tooltip styles ────────── */
+.game-offline-token-tooltip {
+  animation: bounceIn 0.5s both;
+  display: flex;
+  gap: 5px;
+  left: -35px;
+  padding: 5px;
+  position: absolute;
+  top: -45px;
+  z-index: 2;
+  border-radius: 5px;
+}
+
+.game-offline-token-tooltip button {
+  background-color: var(--select-color);
+  height: 30px;
+  width: 30px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 3px solid transparent;
+}
+
+.game-offline-token-tooltip button.selected {
+  border: 3px solid white;
+  box-shadow:
+    rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em,
+    rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em,
+    rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset;
+}
+
+.game-offline-token-tooltip::after {
+  border-style: solid;
+  border-width: 10px;
+  content: "";
+  height: 0;
+  left: 30%;
+  position: absolute;
+  top: 100%;
+  width: 0;
+  border-color: rgba(255, 255, 255, 0.2) transparent transparent transparent;
+}
+
+/* ────────── Ludo: game-offline-token-wrapper  styles ────────── */
+.game-offline-token-wrapper {
+  height: 35px;
+  position: relative;
+  width: 35px;
+}
+
+.game-offline-token-color {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  height: 100%;
+  width: 100%;
+}
+
+.game-offline-token-color:disabled,
+.game-offline-token-color[disabled] {
+  cursor: auto;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.game-offline-token-color .game-token-piece {
+  left: 15%;
+  top: 15%;
+}
+
+.game-offline-token-color:disabled .game-token-piece,
+.game-offline-token-color[disabled] .game-token-piece {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+/* ────────── Ludo: modal-share-buttons styles ────────── */
+.modal-share-buttons {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.modal-share-button {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 25%;
+}
+
+.modal-share-button button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  height: 40px;
+  margin-bottom: 5px;
+  width: 40px;
+}
+
+.modal-share-button span {
+  font-size: 13px;
+}
+
+/* ────────── Ludo: modal-share-header styles ────────── */
+.modal-share-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.modal-share-header button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  height: 25px;
+  width: 25px;
+}
+
+/* ────────── Ludo: modal-share-container styles ────────── */
+.modal-share-container {
+  animation: fadeIn 500ms ease both;
+  background: rgb(0 0 0 / 85%);
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 20;
+}
+
+.modal-share-wrapper {
+  animation: bounceIn 500ms ease both;
+  background-color: white;
+  bottom: 0;
+  position: absolute;
+  width: 100%;
+  border-radius: 15px 15px 0 0;
+  padding: 20px;
+  box-shadow:
+    rgba(17, 17, 26, 0.1) 0px 4px 16px,
+    rgba(17, 17, 26, 0.1) 0px 8px 24px,
+    rgba(17, 17, 26, 0.1) 0px 16px 56px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ────────── Ludo: about  styles ────────── */
+.about-game-body {
+  animation: fadeInLeft 500ms ease both;
+  background-color: rgb(0 37 78 / 60%);
+  border-radius: 10px;
+  margin-top: 40px;
+  padding: 0 25px;
+  width: 80%;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
+.about-game-body p {
+  color: white;
+  font-size: 16px;
+  margin: 25px 0;
+  text-align: justify;
+}
+
+.about-game-body a,
+.about-game-body a:visited {
+  color: white;
+  font-weight: bold;
+}
+
+.about-game-social {
+  align-items: center;
+  animation: bounceIn 1s both;
+  display: flex;
+  justify-content: space-around;
+  margin-top: 40px;
+  width: 80%;
+}
+
+.about-game-social-link {
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.about-game-social-link .icon-wrapper {
+  height: 30px;
+  width: 30px;
+}
+
+/* ────────── Ludo: lobby-alert styles ────────── */
+.lobby-alert {
+  align-items: center;
+  background-color: #fff3cd;
+  border-radius: 10px;
+  border: 2px solid #ffeeba;
+  box-shadow:
+    rgba(0, 0, 0, 0.16) 0px 3px 6px,
+    rgba(0, 0, 0, 0.23) 0px 3px 6px;
+  color: #856404;
+  display: flex;
+  justify-content: center;
+  padding: 5px;
+  width: 80%;
+}
+
+.lobby-alert .icon-wrapper {
+  align-items: center;
+  display: flex;
+  height: 40px;
+  justify-content: center;
+  margin-right: 5px;
+  width: 40px;
+}
+
+/* ────────── Ludo: rebbon styles ────────── */
+/* https://www.generateit.net/css-ribbon-generator/ */
+.ribbon {
+  box-shadow: rgba(0, 0, 0, 0.3) 0 0 0;
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 16px !important;
+  position: relative;
+  text-align: center;
+  width: 100%;
+  background: #ca201e;
+}
+
+.ribbon p {
+  font-size: 25px !important;
+  color: #ffffff;
+  text-shadow: white 1px 1px 0;
+  margin: 0px;
+  padding: 15px 10px;
+}
+
+.ribbon:before,
+.ribbon:after {
+  content: "";
+  position: absolute;
+  display: block;
+  bottom: -1em;
+  z-index: -1;
+}
+
+.ribbon:before {
+  left: -2em;
+  border-right-width: 1.5em;
+  border: 1.5em solid #e12320;
+  border-left-color: transparent;
+}
+
+.ribbon:after {
+  right: -2em;
+  border-left-width: 1.5em;
+  border: 1.5em solid #e12320;
+  border-right-color: transparent;
+}
+
+.ribbon-content {
+  text-transform: uppercase;
+}
+
+.ribbon .ribbon-content:before,
+.ribbon .ribbon-content:after {
+  position: absolute;
+  display: block;
+  border-style: solid;
+  bottom: -1em;
+  content: "";
+}
+
+.ribbon .ribbon-content:before,
+.ribbon .ribbon-content:after {
+  border-color: #5d0f0e transparent transparent transparent;
+}
+
+.ribbon .ribbon-content:before {
+  left: 0;
+  border-width: 1em 0 0 1em;
+}
+
+.ribbon .ribbon-content:after {
+  right: 0;
+  border-width: 1em 1em 0 0;
+}
+
+/* ────────── Ludo: auth page styles ────────── */
+.page-auth-section {
+  align-items: center;
+  animation: fadeInLeft 500ms ease both;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 20px 0;
+  width: 100%;
+}
+
+.page-auth-title {
+  color: white;
+  margin-bottom: 30px;
+}
+
+.page-auth-social {
+  align-items: center;
+  border-radius: 10px;
+  color: white;
+  display: flex;
+  font-size: 23px;
+  font-weight: bold;
+  justify-content: space-between;
+  padding: 10px;
+  text-decoration: none;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.page-auth-social:not(:last-child) {
+  margin-bottom: 20px;
+}
+
+.page-auth-social .icon-wrapper {
+  width: 40px;
+  height: 40px;
+}
+
+.page-auth-social.github {
+  background-color: #4a4a4a;
+}
+
+.page-auth-social.google {
+  background-color: #f44336;
+}
+
+/* ────────── Ludo: matching avatar styles (Tailwind companion) ────────── */
+/* Avatar classes are now handled by Tailwind in playerProfile/index.tsx    */
+/* These legacy classes kept only for backward-compat if needed elsewhere   */
+.page-matchmaking-avatar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 0;
+}
+.page-matchmaking-image-wrapper {
+  display: none;
+}
+.page-matchmaking-image-loading {
+  display: none;
+}
+.page-matchmaking-image {
+  display: none;
+}
+.page-matchmaking-avatar-name {
+  display: none;
+}
+
+/* ────────── Ludo: page-matchmaking-room-info styles ────────── */
+.page-matchmaking-room-info {
+  align-items: center;
+  background-color: rgb(0 37 78 / 60%);
+  border-radius: 10px;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 30px 0;
+  padding-bottom: 20px;
+  width: 80%;
+}
+
+.page-matchmaking-room-info h3 {
+  background-color: rgb(0 37 78 / 84%);
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+  padding: 10px 0;
+  text-align: center;
+  width: 100%;
+}
+
+.page-matchmaking-room-info-detail {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  width: 100%;
+}
+
+.page-matchmaking-room-info-detail code {
+  background-color: rgb(0 37 78 / 84%);
+  border-radius: 10px;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  font-size: 30px;
+  font-weight: bold;
+  margin-right: 20px;
+  padding: 8px;
+  text-align: center;
+  width: 35%;
+}
+
+.page-matchmaking-room-info-detail .button {
+  align-items: center;
+  border-radius: 10px;
+  display: flex;
+  font-size: 25px;
+  justify-content: center;
+  padding: 10px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.page-matchmaking-room-info-detail .button .icon-wrapper {
+  height: 25px;
+  margin-left: 15px;
+  width: 25px;
+}
+
+/* ────────── Ludo: profile picture styles ────────── */
+.profile-picture {
+  height: 35px;
+  width: 35px;
+  border-radius: 50%;
+  box-shadow:
+    rgba(6, 24, 44, 0.4) 0px 0px 0px 2px,
+    rgba(6, 24, 44, 0.65) 0px 4px 6px -1px,
+    rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
+}
+
+/* ────────── Ludo: play with friends styles ────────── */
+.page-with-friends-section {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px;
+  width: 80%;
+}
+
+.page-with-friends-section h2 {
+  color: white;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+.page-with-friends-form {
+  align-items: center;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  padding: 15px;
+  width: 100%;
+}
+
+.page-with-friends-code {
+  border-radius: 10px 0 0 10px;
+  border: none;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 10px;
+  text-align: center;
+  width: 75%;
+}
+
+.page-with-friends-join {
+  border-radius: 0 10px 10px 0;
+  font-size: 20px;
+  height: 100%;
+  text-transform: uppercase;
+  width: 25%;
+}
+
+.page-with-friends-new-room {
+  border-radius: 10px;
+  padding: 0 15px;
+  width: 100%;
+}
+
+.page-with-friends-new-config {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.page-with-friends-create {
+  align-items: center;
+  border-radius: 10px;
+  display: flex;
+  font-size: 20px;
+  font-weight: bold;
+  justify-content: space-between;
+  padding: 10px;
+  text-transform: uppercase;
+  width: 80%;
+}
+
+.page-with-friends-create .icon-wrapper {
+  height: 35px;
+  width: 35px;
+}
+
+/* ────────── Ludo: total players styles ────────── */
+.page-total-players-section {
+  align-items: center;
+  animation: fadeInLeft 500ms ease both;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px 0;
+  width: 100%;
+}
+
+.page-total-players-section h2 {
+  margin-bottom: 20px;
+  color: white;
+  text-transform: uppercase;
+}
+
+.page-total-players-button,
+.page-total-players-friends {
+  align-items: center;
+  border-radius: 10px;
+  display: flex;
+  font-size: 20px;
+  font-weight: bold;
+  justify-content: space-between;
+  padding: 10px;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.page-total-players-button:not(:last-child) {
+  margin-bottom: 20px;
+}
+
+.page-total-players-button span {
+  align-items: center;
+  border-radius: 50%;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset,
+    rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
+  display: flex;
+  font-size: 25px;
+  height: 35px;
+  justify-content: center;
+  width: 35px;
+}
+
+.page-total-players-friends .icon-wrapper {
+  height: 35px;
+  width: 35px;
+}
+
+/* ────────── Ludo: page-matchmaking-players-info styles ────────── */
+/* Layout now handled by Tailwind in playerInfo/index.tsx                   */
+/* glass-effect class retained from globals for backdrop-filter support     */
+.page-matchmaking-players-info {
+  animation: bounceIn 0.5s both;
+  border-radius: 20px;
+  margin: 20px auto;
+  padding: 24px 20px;
+  width: 88%;
+  max-width: 340px;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.page-matchmaking-two-players {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.page-matchmaking-vs {
+  flex: 0 0 auto;
+  font-size: 38px;
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: -1px;
+  background: linear-gradient(to bottom, #fdf182 40%, #e6b31e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: #7f580d;
+  filter: drop-shadow(0 2px 6px rgba(230, 179, 30, 0.45));
+  animation: vsPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+}
+
+@keyframes vsPop {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ── Matchmaking avatar animations ── */
+@keyframes avatarIn {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes ringAppear {
+  from {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes searchBob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-3px) rotate(-8deg);
+  }
+  75% {
+    transform: translateY(3px) rotate(8deg);
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@keyframes dotPulse {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.3;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes dotFade {
+  0%,
+  60%,
+  100% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+/* ── Matchmaking avatar Tailwind companion classes ── */
+.mm-avatar-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  object-fit: cover;
+  display: block;
+  box-shadow:
+    0 0 0 3px rgba(100, 220, 120, 0.75),
+    0 4px 20px rgba(0, 0, 0, 0.45);
+  animation: avatarIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.mm-found-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 18px;
+  border: 2px solid rgba(100, 220, 120, 0.75);
+  box-shadow: 0 0 14px rgba(80, 200, 100, 0.5);
+  animation: ringAppear 0.5s ease both;
+  pointer-events: none;
+}
+.mm-search-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.09);
+  border: 2px dashed rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.mm-search-box::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.11) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s linear infinite;
+}
+.mm-search-icon {
+  position: relative;
+  z-index: 1;
+  animation: searchBob 2s ease-in-out infinite;
+}
+.mm-pulse-dots {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  z-index: 2;
+}
+.mm-pulse-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 215, 60, 0.9);
+  animation: dotPulse 1.2s ease-in-out infinite;
+}
+.mm-pulse-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+.mm-pulse-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.mm-pulse-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+.mm-dot-fade {
+  animation: dotFade 1.4s ease-in-out infinite;
+  opacity: 0;
+}
+.mm-dot-fade:nth-child(1) {
+  animation-delay: 0s;
+}
+.mm-dot-fade:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.mm-dot-fade:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.page-matchmaking-four-players {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.page-matchmaking-four-players-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  width: 100%;
+}
+
+/* ────────── Ludo: toolbar styles ────────── */
+
+/* ═══════════════════════════════════════════════
+   LUDO STAR UI THEME - Add these to globals.css
+   ═══════════════════════════════════════════════ */
+
+/* ── Ludo Star Color Variables ── */
+:root {
+  --ls-purple-deep: #1a0533;
+  --ls-purple-mid: #2d0a5e;
+  --ls-purple-light: #4a1a8a;
+  --ls-violet: #6b35c8;
+  --ls-gold: #ffd700;
+  --ls-gold-light: #ffe566;
+  --ls-gold-dark: #c8960a;
+  --ls-orange: #ff8c00;
+  --ls-green: #2ecc71;
+  --ls-red: #e74c3c;
+  --ls-blue: #3498db;
+  --ls-cyan: #00d4ff;
+  --ls-pink: #ff4da6;
+
+  /* Gradients */
+  --ls-bg-gradient: radial-gradient(
+    ellipse at top,
+    #3d0a7a 0%,
+    #1a0533 40%,
+    #0d0221 100%
+  );
+  --ls-card-gradient: linear-gradient(
+    145deg,
+    rgba(74, 26, 138, 0.9) 0%,
+    rgba(29, 5, 70, 0.95) 100%
+  );
+  --ls-gold-gradient: linear-gradient(
+    180deg,
+    #ffe566 0%,
+    #ffd700 40%,
+    #c8960a 100%
+  );
+  --ls-gold-btn-gradient: linear-gradient(
+    180deg,
+    #ffec6e 0%,
+    #ffc107 50%,
+    #e6a800 100%
+  );
+  --ls-green-btn-gradient: linear-gradient(
+    180deg,
+    #4cde7e 0%,
+    #1db954 50%,
+    #16a04a 100%
+  );
+  --ls-blue-btn-gradient: linear-gradient(
+    180deg,
+    #5bc8ff 0%,
+    #2196f3 50%,
+    #1565c0 100%
+  );
+  --ls-red-btn-gradient: linear-gradient(
+    180deg,
+    #ff6b6b 0%,
+    #e53935 50%,
+    #b71c1c 100%
+  );
+  --ls-purple-btn-gradient: linear-gradient(
+    180deg,
+    #ab5fff 0%,
+    #7c3aed 50%,
+    #5b21b6 100%
+  );
+}
+
+/* ── Ludo Star Button Style ── */
+.ls-btn {
+  border-radius: 10px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  position: relative;
+  border: none;
+  cursor: pointer;
+  transition:
+    transform 80ms ease,
+    box-shadow 80ms ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+}
+
+.ls-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  pointer-events: none;
+}
+
+.ls-btn:active {
+  transform: translateY(3px);
+  box-shadow: none !important;
+}
+
+.ls-btn-gold {
+  background: var(--ls-gold-btn-gradient);
+  color: #5a3200;
+  box-shadow:
+    0 6px 0 #9a6800,
+    0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.ls-btn-green {
+  background: var(--ls-green-btn-gradient);
+  color: white;
+  box-shadow:
+    0 6px 0 #0d7a35,
+    0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.ls-btn-blue {
+  background: var(--ls-blue-btn-gradient);
+  color: white;
+  box-shadow:
+    0 6px 0 #0d47a1,
+    0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.ls-btn-red {
+  background: var(--ls-red-btn-gradient);
+  color: white;
+  box-shadow:
+    0 6px 0 #7f0000,
+    0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.ls-btn-purple {
+  background: var(--ls-purple-btn-gradient);
+  color: white;
+  box-shadow:
+    0 6px 0 #3b0764,
+    0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.ls-btn-yellow {
+  background: var(--ls-gold-btn-gradient);
+  color: #5a3200;
+  box-shadow:
+    0 6px 0 #9a6800,
+    0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.ls-btn-pink {
+  background: var(--ls-pink-btn-gradient);
+  color: white;
+  box-shadow:
+    0 6px 0 #b3005c,
+    0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+:root {
+  /* Logo style glossy gradients */
+  --ls-logo-red-gradient: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #ffb7aa 8%,
+    #ff3b28 28%,
+    #ff1c12 55%,
+    #b80000 100%
+  );
+
+  --ls-logo-orange-gradient: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #ffe3a3 10%,
+    #ffbe16 35%,
+    #ff8a00 65%,
+    #c74c00 100%
+  );
+
+  --ls-logo-gold-gradient: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #fff1a6 10%,
+    #ffd51a 35%,
+    #ffae00 65%,
+    #b96b00 100%
+  );
+
+  --ls-logo-green-gradient: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #d7ff8f 10%,
+    #88f000 35%,
+    #45c900 65%,
+    #188300 100%
+  );
+
+  --ls-logo-blue-gradient: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #aeeaff 10%,
+    #1dbdff 35%,
+    #0077ff 65%,
+    #003fbe 100%
+  );
+
+  --ls-logo-purple-gradient: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #e9b4ff 10%,
+    #bd32ff 35%,
+    #8c13e8 65%,
+    #4a008e 100%
+  );
+
+  --ls-logo-pink-gradient: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #ffc3e8 10%,
+    #ff4fb0 35%,
+    #f01483 65%,
+    #9b004d 100%
+  );
+
+  --ls-logo-cyan-dark: #053a4b;
+}
+
+.ls-btn-logo-red {
+  background: var(--ls-logo-red-gradient);
+  color: #ffffff;
+  box-shadow:
+    0 6px 0 #7a0000,
+    0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.ls-btn-logo-orange {
+  background: var(--ls-logo-orange-gradient);
+  color: #ffffff;
+  box-shadow:
+    0 6px 0 #994000,
+    0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.ls-btn-logo-gold {
+  background: var(--ls-logo-gold-gradient);
+  color: #5a3200;
+  box-shadow:
+    0 6px 0 #9a6800,
+    0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.ls-btn-logo-green {
+  background: var(--ls-logo-green-gradient);
+  color: #ffffff;
+  box-shadow:
+    0 6px 0 #0f6f00,
+    0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.ls-btn-logo-blue {
+  background: var(--ls-logo-blue-gradient);
+  color: #ffffff;
+  box-shadow:
+    0 6px 0 #003a99,
+    0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.ls-btn-logo-purple {
+  background: var(--ls-logo-purple-gradient);
+  color: #ffffff;
+  box-shadow:
+    0 6px 0 #3a006f,
+    0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.ls-btn-logo-pink {
+  background: var(--ls-logo-pink-gradient);
+  color: #ffffff;
+  box-shadow:
+    0 6px 0 #8a0045,
+    0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.ls-btn {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.35),
+    0 0 8px rgba(0, 0, 0, 0.25);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    filter 0.15s ease;
+}
+
+.ls-btn::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 8%;
+  height: 35%;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.75),
+    rgba(255, 255, 255, 0)
+  );
+  pointer-events: none;
+}
+
+.ls-btn:active {
+  transform: translateY(4px);
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.45),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Ludo Star Card Style ── */
+.ls-card {
+  background: var(--ls-card-gradient);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+  position: relative;
+}
+
+.ls-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+}
+
+/* ── Gold Text ── */
+.ls-gold-text {
+  background: var(--ls-gold-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+}
+
+/* ── Star Glow ── */
+.ls-glow-gold {
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.7));
+}
+
+.ls-glow-purple {
+  filter: drop-shadow(0 0 12px rgba(107, 53, 200, 0.8));
+}
+
+/* ── Shine animation ── */
+@keyframes ls-shine {
+  0% {
+    transform: translateX(-100%) skew(-15deg);
+  }
+  100% {
+    transform: translateX(300%) skew(-15deg);
+  }
+}
+
+.ls-shine-effect {
+  overflow: hidden;
+  position: relative;
+}
+
+.ls-shine-effect::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: ls-shine 2.5s infinite;
+  pointer-events: none;
+}
+
+/* ── Pulse animation ── */
+@keyframes ls-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.ls-pulse {
+  animation: ls-pulse 1.8s ease-in-out infinite;
+}
+
+/* ── Float animation ── */
+@keyframes ls-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.ls-float {
+  animation: ls-float 3s ease-in-out infinite;
+}
+
+/* ── Coin spin ── */
+@keyframes ls-coin-spin {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+.ls-coin {
+  animation: ls-coin-spin 2s linear infinite;
+  display: inline-block;
+}
+
+/* ── Background stars ── */
+.ls-stars-bg {
+  background-image:
+    linear-gradient(rgba(34, 4, 46, 0.24), rgba(18, 3, 34, 0.42)),
+    url("/main_bg.webp");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+/* ── Bottom Nav Active Indicator ── */
+.ls-nav-active::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ls-gold);
+  box-shadow: 0 0 6px var(--ls-gold);
+}
