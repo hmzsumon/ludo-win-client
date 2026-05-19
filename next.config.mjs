@@ -26,7 +26,7 @@ const nextConfig = {
     return [
       {
         source: "/api/v1/:path*",
-        destination: "https://api.5-223-69-226.nip.io/api/v1/:path*",
+        destination: "https://213-210-37-168.nip.io/api/v1/:path*",
       },
     ];
   },
