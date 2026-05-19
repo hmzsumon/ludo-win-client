@@ -14,11 +14,15 @@ const geistSans = localFont({
   variable: "--font-geist-sans",
   weight: "100 900",
 });
+
 const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
   weight: "100 900",
 });
+
+const appName = "Ludo Win";
+const appUrl = "https://ludowinapp.vercel.app";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -26,26 +30,66 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
+  themeColor: "#7c3aed",
 };
 
 export const metadata: Metadata = {
-  title: "Ludo Party",
-  description: "Play Ludo Party on mobile with a fast, responsive experience",
+  metadataBase: new URL(appUrl),
+
+  title: {
+    default: appName,
+    template: `%s | ${appName}`,
+  },
+
+  applicationName: appName,
+
+  description: "Play Ludo Win on mobile with a fast, responsive experience",
+
+  manifest: "/manifest.json",
+
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+  },
+
+  appleWebApp: {
+    capable: true,
+    title: appName,
+    statusBarStyle: "black-translucent",
+  },
+
+  formatDetection: {
+    telephone: false,
+  },
+
   openGraph: {
-    title: "Ludo Party",
-    description: "Play Ludo Party on mobile with a fast, responsive experience",
-    url: "https://sw999.bet",
-    siteName: "Ludo Party",
+    title: appName,
+    description: "Play Ludo Win on mobile with a fast, responsive experience",
+    url: appUrl,
+    siteName: appName,
     images: [
       {
-        url: "https://sw999.bet/og-image.png",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Ludo Party",
+        alt: appName,
       },
     ],
     type: "website",
     locale: "en_US",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: appName,
+    description: "Play Ludo Win on mobile with a fast, responsive experience",
+    images: ["/og-image.png"],
   },
 };
 
@@ -55,12 +99,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html className="light">
+    <html lang="en" className="light">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased app-default-bg`}
         suppressHydrationWarning={true}
       >
         <DisableZoom />
+
         <StoreProvider>
           <SocketProvider>
             <Providers>
