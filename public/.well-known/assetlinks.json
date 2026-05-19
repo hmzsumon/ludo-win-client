@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.ludowin.app",
+      "package_name": "app.vercel.ludowinapp.twa",
       "sha256_cert_fingerprints": [
-        "13:AF:85:21:66:F5:15:75:BB:3B:1B:35:1C:BB:18:DF:3A:A4:01:FB:80:AF:18:91:1B:7C:EE:45:3E:BF:9B:48"
+        "17:0D:C0:54:7E:85:F9:F5:99:7D:15:DE:03:AB:9A:1E:FB:D9:EC:C7:88:83:EA:1B:4D:13:A2:8A:E7:B5:BD:78"
       ]
     }
   }
