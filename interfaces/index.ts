@@ -99,6 +99,7 @@ export interface IUser {
   email: string;
   isBot?: boolean;
   isOnline?: boolean;
+  avatar?: string;
   photo?: string;
   socketID?: string;
   color?: TColors;

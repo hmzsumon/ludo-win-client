@@ -115,7 +115,7 @@ function TypesModal({
         className="w-full rounded-t-3xl overflow-hidden"
         style={{
           background:
-            "linear-gradient(180deg, rgba(55,8,80,0.99) 0%, rgba(20,4,31,1) 100%)",
+            "linear-gradient(145deg, rgba(255,255,255,0.22), rgba(5,83,190,0.30))",
           border: "1px solid rgba(255,255,255,0.1)",
         }}
       >
@@ -195,7 +195,7 @@ function DateRangeModal({
         className="w-full rounded-t-3xl overflow-hidden pb-8"
         style={{
           background:
-            "linear-gradient(180deg, rgba(55,8,80,0.99) 0%, rgba(20,4,31,1) 100%)",
+            "linear-gradient(145deg, rgba(255,255,255,0.22), rgba(5,83,190,0.30))",
           border: "1px solid rgba(255,255,255,0.1)",
         }}
       >
@@ -260,7 +260,7 @@ function DateRangeModal({
                 onClose();
               }}
               className="flex-1 rounded-xl py-3 text-sm font-bold text-white"
-              style={{ background: "linear-gradient(135deg,#9333ea,#7c3aed)" }}
+              style={{ background: "linear-gradient(135deg,#0ea5e9,#0863ca)" }}
             >
               Apply
             </button>
@@ -303,7 +303,7 @@ function CancelWithdrawModal({
         className="w-full max-w-[360px] overflow-hidden rounded-[28px]"
         style={{
           background:
-            "linear-gradient(180deg, rgba(58,9,80,0.98) 0%, rgba(20,4,31,1) 100%)",
+            "linear-gradient(145deg, rgba(255,255,255,0.22), rgba(5,83,190,0.30))",
           border: "1px solid rgba(255,255,255,0.1)",
           boxShadow: "0 24px 70px rgba(0,0,0,0.55)",
         }}
@@ -436,7 +436,7 @@ function WithdrawCard({
       className="mx-3 mb-3 rounded-2xl overflow-hidden"
       style={{
         background:
-          "linear-gradient(180deg, rgba(55,8,75,0.5) 0%, rgba(20,4,31,0.7) 100%)",
+          "linear-gradient(145deg, rgba(255,255,255,0.20), rgba(5,83,190,0.24))",
         border: "1px solid rgba(255,255,255,0.07)",
       }}
     >
@@ -628,13 +628,13 @@ export default function WithdrawRecordPage() {
   };
 
   return (
-    <div className="min-h-screen pb-10" style={{ background: "#14041f" }}>
+    <div className="min-h-screen lw-main-flow-bg pb-10">
       {/* Header */}
       <div
         className="sticky top-0 z-20 flex items-center justify-between px-4 py-3"
         style={{
           background:
-            "linear-gradient(180deg,rgba(30,5,50,0.98),rgba(20,4,31,0.95))",
+            "linear-gradient(135deg,rgba(8,99,202,0.94),rgba(0,174,229,0.88))",
           borderBottom: "1px solid rgba(255,255,255,0.07)",
           backdropFilter: "blur(12px)",
         }}
@@ -670,7 +670,7 @@ export default function WithdrawRecordPage() {
           style={{
             background:
               status === "all"
-                ? "linear-gradient(135deg,#9333ea,#7c3aed)"
+                ? "linear-gradient(135deg,#0ea5e9,#0863ca)"
                 : "rgba(255,255,255,0.07)",
             color: status === "all" ? "#fff" : "rgba(255,255,255,0.5)",
             border:
@@ -749,7 +749,7 @@ export default function WithdrawRecordPage() {
             <div
               className="mx-3 rounded-2xl px-4 py-3 flex items-center justify-between"
               style={{
-                background: "rgba(147,51,234,0.1)",
+                background: "rgba(14,165,233,0.14)",
                 border: "1px solid rgba(147,51,234,0.2)",
               }}
             >

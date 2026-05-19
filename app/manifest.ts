@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Ludo Party",
-    short_name: "Ludo Party",
-    description: "Ludo Party game app",
+    name: "Ludo Win",
+    short_name: "Ludo Win",
+    description: "Ludo Win is a Ludo game",
     start_url: "/",
     scope: "/",
     display: "standalone",

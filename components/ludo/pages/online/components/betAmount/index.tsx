@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 
-import GameActionButton from "@/components/game-ui/GameActionButton";
-import Logo from "@/components/ludo/logo";
+import Logo from "@/components/branding/logo";
+import LsButton from "@/components/ui/LsButton";
 import PageWrapper from "@/components/wrapper/page";
 import { useGetWalletQuery } from "@/redux/features/wallet/walletApi";
 import { useSelector } from "react-redux";
@@ -174,109 +174,29 @@ const BetAmount = ({ onBack, onConfirm }: BetAmountProps) => {
   return (
     <PageWrapper>
       {/* ────────── mobile safe screen wrapper ────────── */}
-      <div
-        style={{
-          width: "100%",
-          minHeight: "100dvh",
-          overflowY: "auto",
-          WebkitOverflowScrolling: "touch",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          paddingBottom: "max(24px, env(safe-area-inset-bottom))",
-        }}
-      >
+      <div className="flex min-h-[100dvh] w-full flex-col items-center justify-start overflow-y-auto pb-[max(24px,env(safe-area-inset-bottom))] [-webkit-overflow-scrolling:touch]">
         <Logo />
 
         {/* ────────── main container ────────── */}
-        <div
-          style={{
-            width: "100%",
-            maxWidth: 430,
-            margin: "0 auto",
-            padding: "8px 16px 20px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 18,
-            flex: "0 0 auto",
-          }}
-        >
+        <div className="mx-auto flex w-full max-w-[430px] flex-[0_0_auto] flex-col items-center gap-[18px] px-4 pb-5 pt-2">
           {/* ────────── heading card ────────── */}
-          <div
-            style={{
-              width: "100%",
-              borderRadius: 20,
-              padding: "14px 16px",
-              background:
-                "linear-gradient(180deg, rgba(8,33,77,0.68) 0%, rgba(6,20,48,0.48) 100%)",
-              border: "1px solid rgba(255,255,255,0.16)",
-              boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
-              textAlign: "center",
-              backdropFilter: "blur(6px)",
-            }}
-          >
-            <h2
-              style={{
-                color: "#ffffff",
-                fontSize: 28,
-                fontWeight: 900,
-                letterSpacing: "0.04em",
-                lineHeight: 1.1,
-                textTransform: "uppercase",
-                textShadow: "0 2px 10px rgba(0,0,0,0.28)",
-                margin: 0,
-              }}
-            >
+          <div className="w-full rounded-[20px] border border-white/15 bg-gradient-to-b from-[#08214d]/70 to-[#061430]/50 px-4 py-3.5 text-center shadow-[0_10px_24px_rgba(0,0,0,0.18)] backdrop-blur-md">
+            <h2 className="m-0 text-sm font-black uppercase leading-[1.1] tracking-[0.04em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.28)]">
               Choose Wager Amount
             </h2>
 
-            <div
-              style={{
-                marginTop: 12,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                padding: "10px 16px",
-                borderRadius: 999,
-                background:
-                  "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.08))",
-                border: "1px solid rgba(255,255,255,0.18)",
-              }}
-            >
-              <span
-                style={{
-                  color: "#dff7ff",
-                  fontSize: 15,
-                  fontWeight: 700,
-                }}
-              >
+            <div className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-gradient-to-b from-white/15 to-white/10 px-4 py-2.5">
+              <span className="text-[15px] font-bold text-[#dff7ff]">
                 Available Balance:
               </span>
-              <span
-                style={{
-                  color: "#ffe36e",
-                  fontSize: 18,
-                  fontWeight: 900,
-                  textShadow: "0 2px 8px rgba(0,0,0,0.2)",
-                }}
-              >
+              <span className="text-lg font-black text-[#ffe36e] drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
                 {walletBalance}
               </span>
             </div>
           </div>
 
           {/* ────────── preset amount grid ────────── */}
-          <div
-            style={{
-              width: "100%",
-              display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-              gap: 14,
-            }}
-          >
+          <div className="grid w-full grid-cols-2 gap-3.5">
             {PRESET_AMOUNTS.map((amount) => {
               const active = selectedPresetAmount === amount;
               const colors = PRESET_STYLES[amount];
@@ -289,108 +209,63 @@ const BetAmount = ({ onBack, onConfirm }: BetAmountProps) => {
                     /* ────────── show selected preset inside input ────────── */
                     setAmountInput(String(amount));
                   }}
-                  style={{
-                    position: "relative",
-                    width: "100%",
-                    border: "none",
-                    background: "transparent",
-                    padding: 0,
-                    cursor: "pointer",
-                    borderRadius: 22,
-                    transform: active ? "translateY(-2px) scale(1.02)" : "none",
-                    transition: "all 0.2s ease",
-                    boxShadow: active
-                      ? "0 0 0 3px #ffe066, 0 12px 24px rgba(0,0,0,0.22)"
-                      : "0 8px 18px rgba(0,0,0,0.14)",
-                  }}
+                  className={[
+                    "relative w-full cursor-pointer rounded-[22px] border-none bg-transparent p-0 transition-all duration-200",
+                    active
+                      ? "-translate-y-0.5 scale-[1.02] "
+                      : "shadow-[0_8px_18px_rgba(0,0,0,0.14)]",
+                  ].join(" ")}
                 >
                   <div
-                    style={{
-                      position: "absolute",
-                      top: -8,
-                      right: -8,
-                      zIndex: 2,
-                      opacity: active ? 1 : 0,
-                      transition: "opacity 0.2s ease",
-                    }}
+                    className={[
+                      "absolute left-2 top-4 z-[2] transition-opacity duration-200",
+                      active ? "opacity-100" : "opacity-0",
+                    ].join(" ")}
                   >
-                    <div
-                      style={{
-                        background: "#ffe066",
-                        color: "#3b2f00",
-                        borderRadius: 999,
-                        fontSize: 10,
-                        fontWeight: 900,
-                        padding: "4px 8px",
-                        boxShadow: "0 4px 10px rgba(0,0,0,0.18)",
-                      }}
-                    >
-                      SELECTED
+                    <div className="rounded-full bg-[#ffe066] px-2 py-2 text-[10px] font-black  shadow-[0_4px_10px_rgba(0,0,0,0.18)]">
+                      ✔️
                     </div>
                   </div>
 
-                  <GameActionButton
-                    label={`${amount}`}
+                  <LsButton
+                    variant={
+                      amount === 50
+                        ? "logo-blue"
+                        : amount === 100
+                          ? "logo-green"
+                          : amount === 500
+                            ? "logo-orange"
+                            : "logo-purple"
+                    }
                     size="lg"
-                    colors={colors}
-                    className="w-full"
-                  />
+                    fullWidth
+                  >
+                    {amount}
+                  </LsButton>
                 </button>
               );
             })}
           </div>
 
           {/* ────────── smart custom amount input ────────── */}
-          <div style={{ width: "100%" }}>
-            <div
-              style={{
-                width: "100%",
-                borderRadius: 22,
-                padding: "14px 14px 12px",
-                background:
-                  "linear-gradient(180deg, rgba(9,34,74,0.66) 0%, rgba(4,15,35,0.46) 100%)",
-                border: "1px solid rgba(255,255,255,0.16)",
-                boxShadow: "0 12px 24px rgba(0,0,0,0.18)",
-                backdropFilter: "blur(8px)",
-              }}
-            >
+          <div className="w-full">
+            <div className="w-full rounded-[22px] border border-white/15 bg-gradient-to-b from-[#09224a]/70 to-[#040f23]/50 px-3.5 pb-3 pt-3.5 shadow-[0_12px_24px_rgba(0,0,0,0.18)] backdrop-blur-md">
               <label
                 htmlFor="custom-wager-amount"
-                style={{
-                  display: "block",
-                  color: "#ffffff",
-                  fontSize: 12,
-                  fontWeight: 800,
-                  marginBottom: 10,
-                  textShadow: "0 1px 6px rgba(0,0,0,0.2)",
-                  textAlign: "center",
-                }}
+                className="mb-2.5 block text-center text-xs font-extrabold text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.2)]"
               >
                 Enter Amount
               </label>
 
               <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  borderRadius: 16,
-                  padding: "0 14px",
-                  background: "rgba(255,255,255,0.12)",
-                  border: validationMessage
-                    ? "1px solid rgba(255,99,99,0.65)"
-                    : "1px solid rgba(255,214,10,0.45)",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12)",
-                }}
+                className={[
+                  "flex items-center gap-2.5 rounded-2xl bg-white/10 px-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
+                  validationMessage
+                    ? "border border-red-400/70"
+                    : "border border-yellow-300/50",
+                ].join(" ")}
               >
-                <span
-                  style={{
-                    color: "#ffe36e",
-                    fontWeight: 900,
-                    fontSize: 18,
-                    minWidth: 20,
-                  }}
-                >
+                <span className="min-w-5 text-lg font-black text-[#ffe36e]">
                   💎
                 </span>
 
@@ -403,82 +278,29 @@ const BetAmount = ({ onBack, onConfirm }: BetAmountProps) => {
                   placeholder="Type amount"
                   value={amountInput}
                   onChange={(event) => setAmountInput(event.target.value)}
-                  style={{
-                    width: "100%",
-                    height: 52,
-                    border: "none",
-                    outline: "none",
-                    background: "transparent",
-                    color: "#ffffff",
-                    fontSize: 18,
-                    fontWeight: 700,
-                    textAlign: "left",
-                  }}
+                  className="h-[52px] w-full border-none bg-transparent text-left text-lg font-bold text-white outline-none placeholder:text-white/35"
                 />
               </div>
 
               {/* ────────── inline amount warning and suggestion ────────── */}
               {validationMessage ? (
-                <p
-                  style={{
-                    marginTop: 10,
-                    marginBottom: 0,
-                    color: "#ffb3b3",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    textAlign: "left",
-                    lineHeight: 1.45,
-                    paddingLeft: 4,
-                  }}
-                >
+                <p className="mb-0 mt-2.5 pl-1 text-left text-xs font-bold leading-[1.45] text-[#ffb3b3]">
                   {validationMessage}
                 </p>
               ) : (
-                <p
-                  style={{
-                    marginTop: 10,
-                    marginBottom: 0,
-                    color: "#9fffb0",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    textAlign: "left",
-                    lineHeight: 1.45,
-                    paddingLeft: 4,
-                  }}
-                >
+                <p className="mb-0 mt-2.5 pl-1 text-left text-xs font-bold leading-[1.45] text-[#9fffb0]">
                   Valid amount. You can continue.
                 </p>
               )}
 
-              <p
-                style={{
-                  marginTop: 10,
-                  marginBottom: 0,
-                  color: "#dff7ff",
-                  opacity: 0.92,
-                  fontSize: 14,
-                  fontWeight: 700,
-                  textAlign: "center",
-                }}
-              >
+              <p className="mb-0 mt-2.5 text-center text-sm font-bold text-[#dff7ff]/90">
                 Selected Amount:{" "}
-                <span style={{ color: "#ffe36e", fontWeight: 900 }}>
-                  {finalAmount}
-                </span>
+                <span className="font-black text-[#ffe36e]">{finalAmount}</span>
               </p>
 
               {/* ────────── low balance helper ────────── */}
               {isFinalAmountValid && walletBalance < finalAmount && (
-                <p
-                  style={{
-                    marginTop: 8,
-                    marginBottom: 0,
-                    color: "#ffb3b3",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    textAlign: "center",
-                  }}
-                >
+                <p className="mb-0 mt-2 text-center text-xs font-bold text-[#ffb3b3]">
                   Insufficient balance for this wager amount.
                 </p>
               )}
@@ -486,35 +308,24 @@ const BetAmount = ({ onBack, onConfirm }: BetAmountProps) => {
           </div>
 
           {/* ────────── action buttons ────────── */}
-          <div
-            style={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: 4,
-            }}
-          >
+          <div className="mt-1 flex w-full items-center justify-center">
             <div
-              style={{
-                width: "100%",
-                opacity: isConfirmDisabled ? 0.65 : 1,
-                pointerEvents: isConfirmDisabled ? "none" : "auto",
-                filter: isConfirmDisabled ? "grayscale(0.35)" : "none",
-                transition: "all 0.2s ease",
-              }}
+              className={[
+                "w-full transition-all duration-200",
+                isConfirmDisabled
+                  ? "pointer-events-none opacity-65 grayscale-[0.35]"
+                  : "pointer-events-auto opacity-100 grayscale-0",
+              ].join(" ")}
             >
-              <GameActionButton
+              <LsButton
                 onClick={handleConfirm}
-                label={"Search Same Amount Player"}
+                variant="logo-blue"
                 size="lg"
-                colors={{
-                  start: "#ffd66e",
-                  mid: "#ffb340",
-                  end: "#d67b00",
-                }}
-                className="w-full"
-              />
+                fullWidth
+                disabled={isConfirmDisabled}
+              >
+                Search Same Amount Player
+              </LsButton>
             </div>
           </div>
         </div>

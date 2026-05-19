@@ -28,6 +28,7 @@ const Image = ({
    */
   const {
     index = 0,
+    avatar = "",
     photo = "",
     isOnline = false,
     isMuted = false,
@@ -78,7 +79,7 @@ const Image = ({
         handleInterval(true);
       }
     },
-    isRunning ? TIME_INTERVAL_CHRONOMETER : null
+    isRunning ? TIME_INTERVAL_CHRONOMETER : null,
   );
 
   const style = {
@@ -103,7 +104,12 @@ const Image = ({
   return (
     <div className="game-profile-image">
       {isOffline && <div className="game-profile-image-ofline">Left</div>}
-      <Avatar photo={photo} className="game-profile-image-avatar" />
+      <Avatar
+        avatar={avatar}
+        photo={photo}
+        name={player.name}
+        className="game-profile-image-avatar"
+      />
       {showMuteChat && (
         <button
           title={titleMuteChat}

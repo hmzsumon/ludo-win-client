@@ -142,7 +142,7 @@ export default function DepositPage() {
   const formatTxId = (txId: string) => `${txId.slice(0, 6)}…${txId.slice(-4)}`;
 
   return (
-    <div className="min-h-screen bg-neutral-950 px-1 py-4 md:px-6 md:py-8">
+    <div className="min-h-screen lw-main-flow-bg px-1 py-4 md:px-6 md:py-8">
       <div className="mx-auto w-full max-w-4xl">
         {/* ────────── header ────────── */}
         <DepositHeader
@@ -170,8 +170,8 @@ export default function DepositPage() {
         />
 
         {/* ────────── deposit card ────────── */}
-        <div className="overflow-hidden rounded-2xl border border-neutral-800 shadow-xl">
-          <div className="bg-gradient-to-r from-emerald-600 to-cyan-600 px-6 py-4 text-white">
+        <div className="overflow-hidden rounded-[26px] border border-white/30 bg-white/15 shadow-[0_20px_45px_rgba(0,72,155,0.22)] backdrop-blur-xl">
+          <div className="lw-blue-topbar px-6 py-4 text-white">
             <div className="flex items-center justify-between">
               <span className="text-sm/none opacity-80">
                 USDT ({network}) deposit
@@ -184,7 +184,7 @@ export default function DepositPage() {
             </div>
           </div>
 
-          <div className="space-y-6 bg-neutral-950 p-6">
+          <div className="space-y-6 p-6">
             {/* ────────── QR code ────────── */}
             <QRCodeCard
               isLoading={isLoading}

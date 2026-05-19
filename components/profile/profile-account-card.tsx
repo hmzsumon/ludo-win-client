@@ -18,41 +18,35 @@ const ProfileAccountCard = ({ dashboard, isLoading }: Props) => {
   ];
 
   return (
-    <section
-      className="relative rounded-[20px] overflow-hidden p-4"
-      style={{
-        background:
-          "linear-gradient(145deg, rgba(74,26,138,0.6) 0%, rgba(29,5,70,0.7) 100%)",
-        border: "1px solid rgba(255,215,0,0.15)",
-        boxShadow:
-          "0 8px 28px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)",
-      }}
-    >
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent" />
+    <section className="relative overflow-hidden rounded-[24px] border border-white/45 bg-white/28 p-4 shadow-[0_14px_34px_rgba(0,92,190,0.16)] backdrop-blur-xl">
+      <div className="absolute inset-x-0 top-0 h-[2px] bg-[linear-gradient(90deg,rgba(255,255,255,0),rgba(35,217,255,0.9),rgba(255,243,74,0.85),rgba(255,255,255,0))]" />
+      <div className="absolute -right-12 -top-12 h-28 w-28 rounded-full bg-cyan-300/25 blur-2xl" />
 
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xl">🪪</span>
-          <h3 className="text-[17px] font-black text-white">Account Info</h3>
+          <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/45 bg-[linear-gradient(180deg,#23d9ff_0%,#0676df_100%)] text-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.65),0_8px_18px_rgba(0,95,190,0.22)]">
+            🪪
+          </span>
+          <h3 className="text-[17px] font-black text-[#073d95]">
+            Account Info
+          </h3>
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         {infoRows.map((row) => (
           <div
             key={row.label}
-            className="flex items-center gap-3 rounded-xl px-3 py-2.5"
-            style={{
-              background: "rgba(0,0,0,0.2)",
-              border: "1px solid rgba(255,255,255,0.05)",
-            }}
+            className="flex items-center gap-3 rounded-2xl border border-white/55 bg-white/42 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]"
           >
-            <span className="text-base shrink-0">{row.icon}</span>
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#e9f8ff] text-base shadow-[0_6px_14px_rgba(0,86,180,0.1)]">
+              {row.icon}
+            </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-yellow-400/50 leading-none">
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/90 leading-none">
                 {row.label}
               </p>
-              <p className="text-[13px] font-bold text-white truncate mt-0.5">
+              <p className="mt-1 truncate text-[13px] font-black text-lime-400">
                 {isLoading ? "Loading..." : row.value}
               </p>
             </div>

@@ -35,7 +35,7 @@ const formatBDT = (n: number) =>
 
 const PANEL = {
   background:
-    "linear-gradient(180deg, rgba(67,11,88,0.55) 0%, rgba(20,4,31,0.75) 100%)",
+    "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(5,83,190,0.26) 100%)",
   border: "1px solid rgba(255,255,255,0.08)",
 };
 
@@ -285,12 +285,12 @@ export default function WithdrawPage() {
   const isAccountInactive = user?.is_active === false;
 
   return (
-    <div className="min-h-screen pb-10" style={{ background: "#14041f" }}>
+    <div className="min-h-screen lw-main-flow-bg pb-10">
       <div
         className="sticky top-0 z-20 flex items-center justify-between px-4 py-3"
         style={{
           background:
-            "linear-gradient(180deg,rgba(30,5,50,0.98),rgba(20,4,31,0.95))",
+            "linear-gradient(135deg,rgba(8,99,202,0.94),rgba(0,174,229,0.88))",
           borderBottom: "1px solid rgba(255,255,255,0.07)",
           backdropFilter: "blur(12px)",
         }}
@@ -328,8 +328,8 @@ export default function WithdrawPage() {
             className="w-full rounded-2xl p-6 flex flex-col items-center gap-3 text-center"
             style={{
               background:
-                "linear-gradient(135deg, rgba(120,10,10,0.7), rgba(60,4,4,0.9))",
-              border: "1px solid rgba(255,80,80,0.25)",
+                "linear-gradient(145deg, rgba(255,255,255,0.20), rgba(255,255,255,0.10))",
+              border: "1px solid rgba(255,255,255,0.28)",
             }}
           >
             <div className="text-5xl">🔐</div>

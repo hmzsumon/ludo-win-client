@@ -12,7 +12,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { FaAngleLeft } from "react-icons/fa";
-import { SlRefresh } from "react-icons/sl";
 
 import PaymentBrandIcon from "./components/BkashIcon";
 
@@ -22,22 +21,25 @@ const MAX_AMOUNT = 25000;
 const getWalletTitle = (methodName?: string, methodType?: string) => {
   const isAgent = methodType === "agent";
   const isPersonal = methodType === "personal";
+
   if (methodName === "Bkash") {
     if (isAgent) return "bKash Agent Wallet ( Cash Out )";
     if (isPersonal) return "bKash Personal Wallet ( Send Money )";
     return "bKash Wallet";
   }
+
   if (methodName === "Nagad") {
     if (isAgent) return "Nagad Agent Wallet ( Cash Out )";
     if (isPersonal) return "Nagad Personal Wallet ( Send Money )";
     return "Nagad Wallet";
   }
+
   return "Wallet";
 };
 
 const PANEL = {
   background:
-    "linear-gradient(180deg, rgba(67,11,88,0.55) 0%, rgba(20,4,31,0.75) 100%)",
+    "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(5,83,190,0.26) 100%)",
   border: "1px solid rgba(255,255,255,0.08)",
 };
 
@@ -92,6 +94,7 @@ export default function PaymentPage() {
         (methodError as fetchBaseQueryError)?.data?.message ||
         (methodError as fetchBaseQueryError)?.data?.error ||
         "Payment channel not found";
+
       toast.error(msg);
     }
   }, [isMethodError, methodError]);
@@ -104,13 +107,20 @@ export default function PaymentPage() {
           "Deposit failed",
       );
     }
+
     if (isCreateSuccess) {
       toast.success("Deposit created successfully!");
       router.push("/deposit/deposit-record");
     }
   }, [isCreateError, isCreateSuccess, createError, router]);
 
+  const handleTxnIdChange = (value: string) => {
+    const upperValue = value.toUpperCase().replace(/\s/g, "");
+    setTxnId(upperValue);
+  };
+
   const amountNum = amountInput ? Number(amountInput) : NaN;
+
   const isValidAmount =
     Number.isFinite(amountNum) &&
     amountNum >= MIN_AMOUNT &&
@@ -121,6 +131,7 @@ export default function PaymentPage() {
     if (!paymentMethod?._id) return false;
     if (!isValidAmount) return false;
     if (!txnId.trim()) return false;
+
     return true;
   }, [channelId, paymentMethod?._id, isValidAmount, txnId]);
 
@@ -129,10 +140,11 @@ export default function PaymentPage() {
       toast.error("Please fill all required fields correctly");
       return;
     }
+
     createDepositWithBDT({
       amount: Number(amountInput),
       customerNumber,
-      txnId,
+      txnId: txnId.trim().toUpperCase(),
       methodId: paymentMethod?._id,
       promotionOptIn,
     });
@@ -149,57 +161,43 @@ export default function PaymentPage() {
         : "#9333ea";
 
   return (
-    <div className="min-h-screen" style={{ background: "#14041f" }}>
+    <div className="min-h-screen lw-main-flow-bg">
       {/* Header */}
       <div
         className="sticky top-0 z-20 flex items-center justify-between px-4 py-3"
         style={{
           background:
-            "linear-gradient(180deg,rgba(30,5,50,0.98),rgba(20,4,31,0.95))",
+            "linear-gradient(135deg,rgba(8,99,202,0.94),rgba(0,174,229,0.88))",
           borderBottom: "1px solid rgba(255,255,255,0.07)",
           backdropFilter: "blur(12px)",
         }}
       >
         <button
-          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-white/70 transition hover:text-white"
+          className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-white transition hover:text-white"
           style={{ background: "rgba(255,255,255,0.07)" }}
           onClick={() => router.back()}
           type="button"
         >
           <FaAngleLeft className="text-xs" /> Back
         </button>
+
         <h1 className="text-base font-extrabold tracking-widest text-white uppercase">
-          💳 Payment
+          Payment
         </h1>
+
         <div className="w-16" />
       </div>
 
-      <div className="mx-auto max-w-md px-3 pb-10 pt-4 space-y-3">
-        {/* Top Notice */}
-        <div
-          className="rounded-2xl p-4"
-          style={{
-            background:
-              "linear-gradient(135deg,rgba(30,80,180,0.25),rgba(20,50,140,0.3))",
-            border: "1px solid rgba(80,120,255,0.25)",
-          }}
-        >
-          <p className="text-[12px] leading-5 text-blue-200">
-            <b className="text-white">⏱ Request making a request,</b> — use the
-            payment details below within{" "}
-            <b className="text-yellow-300">10 minutes </b> ।
-          </p>
-        </div>
-
+      <div className="space-y-3 px-3 pb-10 pt-4">
         {/* Payment Method Panel */}
-        <div className="rounded-2xl overflow-hidden" style={PANEL}>
+        <div className="overflow-hidden rounded-2xl" style={PANEL}>
           {/* Method Header */}
           <div
-            className="px-4 pt-4 pb-3 flex items-center justify-between"
+            className="px-5 py-3"
             style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
           >
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl overflow-hidden">
+            <div className="space-y-2 text-center">
+              <div className="overflow-hidden rounded-xl">
                 {methodName === "Bkash" ? (
                   <PaymentBrandIcon title="BKash Deposit" />
                 ) : methodName === "Nagad" ? (
@@ -211,48 +209,35 @@ export default function PaymentPage() {
                   />
                 ) : (
                   <div
-                    className="flex h-10 w-10 items-center justify-center rounded-xl text-white font-bold"
-                    style={{ background: "rgba(147,51,234,0.3)" }}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl font-bold text-white"
+                    style={{ background: "rgba(14,165,233,0.28)" }}
                   >
                     PM
                   </div>
                 )}
               </div>
+
               <div>
                 <div className="text-sm font-bold text-white">
                   {getWalletTitle(methodName, methodType)}
                 </div>
-                <div
-                  className="text-[10px] text-white/40 mt-0.5"
-                  style={{ color: methodColor }}
-                >
-                  ● Active
-                </div>
               </div>
             </div>
-            <button
-              className="flex h-7 w-7 items-center justify-center rounded-full text-white/50 hover:text-white transition"
-              style={{ background: "rgba(255,255,255,0.07)" }}
-              type="button"
-              onClick={() => refetch()}
-            >
-              <SlRefresh className="text-xs" />
-            </button>
           </div>
 
           {/* Body */}
-          <div className="p-4 space-y-3">
+          <div className="space-y-3 p-4">
             {isMethodLoading ? (
               <div className="flex items-center gap-2 text-sm text-white/50">
-                <Loader2 className="h-4 w-4 animate-spin" /> Loading payment
-                method...
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading payment method...
               </div>
             ) : !paymentMethod ? (
               <div
                 className="rounded-xl p-3 text-sm"
                 style={{
                   background: "rgba(255,80,80,0.1)",
-                  border: "1px solid rgba(255,80,80,0.25)",
+                  border: "1px solid rgba(255,255,255,0.28)",
                   color: "#ffaaaa",
                 }}
               >
@@ -262,21 +247,23 @@ export default function PaymentPage() {
               <>
                 {/* Account Number */}
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1.5 block">
+                  <label className="mb-1.5 ml-1 block text-[10px] uppercase tracking-widest text-white">
                     Account Number
                   </label>
-                  <div className="flex items-center gap-2">
+
+                  <div className="relative flex w-full items-center">
                     <input
                       value={paymentMethod.accountNumber || ""}
                       readOnly
-                      className="flex-1 rounded-xl px-4 py-2.5 text-sm font-bold tracking-widest"
+                      className="flex-1 rounded-xl px-4 py-3 text-sm font-bold tracking-widest"
                       style={{
                         ...INPUT_BASE,
                         border: `1.5px solid ${methodColor}40`,
                         background: "rgba(0,0,0,0.35)",
                       }}
                     />
-                    <div style={{ flexShrink: 0 }}>
+
+                    <div className="absolute right-2">
                       <CopyToClipboard
                         text={paymentMethod.accountNumber || ""}
                       />
@@ -286,9 +273,10 @@ export default function PaymentPage() {
 
                 {/* Amount */}
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1.5 block">
+                  <label className="mb-1.5 ml-1 block text-[10px] uppercase tracking-widest text-white">
                     Amount
                   </label>
+
                   <div
                     className="flex items-center gap-3 rounded-xl px-4 py-2.5"
                     style={{
@@ -302,6 +290,7 @@ export default function PaymentPage() {
                     }}
                   >
                     <span className="text-base">💎</span>
+
                     <input
                       inputMode="numeric"
                       value={amountInput}
@@ -311,40 +300,33 @@ export default function PaymentPage() {
                   </div>
                 </div>
 
-                {/* TrxID */}
+                {/* Transaction ID */}
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1.5 block">
+                  <label className="mb-1.5 ml-1 block text-[10px] uppercase tracking-widest text-white">
                     Transaction ID <span className="text-red-400">*</span>
                   </label>
+
                   <input
                     value={txnId}
-                    onChange={(e) => setTxnId(e.target.value)}
+                    onChange={(e) => handleTxnIdChange(e.target.value)}
                     placeholder="e.g., 7AB12C3D45"
-                    className="w-full rounded-xl px-4 py-2.5 text-sm font-mono"
+                    className="w-full rounded-xl px-4 py-2.5 font-mono text-sm uppercase tracking-wider"
                     style={{
                       ...INPUT_BASE,
                       border: txnId
                         ? "1.5px solid rgba(180,80,255,0.5)"
                         : "1.5px solid rgba(255,255,255,0.09)",
+                      textTransform: "uppercase",
                     }}
+                    autoCapitalize="characters"
+                    autoComplete="off"
+                    spellCheck={false}
                     maxLength={10}
                   />
-                  <div className="mt-1.5 text-[10px] text-white/30">
+
+                  <div className="mt-1.5 text-center text-[10px] font-bold text-red-300">
                     Enter the TrxID from your {methodName} transaction history.
                   </div>
-                </div>
-
-                {/* Warning */}
-                <div
-                  className="rounded-xl p-3 text-[11px] leading-5"
-                  style={{
-                    background: "rgba(255,200,0,0.07)",
-                    border: "1px solid rgba(255,200,0,0.2)",
-                    color: "#fde68a",
-                  }}
-                >
-                  ⚠️ Please recheck all information. Wrong
-                  TxID/TrxID/UTR/Reference can delay verification.
                 </div>
 
                 {/* Confirm Button */}
@@ -369,10 +351,12 @@ export default function PaymentPage() {
                         : "none",
                     cursor: !isValid || isCreating ? "not-allowed" : "pointer",
                   }}
+                  type="button"
                 >
                   {isCreating ? (
                     <span className="inline-flex items-center justify-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" /> Processing...
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Processing...
                     </span>
                   ) : (
                     "CONFIRM DEPOSIT"

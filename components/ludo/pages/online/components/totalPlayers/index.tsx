@@ -1,5 +1,5 @@
+import Logo from "@/components/branding/logo";
 import Icon from "@/components/ludo/icon";
-import Logo from "@/components/ludo/logo";
 import PageWrapper from "@/components/wrapper/page";
 import type { TTotalPlayers } from "@/interfaces";
 

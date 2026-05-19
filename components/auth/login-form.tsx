@@ -90,7 +90,7 @@ export default function LoginForm(): JSX.Element {
 
       {/* ── Title ── */}
       <div className="text-center">
-        <h1 className="text-[32px] font-black tracking-tight text-white">
+        <h1 className="text-[24px] brand-highlight-text uppercase font-black tracking-tight ">
           Welcome Back!
         </h1>
         <p className="text-sm text-white/50 font-semibold mt-1">
@@ -104,15 +104,15 @@ export default function LoginForm(): JSX.Element {
           className="flex-1 h-px"
           style={{
             background:
-              "linear-gradient(90deg, transparent, rgba(255,215,0,0.3))",
+              "linear-gradient(90deg, transparent, rgba(255,215,0,0.9))",
           }}
         />
-        <span className="text-yellow-400/60 text-xs font-bold">✦ LOGIN ✦</span>
+        <span className="text-white text-xs font-bold">✦ LOGIN ✦</span>
         <div
           className="flex-1 h-px"
           style={{
             background:
-              "linear-gradient(90deg, rgba(255,215,0,0.3), transparent)",
+              "linear-gradient(90deg, rgba(255,215,0,0.9), transparent)",
           }}
         />
       </div>
@@ -131,7 +131,7 @@ export default function LoginForm(): JSX.Element {
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           {/* Mobile Number Input */}
           <div>
-            <label className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-blue-400">
+            <label className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-[#03b2fd]">
               📱 Mobile Number
             </label>
             <AuthInput
@@ -153,7 +153,7 @@ export default function LoginForm(): JSX.Element {
 
           {/* Password Input */}
           <div>
-            <label className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-lime-400">
+            <label className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-[#03b2fd]">
               🔒 Password
             </label>
             <AuthInput
@@ -177,7 +177,7 @@ export default function LoginForm(): JSX.Element {
           <div className="text-right -mt-1">
             <Link
               href="/forgot-password"
-              className="text-[12px] font-bold text-yellow-400/70 hover:text-yellow-400 transition"
+              className="text-[12px] font-bold text-red-500 hover:text-red-400 transition"
             >
               Forgot Password?
             </Link>

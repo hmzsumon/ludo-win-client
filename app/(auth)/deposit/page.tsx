@@ -97,10 +97,10 @@ const getAmountIcon = (method: MethodKey | null) => {
 
 const getPresetAmounts = (method: MethodKey | null) => {
   if (method && USDT_METHODS.includes(method)) {
-    return [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
+    return [1, 5, 10, 20, 50, 100, 500, 1000];
   }
 
-  return [100, 200, 500, 1000, 3000, 5000, 10000, 15000, 20000, 25000];
+  return [100, 200, 500, 1000, 3000, 5000, 15000, 25000];
 };
 
 const clampAmountByMethod = (method: MethodKey | null, n: number) => {
@@ -129,7 +129,7 @@ const DepositMethodCard = ({
     style={{
       background: active
         ? "linear-gradient(135deg, rgba(67,11,88,0.95) 0%, rgba(34,7,54,0.98) 100%)"
-        : "linear-gradient(135deg, rgba(30,5,45,0.8) 0%, rgba(20,4,31,0.9) 100%)",
+        : "linear-gradient(145deg, rgba(255,255,255,0.20), rgba(5,83,190,0.25))",
       border: active
         ? `1.5px solid ${color}`
         : "1.5px solid rgba(255,255,255,0.08)",
@@ -157,6 +157,13 @@ const DepositMethodCard = ({
   </button>
 );
 
+/* ────────── Payment Channel Card ────────── */
+/* কাজ:
+   ✅ inline css বাদ দিয়ে pure TailwindCSS
+   ✅ active হলে purple glass highlight
+   ✅ inactive হলে dark glass button style
+   ✅ payment channel title show করবে
+*/
 const ChannelCard = ({
   active,
   onClick,
@@ -170,28 +177,24 @@ const ChannelCard = ({
   <button
     onClick={onClick}
     type="button"
-    className="relative w-full rounded-xl px-3 py-2 text-center text-xs font-semibold transition-all duration-150"
-    style={{
-      background: active
-        ? "linear-gradient(135deg, rgba(180,80,255,0.25), rgba(100,20,160,0.35))"
-        : "rgba(255,255,255,0.05)",
-      border: active
-        ? "1.5px solid rgba(180,80,255,0.6)"
-        : "1.5px solid rgba(255,255,255,0.08)",
-      color: active ? "#e0aaff" : "rgba(255,255,255,0.6)",
-      boxShadow: active ? "0 0 10px rgba(150,50,255,0.2)" : "none",
-    }}
+    className={[
+      "relative w-full rounded-xl px-3 py-2 text-center text-[.70rem] transition-all duration-150",
+      active
+        ? "border-[1.5px] border-purple-400/60 bg-gradient-to-br from-purple-400/25 to-purple-900/35 text-purple-100 shadow-[0_0_10px_rgba(150,50,255,0.2)]"
+        : "border-[1.5px] border-white/10 bg-white/[0.05] text-white shadow-none",
+    ].join(" ")}
   >
-    <span
-      className="absolute left-1 top-1 inline-flex h-3 w-3 items-center justify-center rounded-full text-[8px]"
-      style={{ background: "linear-gradient(135deg,#ff9500,#ff5500)" }}
-    >
-      👍
-    </span>
     {title}
   </button>
 );
 
+/* ────────── Amount Preset Chip ────────── */
+/* কাজ:
+   ✅ inline css বাদ দিয়ে pure TailwindCSS
+   ✅ active হলে purple gradient highlight
+   ✅ inactive হলে glass dark button style
+   ✅ BDT / USDT currency format dynamic
+*/
 const AmountChip = ({
   value,
   active,
@@ -206,17 +209,12 @@ const AmountChip = ({
   <button
     type="button"
     onClick={onClick}
-    className="rounded-xl py-2 text-center text-xs font-bold transition-all duration-150"
-    style={{
-      background: active
-        ? "linear-gradient(135deg, #9333ea, #7c3aed)"
-        : "rgba(255,255,255,0.06)",
-      border: active
-        ? "1.5px solid rgba(180,80,255,0.7)"
-        : "1.5px solid rgba(255,255,255,0.08)",
-      color: active ? "#fff" : "rgba(255,255,255,0.55)",
-      boxShadow: active ? "0 0 12px rgba(147,51,234,0.4)" : "none",
-    }}
+    className={[
+      "rounded-xl py-2 text-center text-xs font-bold transition-all duration-150",
+      active
+        ? "border-[1.5px] border-purple-400/70 bg-gradient-to-br from-purple-600 to-violet-600 text-white shadow-[0_0_12px_rgba(147,51,234,0.4)]"
+        : "border-[1.5px] border-white/10 bg-white/[0.06] text-white shadow-none",
+    ].join(" ")}
   >
     {currency === "USDT" ? `${value} USDT` : `৳${value.toLocaleString()}`}
   </button>
@@ -266,7 +264,7 @@ const codeFromTitle = (title?: string) => {
 
 const PANEL_STYLE = {
   background:
-    "linear-gradient(180deg, rgba(67,11,88,0.55) 0%, rgba(20,4,31,0.75) 100%)",
+    "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(5,83,190,0.26) 100%)",
   border: "1px solid rgba(255,255,255,0.08)",
 };
 
@@ -283,7 +281,7 @@ export default function DepositPage() {
   const { user } = useSelector((s: any) => s.auth) || { user: null };
   const isAccountInactive = user?.is_active === false;
 
-  const [promoChoice, setPromoChoice] = useState<PromoChoice | null>(null);
+  const [promoChoice, setPromoChoice] = useState<PromoChoice>("opt_in");
   const { data: promoRes } = useGetDepositPromoInfoQuery();
   const promo = promoRes?.data;
 
@@ -385,18 +383,15 @@ export default function DepositPage() {
   /* ════════════════════════════════════════════════════════════════
      account inactive block — deposit সম্পূর্ণ বন্ধ
      কাজ: admin inactive করলে deposit page এ এই screen দেখাবে
-     ════════════════════════════════════════════════════════════════ */
+  ════════════════════════════════════════════════════════════════ */
   if (isAccountInactive) {
     return (
-      <div
-        className="min-h-screen flex flex-col"
-        style={{ background: "#14041f" }}
-      >
+      <div className="min-h-screen lw-main-flow-bg flex flex-col">
         <div
           className="sticky top-0 z-20 flex items-center justify-between px-4 py-3"
           style={{
             background:
-              "linear-gradient(180deg,rgba(30,5,50,0.98),rgba(20,4,31,0.95))",
+              "linear-gradient(135deg,rgba(8,99,202,0.94),rgba(0,174,229,0.88))",
             borderBottom: "1px solid rgba(255,255,255,0.07)",
             backdropFilter: "blur(12px)",
           }}
@@ -420,8 +415,8 @@ export default function DepositPage() {
             className="w-full max-w-md rounded-2xl p-6 flex flex-col items-center gap-3 text-center"
             style={{
               background:
-                "linear-gradient(135deg, rgba(120,10,10,0.7), rgba(60,4,4,0.9))",
-              border: "1px solid rgba(255,80,80,0.25)",
+                "linear-gradient(145deg, rgba(255,255,255,0.20), rgba(255,255,255,0.10))",
+              border: "1px solid rgba(255,255,255,0.28)",
             }}
           >
             <div className="text-5xl">🔐</div>
@@ -478,10 +473,10 @@ export default function DepositPage() {
   };
 
   /* ════════════════════════════════════════════════════════════════
-   deposit/page.tsx
-   ✅ amount + promo flag payment route এ পাঠায়
-   ✅ BDT / Binance / BlockBee — সব route consistent
-════════════════════════════════════════════════════════════════ */
+     deposit/page.tsx
+     ✅ amount + promo flag payment route এ পাঠায়
+     ✅ BDT / Binance / BlockBee — সব route consistent
+  ════════════════════════════════════════════════════════════════ */
   const onNext = () => {
     if (!canNext) {
       toast.error(`Amount must be between ${minAmount} and ${MAX_AMOUNT}`);
@@ -494,14 +489,14 @@ export default function DepositPage() {
     }
 
     /* ────────── promo flag normalize ──────────
-     opt_in  -> "1"
-     opt_out -> "0"
-  */
+       opt_in  -> "1"
+       opt_out -> "0"
+    */
     const promoFlag = promoChoice === "opt_in" ? "1" : "0";
 
     /* ────────── BlockBee ──────────
-     amount + promo দুইটাই যাবে
-  */
+       amount + promo দুইটাই যাবে
+    */
     if (selectedMethod === "BlockBee") {
       router.push(
         `/deposit/blockbee?amount=${encodeURIComponent(amountInput)}&promo=${encodeURIComponent(promoFlag)}`,
@@ -524,19 +519,19 @@ export default function DepositPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "#14041f" }}>
+    <div className="min-h-screen lw-main-flow-bg">
       <div className="mx-auto max-w-xl pb-10">
         <div
           className="sticky top-0 z-20 flex items-center justify-between px-4 py-3"
           style={{
             background:
-              "linear-gradient(180deg,rgba(30,5,50,0.98),rgba(20,4,31,0.95))",
+              "linear-gradient(135deg,rgba(8,99,202,0.94),rgba(0,174,229,0.88))",
             borderBottom: "1px solid rgba(255,255,255,0.07)",
             backdropFilter: "blur(12px)",
           }}
         >
           <button
-            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-white/70 transition hover:text-white"
+            className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-white/70 transition hover:text-white"
             style={{ background: "rgba(255,255,255,0.07)" }}
             onClick={() => router.back()}
             type="button"
@@ -670,12 +665,12 @@ export default function DepositPage() {
             <div className="rounded-2xl p-4" style={PANEL_STYLE}>
               <div className="mb-3 flex items-center gap-2">
                 <div className="h-1.5 w-1.5 rounded-full bg-pink-400" />
-                <span className="text-xs font-bold uppercase tracking-widest text-white/50">
+                <span className="text-xs font-bold uppercase tracking-widest text-white">
                   Deposit Amount
                 </span>
               </div>
 
-              <div className="grid grid-cols-5 gap-1.5">
+              <div className="grid grid-cols-4 gap-1.5">
                 {presetAmounts.map((v) => (
                   <AmountChip
                     key={v}
@@ -734,11 +729,12 @@ export default function DepositPage() {
                 <PromotionConsent
                   value={promoChoice}
                   onChange={setPromoChoice}
-                  tiers={promo?.tiers}
+                  tiers={promo?.tiers || []}
                   nextBonusDepositNumber={promo?.nextBonusDepositNumber}
                   nextBonusPercent={promo?.nextBonusPercent}
+                  nextBonusMaxAmount={promo?.nextBonusMaxAmount}
                   turnoverMultiplier={promo?.turnoverMultiplier}
-                  amount={isValidAmount ? Number(amountInput) : undefined}
+                  amount={amountNumber}
                 />
               )}
 

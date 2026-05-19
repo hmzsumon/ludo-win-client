@@ -97,14 +97,16 @@ const AvatarPickerModal = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 p-4">
-      <div className="w-full max-w-md rounded-[24px] border border-white/10 bg-[#2a0845] p-4 shadow-2xl">
+    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-[#003777]/45 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-[24px] border border-white/45 bg-white/35 p-4 shadow-2xl backdrop-blur-xl">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-[18px] font-black text-white">Choose Avatar</h3>
+          <h3 className="text-[18px] font-black text-[#073d95]">
+            Choose Avatar
+          </h3>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg px-3 py-1 text-white/70 transition hover:bg-white/10 hover:text-white"
+            className="rounded-lg px-3 py-1 text-[#073d95]/70 transition hover:bg-white/35 hover:text-[#073d95]"
           >
             ✕
           </button>
@@ -143,7 +145,7 @@ const AvatarPickerModal = ({
           type="button"
           onClick={onSave}
           disabled={!selectedAvatar || saving}
-          className="mt-5 w-full rounded-full bg-gradient-to-r from-yellow-300 to-yellow-500 px-4 py-3 text-[14px] font-black text-black disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-5 w-full rounded-full bg-gradient-to-r from-[#23d9ff] to-[#0572d1] px-4 py-3 text-[14px] font-black text-white shadow-[0_10px_20px_rgba(0,105,205,0.24)] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {saving ? "Saving..." : "Save Avatar"}
         </button>
@@ -236,19 +238,12 @@ const ProfileHeroCard = () => {
 
   return (
     <>
-      <section
-        className="relative w-full overflow-hidden rounded-[24px] p-5"
-        style={{
-          background:
-            "linear-gradient(145deg, rgba(74,26,138,0.85) 0%, rgba(29,5,70,0.9) 100%)",
-          border: `1px solid ${currentRank ? rankCfg.border : "rgba(255,215,0,0.2)"}`,
-          boxShadow:
-            "0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)",
-        }}
-      >
-        <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-yellow-400/40 to-transparent" />
+      <section className="relative w-full overflow-hidden rounded-[30px] border border-white/50 bg-white/30 p-5 shadow-[0_18px_38px_rgba(0,92,190,0.2)] backdrop-blur-xl">
+        <div className="absolute inset-x-0 top-0 h-[2px] bg-[linear-gradient(90deg,rgba(255,255,255,0),rgba(255,243,74,0.95),rgba(35,217,255,0.9),rgba(255,255,255,0))]" />
+        <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-cyan-300/28 blur-2xl" />
+        <div className="absolute -left-14 bottom-12 h-32 w-32 rounded-full bg-yellow-200/24 blur-2xl" />
 
-        <div className="flex flex-col gap-5">
+        <div className="relative flex flex-col gap-5">
           {/* ── Avatar + Name section ── */}
           <div className="flex items-center gap-4">
             <div className="relative shrink-0">
@@ -256,10 +251,10 @@ const ProfileHeroCard = () => {
                 className="relative h-24 w-24 overflow-hidden rounded-full"
                 style={{
                   background:
-                    "linear-gradient(145deg, #5b21b6 0%, #7c3aed 100%)",
-                  border: "3px solid #ffd700",
+                    "linear-gradient(145deg, #23d9ff 0%, #0572d1 100%)",
+                  border: "3px solid rgba(255,255,255,0.92)",
                   boxShadow:
-                    "0 0 0 6px rgba(255,215,0,0.15), 0 8px 24px rgba(0,0,0,0.5)",
+                    "0 0 0 6px rgba(35,217,255,0.18), 0 10px 22px rgba(0,86,180,0.2)",
                 }}
               >
                 {user?.avatar ? (
@@ -278,7 +273,7 @@ const ProfileHeroCard = () => {
               </div>
 
               <div
-                className="absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-[#1a0533] bg-green-400"
+                className="absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white bg-green-400"
                 style={{ boxShadow: "0 0 6px rgba(46,204,113,0.8)" }}
               />
 
@@ -286,8 +281,8 @@ const ProfileHeroCard = () => {
                 className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-black text-white"
                 style={{
                   background:
-                    "linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                    "linear-gradient(135deg, #23d9ff 0%, #0572d1 100%)",
+                  border: "1px solid rgba(255,255,255,0.55)",
                 }}
               >
                 🇧🇩 BD
@@ -295,18 +290,18 @@ const ProfileHeroCard = () => {
             </div>
 
             <div>
-              <h2 className="leading-tight text-[24px] font-black tracking-tight text-white">
+              <h2 className="leading-tight text-[24px] font-black tracking-tight text-[#063f9a] drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]">
                 {shortName}
               </h2>
 
-              <p className="mt-0.5 text-[13px] font-semibold text-white/50">
+              <p className="mt-0.5 text-[13px] font-black text-[#0671cf]/70">
                 {username}
               </p>
 
               <button
                 type="button"
                 onClick={() => setIsAvatarModalOpen(true)}
-                className="ls-btn ls-btn-purple mt-3 px-4 py-2 text-[12px] font-black"
+                className="mt-3 rounded-full border border-white/50 bg-[linear-gradient(180deg,#fff34a_0%,#ffc300_100%)] px-4 py-2 text-[12px] font-black text-[#06357f] shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_5px_0_rgba(199,132,0,0.62),0_10px_18px_rgba(0,92,190,0.12)] transition active:translate-y-0.5"
               >
                 ✏️ Edit Profile
               </button>
@@ -315,19 +310,8 @@ const ProfileHeroCard = () => {
 
           {/* ── VIP Rank Card ── */}
           <Link href="/vip-cashback" className="block">
-            <div
-              className="relative flex cursor-pointer flex-col items-center justify-center rounded-2xl px-6 py-4 text-center transition-transform active:scale-[0.98]"
-              style={{
-                background: currentRank
-                  ? `linear-gradient(135deg, ${rankCfg.bg} 0%, rgba(29,5,70,0.6) 100%)`
-                  : "rgba(0,0,0,0.3)",
-                border: `1px solid ${currentRank ? rankCfg.border : "rgba(255,215,0,0.2)"}`,
-                boxShadow: currentRank
-                  ? `0 0 20px ${rankCfg.glow}30`
-                  : "0 0 20px rgba(255,215,0,0.1)",
-              }}
-            >
-              <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-white/50">
+            <div className="relative flex cursor-pointer flex-col items-center justify-center rounded-[24px] border border-white/55 bg-white/40 px-6 py-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_12px_24px_rgba(0,92,190,0.14)] transition-transform active:scale-[0.98]">
+              <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-[#0671cf]/70">
                 Current Rank
               </p>
 
@@ -337,7 +321,7 @@ const ProfileHeroCard = () => {
                 <h3
                   className="text-[28px] font-black"
                   style={{
-                    color: currentRank ? rankCfg.color : "#666",
+                    color: currentRank ? rankCfg.color : "#063f9a",
                     textShadow: currentRank
                       ? `0 0 12px ${rankCfg.glow}`
                       : "none",
@@ -355,7 +339,7 @@ const ProfileHeroCard = () => {
                   >
                     {currentRank.cashback}% cashback
                   </span>
-                  <span className="text-[10px] font-semibold text-white/40">
+                  <span className="text-[10px] font-bold text-[#0671cf]/60">
                     {currentStageMatches} fresh matches
                   </span>
                 </div>
@@ -363,7 +347,7 @@ const ProfileHeroCard = () => {
 
               <div
                 className="mt-3 h-1.5 w-full overflow-hidden rounded-full"
-                style={{ background: "rgba(255,255,255,0.1)" }}
+                style={{ background: "rgba(6,113,207,0.16)" }}
               >
                 <div
                   className="h-full rounded-full transition-all duration-700"
@@ -377,11 +361,11 @@ const ProfileHeroCard = () => {
                 />
               </div>
 
-              <p className="mt-1 text-[10px] font-semibold text-white/30">
+              <p className="mt-1 text-[10px] font-bold text-[#0671cf]/65">
                 {vipLoading ? "Loading..." : progressText}
               </p>
 
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-lg text-white/30">
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-lg font-black text-[#0671cf]/45">
                 →
               </div>
             </div>

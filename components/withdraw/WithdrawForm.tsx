@@ -175,10 +175,10 @@ export default function WithdrawForm({
   );
 
   const inputClass =
-    "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition focus:border-violet-500/60 focus:ring-2 focus:ring-violet-500/20";
+    "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/80 outline-none transition focus:border-violet-500/60 focus:ring-2 focus:ring-violet-500/20";
 
   const labelClass =
-    "mb-1.5 block text-xs font-semibold uppercase tracking-widest text-white/40";
+    "mb-1.5 block ml-1 text-xs font-semibold uppercase tracking-widest text-white";
 
   return (
     <div className="space-y-4 p-4">

@@ -1,6 +1,6 @@
 // components/wrapper/container/index.tsx
 "use client";
-import useWindowResize from "@/hooks/useWindowResize"; // ← আপনার প্রকল্প অনুযায়ী পাথ
+import useWindowResize from "@/hooks/useWindowResize";
 import React, { useRef } from "react";
 
 const Container = ({ children }: { children: React.ReactNode }) => {

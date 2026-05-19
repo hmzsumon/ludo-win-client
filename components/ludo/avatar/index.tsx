@@ -5,21 +5,27 @@ import Image, { StaticImageData } from "next/image";
 import React from "react";
 
 type AvatarProps = {
-  photo?: string; // external url বা /ludo/avatar/a.png
+  avatar?: string;
+  photo?: string;
   name?: string;
   className?: string;
-  size?: number; // px, default 40
+  size?: number;
 };
 
 const Avatar: React.FC<AvatarProps> = ({
+  avatar = "",
   photo = "",
   name = "",
   className = "",
   size = 40,
 }) => {
-  const [src, setSrc] = React.useState<string | StaticImageData>(
-    photo || defaultAvatar
-  );
+  const resolvedSrc = avatar || photo || defaultAvatar;
+
+  const [src, setSrc] = React.useState<string | StaticImageData>(resolvedSrc);
+
+  React.useEffect(() => {
+    setSrc(resolvedSrc);
+  }, [resolvedSrc]);
 
   return (
     <Image

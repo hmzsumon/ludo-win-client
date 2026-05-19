@@ -44,7 +44,7 @@ export default function BkashPage() {
   useEffect(() => {
     if (paymentMethods) {
       const bkashMethod = paymentMethods.find(
-        (method: { methodName: string }) => method.methodName === "Bkash"
+        (method: { methodName: string }) => method.methodName === "Bkash",
       );
       if (bkashMethod) {
         setPaymentMethod(bkashMethod);
@@ -109,17 +109,17 @@ export default function BkashPage() {
     <div>
       <div className="mt-2">
         <button
-          className="text-gray-100 text-sm hover:underline flex items-center gap-1"
+          className="inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-sm font-bold text-white shadow-sm backdrop-blur-md hover:bg-white/25"
           onClick={() => router.back()}
         >
           <FaAngleLeft />
           Back
         </button>
       </div>
-      <div className=" min-h-screen bg-transparent text-white flex items-start justify-center p-4">
-        <div className="w-full max-w-md rounded-lg border border-[#00493B] bg-[#01241D] shadow-xl">
+      <div className="min-h-screen lw-main-flow-bg bg-transparent text-white flex items-start justify-center p-4">
+        <div className="w-full max-w-md rounded-[26px] border border-white/30 bg-white/15 shadow-[0_20px_45px_rgba(0,72,155,0.24)] backdrop-blur-xl">
           {/* Top notice bar */}
-          <div className="rounded-t-lg bg-[#2F69B1] px-4 py-3 text-sm">
+          <div className="rounded-t-[26px] bg-[linear-gradient(135deg,#0863ca,#10b8ee)] px-4 py-3 text-sm text-white shadow-[0_10px_24px_rgba(8,99,202,0.22)]">
             <p className="leading-snug">
               <b>Before making a request</b>, please transfer funds within 10
               minutes using the payment details specified below.
@@ -182,7 +182,7 @@ export default function BkashPage() {
                   value={amount}
                   onChange={(e) =>
                     setAmount(
-                      e.target.value === "" ? "" : Number(e.target.value)
+                      e.target.value === "" ? "" : Number(e.target.value),
                     )
                   }
                   placeholder="0.00"

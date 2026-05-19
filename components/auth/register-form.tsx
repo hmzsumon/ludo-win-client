@@ -235,7 +235,7 @@ export default function RegisterForm(): JSX.Element {
 
       {/* ─────── PAGE TITLE — পেজ শিরোনাম ─────── */}
       <div className="text-center">
-        <h1 className="text-[28px] font-black tracking-tight text-white">
+        <h1 className="text-[24px] brand-highlight-text uppercase font-black tracking-tight text-white">
           Join the Game!
         </h1>
         <p className="text-sm text-white/50 font-semibold mt-1">
@@ -249,17 +249,15 @@ export default function RegisterForm(): JSX.Element {
           className="flex-1 h-px"
           style={{
             background:
-              "linear-gradient(90deg, transparent, rgba(255,215,0,0.3))",
+              "linear-gradient(90deg, transparent, rgba(255,215,0,0.9))",
           }}
         />
-        <span className="text-yellow-400/60 text-xs font-bold">
-          ✦ REGISTER ✦
-        </span>
+        <span className="text-white text-xs font-bold">✦ REGISTER ✦</span>
         <div
           className="flex-1 h-px"
           style={{
             background:
-              "linear-gradient(90deg, rgba(255,215,0,0.3), transparent)",
+              "linear-gradient(90deg, rgba(255,215,0,0.9), transparent)",
           }}
         />
       </div>
@@ -278,7 +276,7 @@ export default function RegisterForm(): JSX.Element {
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           {/* ── Full Name ── */}
           <div>
-            <label className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-[#fb381a]">
+            <label className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-[#03b2fd]">
               👤 Full Name
             </label>
             <AuthInput
@@ -300,7 +298,7 @@ export default function RegisterForm(): JSX.Element {
 
           {/* ── Email Address — সার্ভারে রিয়েলটাইম চেক হয় ── */}
           <div>
-            <label className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-[#fce629]">
+            <label className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-[#03b2fd]">
               📧 Email Address
             </label>
             <AuthInput
@@ -337,7 +335,7 @@ export default function RegisterForm(): JSX.Element {
 
           {/* ── Mobile Number ── */}
           <div>
-            <label className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-[#b9fa39]">
+            <label className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-[#03b2fd]">
               📱 Mobile Number
             </label>
             <AuthInput
@@ -482,7 +480,7 @@ export default function RegisterForm(): JSX.Element {
 
           {/* ── Password ── */}
           <div>
-            <label className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-[#d14dfa]">
+            <label className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-[#03b2fd]">
               🔒 Password
             </label>
             <AuthInput
@@ -505,7 +503,7 @@ export default function RegisterForm(): JSX.Element {
 
           {/* ── Confirm Password ── */}
           <div>
-            <label className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-[#fa5ab5]">
+            <label className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-[#03b2fd]">
               🔒 Confirm Password
             </label>
             <AuthInput

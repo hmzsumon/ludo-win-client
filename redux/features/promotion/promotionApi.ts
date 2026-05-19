@@ -4,8 +4,8 @@ export type PromotionTier = {
   from: number;
   to: number;
   percent: number;
+  maxBonus?: number;
 };
-
 /* ────────── Deposit bonus info response ────────── */
 export type DepositPromoInfoRes = {
   success: boolean;
@@ -16,6 +16,7 @@ export type DepositPromoInfoRes = {
     bonusTakenCount: number;
     nextBonusDepositNumber: number;
     nextBonusPercent: number;
+    nextBonusMaxAmount: number;
     showPromo: boolean;
   };
 };

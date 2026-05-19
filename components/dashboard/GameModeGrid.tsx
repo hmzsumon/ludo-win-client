@@ -14,7 +14,7 @@ type ModeCardProps = {
 const modes: ModeCardProps[] = [
   {
     title: "Classic",
-    href: "/classic",
+    href: "/online",
     variant: "classic",
     size: "large",
     image: "/images/dashboard/classic.png",
@@ -27,25 +27,25 @@ const modes: ModeCardProps[] = [
     image: "/images/dashboard/master.png",
   },
   {
-    title: "Online",
-    href: "/tournament",
+    title: "Play Online",
+    href: "/online",
     variant: "tournament",
     size: "small",
-    image: "/images/dashboard/online.png",
+    image: "/images/dashboard/globe.png",
   },
   {
     title: "2 Players",
-    href: "/friend",
+    href: "/online",
     variant: "friend",
     size: "small",
     image: "/images/dashboard/two-players.png",
   },
   {
-    title: "Offline",
-    href: "/team",
+    title: " Play Offline",
+    href: "/offline",
     variant: "team",
     size: "small",
-    image: "/images/dashboard/offline.png",
+    image: "/images/dashboard/no-wifi.png",
   },
 ];
 
@@ -95,7 +95,7 @@ function getCardClass(
     tournament:
       "bg-[linear-gradient(180deg,#24e8ff_0%,#16c9ff_45%,#0d88d9_100%)]",
     friend: "bg-[linear-gradient(180deg,#c89cff_0%,#9d5eff_45%,#7f20df_100%)]",
-    team: "bg-[linear-gradient(180deg,#42ff82_0%,#22d765_45%,#0aa64b_100%)]",
+    team: "bg-[linear-gradient(180deg,#263bff_0%,#1274e8_45%,#063b8f_100%)]",
   };
 
   return `${base} ${shadow} ${
@@ -117,8 +117,8 @@ function ModeCard({ title, href, variant, size, image }: ModeCardProps) {
               src={image}
               alt={title}
               fill
-              sizes={isLarge ? "220px" : "130px"}
-              className="object-cover"
+              sizes={isLarge ? "220px" : "100px"}
+              className={isLarge ? "object-cover" : "object-contain p-2"}
               priority={isLarge}
             />
           ) : (

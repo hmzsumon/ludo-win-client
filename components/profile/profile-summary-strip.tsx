@@ -14,25 +14,7 @@ const ProfileSummaryStrip = ({ dashboard, isLoading }: Props) => {
       label: "Matches",
       value: isLoading ? "..." : String(dashboard?.overview?.matches ?? 0),
       icon: "🏆",
-      color: "#ffd700",
-      glow: "rgba(255,215,0,0.3)",
     },
-    // {
-    //   label: "Win Rate",
-    //   value: isLoading ? "..." : `${dashboard?.overview?.winRate ?? 0}%`,
-    //   icon: "🔥",
-    //   color: "#ff6b35",
-    //   glow: "rgba(255,107,53,0.3)",
-    // },
-    // {
-    //   label: "Earnings",
-    //   value: isLoading
-    //     ? "..."
-    //     : `💎${Number(dashboard?.overview?.earnings ?? 0).toLocaleString()}`,
-    //   icon: "🪙",
-    //   color: "#4cde7e",
-    //   glow: "rgba(76,222,126,0.3)",
-    // },
   ];
 
   return (
@@ -40,29 +22,16 @@ const ProfileSummaryStrip = ({ dashboard, isLoading }: Props) => {
       {summaryItems.map((item) => (
         <div
           key={item.label}
-          className="relative flex flex-col items-center justify-center rounded-2xl px-2 py-4 text-center overflow-hidden"
-          style={{
-            background:
-              "linear-gradient(145deg, rgba(74,26,138,0.6) 0%, rgba(29,5,70,0.7) 100%)",
-            border: `1px solid ${item.color}30`,
-            boxShadow: `0 6px 20px rgba(0,0,0,0.4), 0 0 0 1px ${item.color}10`,
-          }}
+          className="relative overflow-hidden rounded-[20px] border border-white/45 bg-white/30 px-2 py-3 text-center shadow-[0_10px_22px_rgba(0,91,190,0.14)] backdrop-blur-xl"
         >
-          <div
-            className="absolute inset-0 opacity-10 rounded-2xl"
-            style={{
-              background: `radial-gradient(circle at center, ${item.color} 0%, transparent 70%)`,
-            }}
-          />
+          <div className="absolute inset-x-0 top-0 h-px bg-white/80" />
+          <div className="absolute -top-8 left-1/2 h-14 w-14 -translate-x-1/2 rounded-full bg-cyan-300/25 blur-xl" />
 
-          <span className="text-2xl mb-1">{item.icon}</span>
-          <h4
-            className="text-[20px] font-black leading-tight"
-            style={{ color: item.color, textShadow: `0 0 10px ${item.glow}` }}
-          >
+          <span className="relative text-xl drop-shadow">{item.icon}</span>
+          <h4 className="relative mt-1 truncate text-[15px] font-black leading-tight text-[#063f9a]">
             {item.value}
           </h4>
-          <p className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">
+          <p className="relative mt-0.5 text-[9px] font-black uppercase tracking-wide text-[#0671cf]/70">
             {item.label}
           </p>
         </div>

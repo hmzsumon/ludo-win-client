@@ -10,6 +10,7 @@ const ProfilePicture = () => {
 
   return (
     <Avatar
+      avatar={user?.avatar || ""}
       photo={user?.photo || ""}
       name={user?.name || ""}
       className="profile-picture"

@@ -7,42 +7,51 @@ const ProfileHistoryCard = ({ dashboard, isLoading }: Props) => {
   const historyRows = dashboard?.gameHistory || [];
 
   return (
-    <section className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(31,28,102,0.78)_0%,rgba(10,18,62,0.82)_100%)] p-4 shadow-[0_10px_26px_rgba(0,0,0,0.28)] backdrop-blur sm:p-5">
-      <div className="flex items-center gap-3">
-        <span className="text-[28px]">📝</span>
-        <h3 className="text-[22px] font-black tracking-tight text-white">
+    <section className="relative overflow-hidden rounded-[26px] border border-white/45 bg-white/28 p-4 shadow-[0_14px_34px_rgba(0,92,190,0.16)] backdrop-blur-xl">
+      <div className="absolute inset-x-0 top-0 h-[2px] bg-[linear-gradient(90deg,rgba(255,255,255,0),rgba(35,217,255,0.9),rgba(255,243,74,0.85),rgba(255,255,255,0))]" />
+      <div className="absolute -right-12 -top-12 h-28 w-28 rounded-full bg-cyan-300/25 blur-2xl" />
+
+      <div className="relative flex items-center gap-2">
+        <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/45 bg-[linear-gradient(180deg,#23d9ff_0%,#0676df_100%)] text-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.65),0_8px_18px_rgba(0,95,190,0.22)]">
+          📝
+        </span>
+        <h3 className="text-[17px] font-black tracking-tight text-[#073d95]">
           Game History
         </h3>
       </div>
 
-      <div className="mt-5 space-y-3">
+      <div className="relative mt-4 space-y-2.5">
         {isLoading ? (
-          <p className="text-white/60">Loading...</p>
+          <p className="rounded-2xl border border-white/45 bg-white/35 p-4 text-sm font-bold text-[#063f9a]/70">
+            Loading...
+          </p>
         ) : historyRows.length === 0 ? (
-          <p className="text-white/60">No game history found.</p>
+          <p className="rounded-2xl border border-white/45 bg-white/35 p-4 text-sm font-bold text-[#063f9a]/70">
+            No game history found.
+          </p>
         ) : (
           historyRows.map((row: any, idx: number) => (
             <div
               key={`${row.roomName}-${idx}`}
-              className="flex items-center justify-between rounded-[18px] bg-[rgba(255,255,255,0.04)] px-4 py-4 ring-1 ring-white/10"
+              className="flex items-center justify-between gap-3 rounded-[20px] border border-white/55 bg-white/42 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]"
             >
-              <div>
-                <p className="text-lg font-extrabold text-white">
+              <div className="min-w-0">
+                <p className="truncate text-[15px] font-black text-[#06357f]">
                   {row.opponentName || "Unknown Player"}
                 </p>
-                <p className="mt-1 text-sm font-medium text-white/60">
+                <p className="mt-0.5 text-[11px] font-bold uppercase tracking-wide text-[#0671cf]/65">
                   Recent Match Result
                 </p>
               </div>
 
-              <div className="text-right">
+              <div className="shrink-0 text-right">
                 <p
-                  className={`text-xl font-black ${
+                  className={`text-[14px] font-black ${
                     row.result === "win"
-                      ? "text-[#ffcf45]"
+                      ? "text-[#f2a900]"
                       : row.result === "lose"
-                        ? "text-[#ff6a8f]"
-                        : "text-[#55c7ff]"
+                        ? "text-[#ef174d]"
+                        : "text-[#0474d5]"
                   }`}
                 >
                   {row.result === "win"
@@ -52,7 +61,7 @@ const ProfileHistoryCard = ({ dashboard, isLoading }: Props) => {
                       : "REFUND"}
                 </p>
 
-                <p className="mt-1 text-lg font-extrabold text-white">
+                <p className="mt-0.5 text-[16px] font-black text-[#063f9a]">
                   💎
                   {Number(
                     row.result === "win" ? row.payoutAmount : row.betAmount,
