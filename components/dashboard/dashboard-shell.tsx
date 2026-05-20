@@ -7,7 +7,7 @@ const DashboardShell = () => {
   return (
     <main className="relative min-h-screen w-full overflow-hidden text-white md:min-h-[880px] md:rounded-[30px] md:border md:border-white/10 md:shadow-[0_25px_90px_rgba(0,0,0,0.55)] ">
       {/* ── Ludo Star Deep Purple Background ── */}
-      <div className="relative w-full min-h-screen overflow-hidden px-4 md:rounded-[30px] ">
+      <div className="relative w-full h-screen overflow-hidden px-4 md:rounded-[30px] ">
         {/* Decorative glow blobs */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div
