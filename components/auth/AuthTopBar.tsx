@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-
 import NotificationDrawer from "@/components/auth/NotificationDrawer";
 import UserSidebar from "@/components/auth/UserSidebar";
 import { useOptionsContext } from "@/context/optionContext";
+import MenuIcon from "@/public/icons/menu.png";
 import { useGetMyUnreadNotificationsCountQuery } from "@/redux/features/notifications/notificationApi";
 import { openUserSidebar } from "@/redux/features/ui/sidebarSlice";
 import { EOptionsGame } from "@/utils/constants";
 import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Icon from "../ludo/icon";
 
 function DiamondBalancePill({
@@ -30,7 +31,7 @@ function DiamondBalancePill({
       type="button"
       onClick={onAdd}
       className="
-        relative flex h-[38px] min-w-[132px] items-center justify-between
+        relative flex h-[30px] min-w-[122px] items-center justify-between
         rounded-full border border-[#395cff]
         bg-[linear-gradient(180deg,#1339a8_0%,#08266f_100%)]
         px-3 pl-2 pr-2
@@ -42,7 +43,7 @@ function DiamondBalancePill({
       {/* Diamond */}
       <span className="relative mr-2 flex h-8 w-8 shrink-0 items-center justify-center">
         <span className="absolute inset-0 rounded-full bg-cyan-300/15 blur-sm" />
-        <span className="relative text-[28px] leading-none drop-shadow-[0_2px_2px_rgba(0,0,0,0.45)]">
+        <span className="relative text-[20px] leading-none drop-shadow-[0_2px_2px_rgba(0,0,0,0.45)]">
           💎
         </span>
       </span>
@@ -50,7 +51,7 @@ function DiamondBalancePill({
       {/* Amount */}
       <span
         className="
-          flex-1 text-left text-[20px] font-black leading-none
+          flex-1 text-left text-sm font-black leading-none
           text-[#fff4a8]
           drop-shadow-[0_2px_0_rgba(0,0,0,0.55)]
         "
@@ -61,7 +62,7 @@ function DiamondBalancePill({
       {/* Plus */}
       <span
         className="
-          ml-2 flex h-7 w-7 shrink-0 items-center justify-center
+          ml-2 flex h-5 w-5 shrink-0 items-center justify-center
           rounded-full
           bg-[linear-gradient(180deg,#ffe66b_0%,#ffc400_45%,#ff9d00_100%)]
           text-[24px] font-black leading-none text-[#17328c]
@@ -239,17 +240,12 @@ export default function AuthTopBar() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full bg-transparent backdrop-blur-xl">
-        <div className="mx-auto flex h-[74px] w-full max-w-[430px] items-center justify-between px-6">
+        <div className="mx-auto flex h-[74px] w-full max-w-[430px] items-center justify-between px-4">
           {/* ── Left: Logo ── */}
-          <div className="flex items-center">
+          <Link href="/personal-profile" className="flex items-center">
             {/* ── User Avatar ── */}
             <button
               type="button"
-              onClick={() => {
-                setSettingsOpen(false);
-                setNotifOpen(false);
-                dispatch(openUserSidebar());
-              }}
               className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/8 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:bg-white/14"
               aria-label="Open user menu"
             >
@@ -278,10 +274,10 @@ export default function AuthTopBar() {
                 )}
               </div>
             </button>
-          </div>
+          </Link>
 
           {/* ── Center: Diamond Balance ── */}
-          <div className="flex flex-1 justify-center px-3">
+          <div className="flex flex-1 justify-center px-1">
             <DiamondBalancePill
               amount={user?.m_balance ?? user?.m_balance ?? 0}
               onAdd={() => {
@@ -330,6 +326,27 @@ export default function AuthTopBar() {
                 <div className="h-5 w-5 [&_svg]:h-5 [&_svg]:w-5">
                   <Icon type="gear" />
                 </div>
+              </button>
+            </div>
+            {/* ── Menu button ── */}
+            <div className="flex items-center">
+              {/* ── User Avatar ── */}
+              <button
+                type="button"
+                onClick={() => {
+                  setSettingsOpen(false);
+                  setNotifOpen(false);
+                  dispatch(openUserSidebar());
+                }}
+                aria-label="Open user menu"
+              >
+                <Image
+                  src={MenuIcon}
+                  alt="Menu"
+                  width={28}
+                  height={20}
+                  className="object-contain"
+                />
               </button>
             </div>
           </div>

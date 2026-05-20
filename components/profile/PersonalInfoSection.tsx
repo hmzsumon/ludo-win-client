@@ -1,7 +1,7 @@
 "use client";
 
 // ✅ PersonalInfoSection.tsx
-// Personal information section
+// Smart personal information card
 // - Full Name read only
 // - Country editable
 // - City add / change editable
@@ -28,9 +28,11 @@ export default function PersonalInfoSection({
   onUpdateProfile,
   isUpdating,
 }: PersonalInfoSectionProps) {
+  /* ────────── Drawer/modal states for editable personal fields ────────── */
   const [showCountryDrawer, setShowCountryDrawer] = useState(false);
   const [showCityModal, setShowCityModal] = useState(false);
 
+  /* ────────── Selected country local state ────────── */
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(
     profile.countryName
       ? {
@@ -41,7 +43,7 @@ export default function PersonalInfoSection({
       : null,
   );
 
-  /* ── Country handler ── */
+  /* ────────── Handler: country select/update ────────── */
   const handleCountrySelect = async (country: Country) => {
     setSelectedCountry(country);
 
@@ -56,7 +58,7 @@ export default function PersonalInfoSection({
     }
   };
 
-  /* ── City handler ── */
+  /* ────────── Handler: city add/update ────────── */
   const handleCityUpdate = async (city: string) => {
     try {
       await onUpdateProfile({ city });
@@ -67,21 +69,16 @@ export default function PersonalInfoSection({
     }
   };
 
+  /* ────────── Display helper: country label ────────── */
   const countryDisplay = selectedCountry
     ? `${selectedCountry.code} ${selectedCountry.name}`.trim()
     : profile.countryName || "";
 
   return (
     <>
-      {/* ── Section Card ── */}
-      <div
-        className="rounded-2xl overflow-hidden px-2"
-        style={{
-          background: "rgba(255,255,255,0.05)",
-          border: "1px solid rgba(255,255,255,0.08)",
-        }}
-      >
-        {/* ── Full name: read only ── */}
+      {/* ────────── Section: Smart glass personal info card ────────── */}
+      <div className="overflow-hidden rounded-[28px] border border-white/60 bg-white/42 px-2 shadow-[0_16px_38px_rgba(43,133,203,0.14)] backdrop-blur-xl">
+        {/* Full name row */}
         <ProfileInfoRow
           label="Full Name"
           value={profile.fullName || undefined}
@@ -89,7 +86,7 @@ export default function PersonalInfoSection({
           showDivider
         />
 
-        {/* ── Country ── */}
+        {/* Country row */}
         <ProfileInfoRow
           label="Country"
           value={countryDisplay || undefined}
@@ -98,7 +95,7 @@ export default function PersonalInfoSection({
           showDivider
         />
 
-        {/* ── City ── */}
+        {/* City row */}
         <ProfileInfoRow
           label="City"
           value={profile.city || undefined}
@@ -108,7 +105,7 @@ export default function PersonalInfoSection({
         />
       </div>
 
-      {/* ── City modal ── */}
+      {/* ────────── Section: City add/update modal ────────── */}
       <AddFieldModal
         open={showCityModal}
         title={profile.city ? "Update City" : "Add City"}
@@ -120,7 +117,7 @@ export default function PersonalInfoSection({
         loading={isUpdating}
       />
 
-      {/* ── Country drawer ── */}
+      {/* ────────── Section: Country select drawer ────────── */}
       <CountrySelectDrawer
         open={showCountryDrawer}
         selected={selectedCountry}

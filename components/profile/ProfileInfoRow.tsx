@@ -1,13 +1,14 @@
 "use client";
 
 // ✅ ProfileInfoRow.tsx
-// Reusable row component – label + value + optional action button
-// Screenshot এর প্রতিটি row এই component দিয়ে তৈরি
+// Smart reusable row component
+// - label + value + optional action button
+// - used by AccountSection and PersonalInfoSection
 
 interface ProfileInfoRowProps {
   label: string;
   value?: string;
-  // "add" | "change" | "link" | "none" – button type
+  // "add" | "change" | "link" | "none" – action button type
   actionType?: "add" | "change" | "link" | "none";
   onActionClick?: () => void;
   // value না থাকলে muted style দেখাবে
@@ -18,7 +19,7 @@ interface ProfileInfoRowProps {
   staticValue?: boolean;
 }
 
-/* ── Action button label map ── */
+/* ────────── Action button label map ────────── */
 const ACTION_LABEL: Record<string, string> = {
   add: "Add",
   change: "Change",
@@ -36,15 +37,19 @@ export default function ProfileInfoRow({
 }: ProfileInfoRowProps) {
   return (
     <div>
-      <div className="flex items-center justify-between px-1 py-3.5">
-        {/* ── Left: Label + Value ── */}
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[14px] font-medium text-white/90">{label}</span>
-          {value && (
+      {/* ────────── Section: Row content ────────── */}
+      <div className="flex items-center justify-between gap-3 px-2 py-3.5">
+        {/* Row left side: label and value */}
+        <div className="min-w-0 flex-1">
+          <span className="block text-[14px] font-black text-slate-900">
+            {label}
+          </span>
+
+          {!staticValue && value && (
             <span
               className={[
-                "text-[12px] mt-0.5",
-                isEmpty ? "text-white/30" : "text-white/50",
+                "mt-0.5 block truncate text-[12px] font-semibold",
+                isEmpty ? "text-slate-400" : "text-slate-500",
               ].join(" ")}
             >
               {value}
@@ -52,29 +57,25 @@ export default function ProfileInfoRow({
           )}
         </div>
 
-        {/* ── Right: Action or Static Value ── */}
+        {/* Row right side: static value or action button */}
         {staticValue && value ? (
-          // শুধু text (যেমন registration date, account number)
-          <span className="text-[13px] text-white/60 font-medium shrink-0 ml-4 text-right">
+          <span className="ml-3 max-w-[58%] shrink-0 truncate rounded-full border border-white/65 bg-white/52 px-3 py-1.5 text-right text-[12px] font-black text-slate-700 shadow-sm backdrop-blur-xl">
             {value}
           </span>
         ) : actionType !== "none" ? (
-          // Action button (Add / Change / Link)
           <button
             onClick={onActionClick}
-            className="shrink-0 ml-4 text-[13px] font-semibold text-[#23ffc8] hover:text-[#23ffc8]/80 active:scale-95 transition-all"
+            className="ml-3 shrink-0 rounded-full border border-sky-200/75 bg-[linear-gradient(145deg,#ffffff_0%,#e7f9ff_100%)] px-3 py-1.5 text-[12px] font-black text-[#0877d7] shadow-sm transition hover:scale-105 hover:bg-white active:scale-95"
+            type="button"
           >
             {ACTION_LABEL[actionType] || actionType}
           </button>
         ) : null}
       </div>
 
-      {/* ── Divider ── */}
+      {/* ────────── Section: Row divider ────────── */}
       {showDivider && (
-        <div
-          className="h-px w-full"
-          style={{ background: "rgba(255,255,255,0.06)" }}
-        />
+        <div className="h-px w-full bg-[linear-gradient(90deg,transparent,rgba(8,119,215,0.16),transparent)]" />
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 // ✅ AccountSection.tsx
-// Account section
+// Smart account information card
 // - email change => support modal
 // - phone change => support modal
 // - phone not exists => link modal
@@ -31,17 +31,17 @@ export default function AccountSection({
 }: AccountSectionProps) {
   const router = useRouter();
 
-  /* ── Modal states ── */
+  /* ────────── Modal states for account actions ────────── */
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showPhoneSupportModal, setShowPhoneSupportModal] = useState(false);
   const [showPhoneLinkModal, setShowPhoneLinkModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
-  /* ── Password API hook ── */
+  /* ────────── Password API mutation hook ────────── */
   const [changePassword, { isLoading: isChangingPassword }] =
     useChangePasswordMutation();
 
-  /* ── Registration date format ── */
+  /* ────────── Registration date format ────────── */
   const formattedDate = profile.registrationDate
     ? new Date(profile.registrationDate).toLocaleDateString("en-GB", {
         day: "2-digit",
@@ -50,7 +50,7 @@ export default function AccountSection({
       })
     : "";
 
-  /* ── Phone link handler ── */
+  /* ────────── Handler: link phone number ────────── */
   const handlePhoneConfirm = async (phone: string) => {
     try {
       await onLinkPhone(phone);
@@ -61,7 +61,7 @@ export default function AccountSection({
     }
   };
 
-  /* ── Password change handler ── */
+  /* ────────── Handler: change password ────────── */
   const handlePasswordChange = async (payload: {
     oldPassword: string;
     newPassword: string;
@@ -78,15 +78,9 @@ export default function AccountSection({
 
   return (
     <>
-      {/* ── Section Card ── */}
-      <div
-        className="rounded-2xl overflow-hidden px-2"
-        style={{
-          background: "rgba(255,255,255,0.05)",
-          border: "1px solid rgba(255,255,255,0.08)",
-        }}
-      >
-        {/* ── Account number ── */}
+      {/* ────────── Section: Smart glass account card ────────── */}
+      <div className="overflow-hidden rounded-[28px] border border-white/60 bg-white/42 px-2 shadow-[0_16px_38px_rgba(43,133,203,0.14)] backdrop-blur-xl">
+        {/* Account number row */}
         <ProfileInfoRow
           label="Account number"
           value={`id: ${profile.accountNumber}`}
@@ -94,7 +88,7 @@ export default function AccountSection({
           showDivider
         />
 
-        {/* ── Email ── */}
+        {/* Email row */}
         <ProfileInfoRow
           label="Email"
           value={profile.email || undefined}
@@ -103,7 +97,7 @@ export default function AccountSection({
           showDivider
         />
 
-        {/* ── Phone ── */}
+        {/* Phone number row */}
         <ProfileInfoRow
           label="Phone number"
           value={profile.phone || undefined}
@@ -118,7 +112,7 @@ export default function AccountSection({
           showDivider
         />
 
-        {/* ── Password ── */}
+        {/* Password row */}
         <ProfileInfoRow
           label="Password"
           value={`Days since last change: ${profile.daysSincePasswordChange}`}
@@ -127,7 +121,7 @@ export default function AccountSection({
           showDivider
         />
 
-        {/* ── Registration date ── */}
+        {/* Registration date row */}
         <ProfileInfoRow
           label="Registration date"
           value={formattedDate}
@@ -136,21 +130,21 @@ export default function AccountSection({
         />
       </div>
 
-      {/* ── Email support modal ── */}
+      {/* ────────── Section: Email change support modal ────────── */}
       <EmailChangeModal
         open={showEmailModal}
         onClose={() => setShowEmailModal(false)}
         onContactSupport={() => router.push("/support")}
       />
 
-      {/* ── Phone support modal ── */}
+      {/* ────────── Section: Phone change support modal ────────── */}
       <PhoneChangeModal
         open={showPhoneSupportModal}
         onClose={() => setShowPhoneSupportModal(false)}
         onContactSupport={() => router.push("/support")}
       />
 
-      {/* ── Phone link modal ── */}
+      {/* ────────── Section: Link phone modal ────────── */}
       <AddFieldModal
         open={showPhoneLinkModal}
         title="Link Phone Number"
@@ -163,7 +157,7 @@ export default function AccountSection({
         loading={isLinkingPhone}
       />
 
-      {/* ── Password change modal ── */}
+      {/* ────────── Section: Password change modal ────────── */}
       <PasswordChangeModal
         open={showPasswordModal}
         onClose={() => setShowPasswordModal(false)}

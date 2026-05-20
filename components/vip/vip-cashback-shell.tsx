@@ -310,10 +310,7 @@ const VipCashbackShell = () => {
               </div>
 
               <div className="flex flex-col gap-2">
-                <h2
-                  className="text-[24px] font-black leading-tight"
-                  style={{ color: rankCfg.color }}
-                >
+                <h2 className="text-[24px] font-black leading-tight text-amber-400">
                   {isLoading
                     ? "Loading..."
                     : (currentRank?.rank ?? "No Rank Yet")}
@@ -335,7 +332,6 @@ const VipCashbackShell = () => {
                     style={{
                       background: "rgba(255,159,0,0.2)",
                       border: "1px solid rgba(255,159,0,0.4)",
-                      color: "#ff9f00",
                     }}
                   >
                     {userProgress?.totalMatches ?? 0} matches

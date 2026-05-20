@@ -53,13 +53,22 @@ const DashboardShell = () => {
           <ApkDownloadCard />
           <GameModeGrid />
 
-          <div>
+          <div className="w-full max-w-md mx-auto mt-2 space-y-4">
             <Link href="/deposit" className="block w-full">
               <button
                 type="submit"
                 className="ls-btn ls-btn-logo-green ls-shine-effect w-full py-3.5 text-[16px] font-black disabled:opacity-70 disabled:cursor-not-allowed mt-1"
               >
                 Deposit
+              </button>
+            </Link>
+
+            <Link href="/vip-cashback" className="block w-full">
+              <button
+                type="submit"
+                className="ls-btn ls-btn-logo-blue ls-shine-effect w-full py-3.5 text-[16px] font-black disabled:opacity-70 disabled:cursor-not-allowed mt-1"
+              >
+                VIP Cashback Record
               </button>
             </Link>
           </div>
