@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useSelector } from "react-redux";
@@ -290,7 +289,7 @@ const ProfileHeroCard = () => {
             </div>
 
             <div>
-              <h2 className="leading-tight text-[24px] font-black tracking-tight text-[#063f9a] drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]">
+              <h2 className="leading-tight text-xl font-black tracking-tight text-[#063f9a] drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]">
                 {shortName}
               </h2>
 
@@ -307,69 +306,6 @@ const ProfileHeroCard = () => {
               </button>
             </div>
           </div>
-
-          {/* ── VIP Rank Card ── */}
-          <Link href="/vip-cashback" className="block">
-            <div className="relative flex cursor-pointer flex-col items-center justify-center rounded-[24px] border border-white/55 bg-white/40 px-6 py-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_12px_24px_rgba(0,92,190,0.14)] transition-transform active:scale-[0.98]">
-              <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-[#0671cf]/70">
-                Current Rank
-              </p>
-
-              {vipLoading ? (
-                <div className="my-1 h-8 w-24 animate-pulse rounded-lg bg-white/10" />
-              ) : (
-                <h3
-                  className="text-[28px] font-black"
-                  style={{
-                    color: currentRank ? rankCfg.color : "#063f9a",
-                    textShadow: currentRank
-                      ? `0 0 12px ${rankCfg.glow}`
-                      : "none",
-                  }}
-                >
-                  {currentRank ? currentRank.rank : "No Rank Yet"}
-                </h3>
-              )}
-
-              {currentRank && !vipLoading && (
-                <div className="mt-2 flex items-center gap-2">
-                  <span
-                    className="rounded-full px-3 py-1 text-[11px] font-black text-black"
-                    style={{ background: rankCfg.color }}
-                  >
-                    {currentRank.cashback}% cashback
-                  </span>
-                  <span className="text-[10px] font-bold text-[#0671cf]/60">
-                    {currentStageMatches} fresh matches
-                  </span>
-                </div>
-              )}
-
-              <div
-                className="mt-3 h-1.5 w-full overflow-hidden rounded-full"
-                style={{ background: "rgba(6,113,207,0.16)" }}
-              >
-                <div
-                  className="h-full rounded-full transition-all duration-700"
-                  style={{
-                    width: `${progressPercent}%`,
-                    background: currentRank
-                      ? `linear-gradient(90deg, ${rankCfg.color}, ${rankCfg.color}aa)`
-                      : "linear-gradient(90deg, #ffd700, #ffd700aa)",
-                    boxShadow: currentRank ? `0 0 6px ${rankCfg.glow}` : "none",
-                  }}
-                />
-              </div>
-
-              <p className="mt-1 text-[10px] font-bold text-[#0671cf]/65">
-                {vipLoading ? "Loading..." : progressText}
-              </p>
-
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-lg font-black text-[#0671cf]/45">
-                →
-              </div>
-            </div>
-          </Link>
         </div>
       </section>
 

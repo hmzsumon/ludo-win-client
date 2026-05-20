@@ -48,7 +48,7 @@ const DashboardShell = () => {
           ))}
         </div>
 
-        <div className="relative z-10 w-full space-y-4">
+        <div className="relative z-10 w-full space-y-3">
           <DashboardHeader />
           <ApkDownloadCard />
           <GameModeGrid />

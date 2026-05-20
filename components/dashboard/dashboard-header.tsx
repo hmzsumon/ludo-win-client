@@ -12,7 +12,7 @@ const DashboardHeader = () => {
       : user?.name || "User";
 
   return (
-    <div className="relative w-full mt-4">
+    <div className="relative w-full mt-2">
       {/* ── Top Row: Profile + Notification ── */}
 
       {/* ── Logo ── */}
