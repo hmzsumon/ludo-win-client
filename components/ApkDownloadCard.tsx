@@ -14,8 +14,8 @@ type Props = {
 };
 
 export default function ApkDownloadCard({
-  apkUrl = "/apk/ludo_party.apk",
-  appName = "Ludo Party",
+  apkUrl = "/apk/ludo-win.apk",
+  appName = "Ludo Win",
   packageName = "com.ludoparty.app",
   storageKey,
   host = "www.ludoparty.live",
@@ -23,7 +23,7 @@ export default function ApkDownloadCard({
   twaQueryValue = "twa",
 }: Props) {
   const key = useMemo(
-    () => storageKey ?? `apk_installed_${packageName || "ludo_party"}`,
+    () => storageKey ?? `apk_installed_${packageName || "ludo-win"}`,
     [storageKey, packageName],
   );
 
@@ -104,7 +104,7 @@ export default function ApkDownloadCard({
           <div className="mt-3 grid grid-cols-2 gap-2">
             <a
               href={apkUrl}
-              download="ludo_party.apk"
+              download="ludo-win.apk"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-yellow-300 to-fuchsia-300 px-3 py-2 text-xs font-black text-[#2b0737] shadow-md transition hover:scale-[1.01] active:scale-[0.98]"
             >
               <FaDownload />
