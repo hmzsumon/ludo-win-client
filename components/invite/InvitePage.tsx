@@ -721,13 +721,6 @@ export default function InvitePage() {
               desc: "Your friend joins using your invite code.",
               reward: "Step 1",
             },
-            {
-              num: 2,
-              icon: "🎯",
-              title: "Friend makes deposit",
-              desc: "You receive sponsor bonus from approved direct deposits.",
-              reward: "Up to 10%",
-            },
           ].map((step) => (
             <div
               key={step.num}
