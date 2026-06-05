@@ -59,22 +59,53 @@ export default function LoginForm(): JSX.Element {
         phone: data.mobileNumber.trim(),
         password: data.password,
       }).unwrap();
+
       toast.success(response?.message || "Login successful");
       router.push("/dashboard");
     } catch (error: any) {
       const message = getApiError(error);
       const lowerMessage = message.toLowerCase();
 
+      /* ────────── Email Verify Redirect ──────────
+         API থেকে email verify error আসলে user কে verify-email page এ পাঠাবে।
+         Login form এ email input নেই, তাই backend থেকে আসা email ব্যবহার করা হচ্ছে।
+      ──────────────────────────────────────────── */
+      if (
+        lowerMessage.includes("verify your email") ||
+        lowerMessage.includes("email before login")
+      ) {
+        const verifyEmail =
+          error?.data?.email ||
+          error?.data?.user?.email ||
+          error?.data?.data?.email;
+
+        toast.error(message);
+
+        if (verifyEmail) {
+          router.push(
+            `/verify-email?email=${encodeURIComponent(
+              String(verifyEmail).trim().toLowerCase(),
+            )}`,
+          );
+          return;
+        }
+
+        setError("mobileNumber", { type: "server", message });
+        return;
+      }
+
       if (lowerMessage.includes("mobile") || lowerMessage.includes("phone")) {
         setError("mobileNumber", { type: "server", message });
         toast.error(message);
         return;
       }
+
       if (lowerMessage.includes("password")) {
         setError("password", { type: "server", message });
         toast.error(message);
         return;
       }
+
       setError("mobileNumber", { type: "server", message });
       setError("password", { type: "server", message });
       toast.error(message);
@@ -205,14 +236,14 @@ export default function LoginForm(): JSX.Element {
       <div className="mt-4 w-full">
         <Link href="/register" className="block w-full">
           <button
-            type="submit"
+            type="button"
             disabled={isLoading}
             className="ls-btn ls-btn-red ls-shine-effect w-full py-3.5 text-[16px] font-black disabled:opacity-70 disabled:cursor-not-allowed mt-1"
           >
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">
                 <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                Signing In...
+                Please wait...
               </span>
             ) : (
               "✨ Create New Account"

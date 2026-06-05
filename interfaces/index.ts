@@ -206,6 +206,8 @@ export interface IDataSocketUser {
   id: string;
   name: string;
   email: string;
+  avatar?: string;
+  photo?: string;
 }
 
 export interface IDataSocket {
@@ -223,6 +225,7 @@ export interface IDataSocket {
 export interface IUserSocket {
   id: string;
   name: string;
+  avatar?: string;
   photo?: string;
   socketID: string;
   color: TColors;

@@ -80,20 +80,26 @@ function SettingToggle({
   label,
   value,
   onChange,
+  disabled = false,
 }: {
   label: string;
   value: boolean;
   onChange: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
-      onClick={onChange}
-      className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left transition hover:bg-white/10"
+      onClick={disabled ? undefined : onChange}
+      disabled={disabled}
+      className={`flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left transition ${
+        disabled
+          ? "cursor-not-allowed opacity-60"
+          : "hover:bg-white/10 active:scale-[0.98]"
+      }`}
     >
       <span className="text-sm font-semibold text-white/90">{label}</span>
 
-      {/* ── Toggle knob ── */}
       <span
         className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 ${
           value ? "bg-emerald-500/90" : "bg-white/15"
@@ -209,8 +215,9 @@ function SoundSettingsPanel({
           />
           <SettingToggle
             label="Background Music"
-            value={optionsGame[EOptionsGame.MUSIC]}
-            onChange={() => toogleOptions(EOptionsGame.MUSIC)}
+            value={false}
+            disabled
+            onChange={() => {}}
           />
           <SettingToggle
             label="Chat Sound"

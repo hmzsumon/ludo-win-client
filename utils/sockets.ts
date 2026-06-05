@@ -110,13 +110,15 @@ const getUsersPlay = (
       continue;
     }
 
-    const { id, name, photo, socketID, color, isBot, isOnline } = player;
+    const { id, name, avatar, photo, socketID, color, isBot, isOnline } =
+      player;
 
     users.push({
       id,
       name,
       email: "",
-      photo,
+      avatar: avatar || photo || "",
+      photo: photo || avatar || "",
       socketID,
       color,
       isBot: Boolean(isBot),

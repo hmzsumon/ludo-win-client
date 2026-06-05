@@ -40,6 +40,8 @@ const OnlinePage = () => {
       id: user?.id || guid(),
       name: user?.name || `Player ${randomNumber(1000, 9999)}`,
       email: user?.email || "",
+      avatar: reduxUser?.avatar || user?.avatar || user?.photo || "",
+      photo: reduxUser?.avatar || user?.avatar || user?.photo || "",
     },
   });
 

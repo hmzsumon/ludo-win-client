@@ -1,7 +1,6 @@
 import { TColors } from "@/interfaces";
 import { SIZE_TILE } from "@/utils/constants";
 import React from "react";
-import "./styles.css";
 
 interface PieceProps {
   color: TColors;

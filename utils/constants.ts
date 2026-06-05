@@ -246,7 +246,7 @@ export enum ESounds {
 
 export const INITIAL_OPTIONS_GAME: IOptionsGame = {
   [EOptionsGame.SOUND]: true,
-  [EOptionsGame.MUSIC]: true,
+  [EOptionsGame.MUSIC]: false,
   [EOptionsGame.CHAT]: true,
 };
 
