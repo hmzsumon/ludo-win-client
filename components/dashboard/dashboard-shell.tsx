@@ -7,7 +7,7 @@ const DashboardShell = () => {
   return (
     <main className="relative min-h-screen w-full overflow-hidden text-white md:min-h-[880px] md:rounded-[30px] md:border md:border-white/10 md:shadow-[0_25px_90px_rgba(0,0,0,0.55)] ">
       {/* ── Ludo Star Deep Purple Background ── */}
-      <div className="relative w-full h-[90vh] overflow-hidden px-4  md:min-h-[880px] md:rounded-[30px] ">
+      <div className="relative w-full  overflow-hidden px-4  md:min-h-[880px] md:rounded-[30px] pb-10 ">
         {/* Decorative glow blobs */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div
@@ -60,6 +60,15 @@ const DashboardShell = () => {
                 className="ls-btn ls-btn-logo-green ls-shine-effect w-full py-3.5 text-[16px] font-black disabled:opacity-70 disabled:cursor-not-allowed mt-1"
               >
                 Deposit
+              </button>
+            </Link>
+
+            <Link href="/withdraw" className="block w-full">
+              <button
+                type="submit"
+                className="ls-btn ls-btn-logo-red ls-shine-effect w-full py-3.5 text-[16px] font-black disabled:opacity-70 disabled:cursor-not-allowed mt-1"
+              >
+                Withdraw
               </button>
             </Link>
 
