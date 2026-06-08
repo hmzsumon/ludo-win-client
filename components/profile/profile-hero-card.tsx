@@ -13,25 +13,18 @@ import { getRankConfig } from "../vip/VipRankBadge";
    Avatar list
    ────────────────────────────────────────────────────────────── */
 const AVATAR_LIST = [
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763047/avatar_12_blopku.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763048/avatyar_15_iaz9ak.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763047/avatar_13_ciioyy.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763047/avatar_10_h554nn.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763047/avatar_9_pkig83.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763047/avatar_19_d8xmjw.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763047/avatar_11_vhfo6s.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763047/avatar_18_g4tuqy.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763046/avatar_6_sayb8t.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763046/avatar_8_zhqdzl.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763046/avatar_17_yum7rj.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763046/avatar_7_jbsa2l.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763045/avatar_16_zaiebd.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763046/avatar_5_i0zxtt.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763045/avatar_4_zvhfdz.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763045/avatar_3_vvyqi1.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763045/avatar_2_jknufy.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763045/avatar_14_v2tqkr.jpg",
-  "https://res.cloudinary.com/dh3p9y59j/image/upload/q_auto/f_auto/v1776763045/avatar_1_fkktlw.jpg",
+  "https://res.cloudinary.com/dehso8toa/image/upload/q_auto/f_auto/v1780949836/avatar_31_zgpjlf.png",
+  "https://res.cloudinary.com/dehso8toa/image/upload/q_auto/f_auto/v1780949836/avatar_30_m3d7o4.png",
+  "https://res.cloudinary.com/dehso8toa/image/upload/q_auto/f_auto/v1780949834/avatar_28_tqof2y.png",
+  "https://res.cloudinary.com/dehso8toa/image/upload/q_auto/f_auto/v1780949835/avatar_29_dompuz.png",
+  "https://res.cloudinary.com/dehso8toa/image/upload/q_auto/f_auto/v1780949834/avatar_27_iahcmt.png",
+  "https://res.cloudinary.com/dehso8toa/image/upload/q_auto/f_auto/v1780949834/avatar_24_fydcul.png",
+  "https://res.cloudinary.com/dehso8toa/image/upload/q_auto/f_auto/v1780949834/avatar_26_eer5a5.png",
+  "https://res.cloudinary.com/dehso8toa/image/upload/q_auto/f_auto/v1780949834/avatar_23_gamucd.png",
+  "https://res.cloudinary.com/dehso8toa/image/upload/q_auto/f_auto/v1780949834/avatar_20_xwmpao.png",
+  "https://res.cloudinary.com/dehso8toa/image/upload/q_auto/f_auto/v1780949834/avatar_22_ymtcm0.png",
+  "https://res.cloudinary.com/dehso8toa/image/upload/q_auto/f_auto/v1780949833/avatar_25_umtbjh.png",
+  "https://res.cloudinary.com/dehso8toa/image/upload/q_auto/f_auto/v1780949833/avatar_21_velmkv.png",
 ];
 
 /* ────────── Progress helper ────────── */
