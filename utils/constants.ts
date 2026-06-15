@@ -93,6 +93,12 @@ export enum ETypeGame {
   ONLINE = "ONLINE",
 }
 
+/* ────────── ludo variation mode ────────── */
+export enum EGameMode {
+  CLASSIC = "CLASSIC",
+  MASTER = "MASTER",
+}
+
 /* ────────── token z-index ────────── */
 export const BASE_ZINDEX_TOKEN = 1;
 export const ZINDEX_TOKEN_SELECT = 7;

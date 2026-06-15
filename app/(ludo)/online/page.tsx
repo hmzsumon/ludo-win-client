@@ -1,10 +1,20 @@
 import OnlinePage from "@/components/ludo/pages/online";
+import { EGameMode } from "@/utils/constants";
 import React from "react";
 
-const Online = () => {
+interface OnlineProps {
+  searchParams?: {
+    mode?: string;
+  };
+}
+
+const Online = ({ searchParams }: OnlineProps) => {
+  const gameMode =
+    searchParams?.mode === "master" ? EGameMode.MASTER : EGameMode.CLASSIC;
+
   return (
     <div>
-      <OnlinePage />
+      <OnlinePage gameMode={gameMode} />
     </div>
   );
 };

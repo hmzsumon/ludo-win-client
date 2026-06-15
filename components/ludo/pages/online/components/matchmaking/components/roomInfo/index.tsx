@@ -11,7 +11,11 @@ interface RoomInfoProps {
 const RoomInfo = ({ roomName }: RoomInfoProps) => {
   const shareUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}/online?room=${roomName}`
+      ? `${window.location.origin}/online?room=${roomName}${
+          new URLSearchParams(window.location.search).get("mode") === "master"
+            ? "&mode=master"
+            : ""
+        }`
       : "";
 
   const dataShare: ShareData = {

@@ -15,6 +15,7 @@ import type {
   TBoardColors,
   TColors,
   TDicevalues,
+  TGameMode,
   TOfflineBotMode,
   TPositionGame,
   TShowTotalTokens,
@@ -26,6 +27,7 @@ import type {
 import {
   DICE_VALUE_GET_OUT_JAIL,
   EActionsBoardGame,
+  EGameMode,
   ENextStepGame,
   EPositionGame,
   ESounds,
@@ -426,10 +428,296 @@ const getTotalTokensInNormalCell = (
 const validateSafeArea = (positionTile: number) =>
   SAFE_AREAS.includes(positionTile);
 
+/* ════════════════════════════════════════════════════════════════
+   Master mode helpers
+   কাজ:
+   - Ludo STAR style kill-required home entry
+   - kill না করা পর্যন্ত home lane locked থাকবে
+   - দুই token এক ঘরে থাকলে joint/double token wall হবে
+   - joint token শুধু even dice দিয়ে dice/2 ঘর move করবে
+   - safe/star cell-এ joint wall হিসেবে কাজ করবে না
+════════════════════════════════════════════════════════════════ */
+const isMasterMode = (gameMode?: TGameMode) => gameMode === EGameMode.MASTER;
+
+const getPlayerKillCount = (players: IPlayer[], playerIndex: number) =>
+  Number(players[playerIndex]?.killedTokensCount || 0);
+
+const getSamePlayerTokensOnNormalCell = (
+  listTokens: IListTokens[],
+  playerIndex: number,
+  positionTile: number,
+) =>
+  listTokens[playerIndex].tokens.filter(
+    (token) =>
+      token.typeTile === EtypeTile.NORMAL &&
+      token.positionTile === positionTile,
+  );
+
+const getJointTokenIndexesAtCell = (
+  listTokens: IListTokens[],
+  playerIndex: number,
+  positionTile: number,
+): number[] => {
+  if (validateSafeArea(positionTile)) return [];
+
+  const sameCellTokens = getSamePlayerTokensOnNormalCell(
+    listTokens,
+    playerIndex,
+    positionTile,
+  );
+
+  return sameCellTokens.length >= 2
+    ? sameCellTokens.slice(0, 2).map((token) => token.index)
+    : [];
+};
+
+const isTokenInJoint = (
+  listTokens: IListTokens[],
+  playerIndex: number,
+  token: IToken,
+) =>
+  token.typeTile === EtypeTile.NORMAL &&
+  getJointTokenIndexesAtCell(
+    listTokens,
+    playerIndex,
+    token.positionTile,
+  ).includes(token.index);
+
+const getJointWallOnCell = (
+  listTokens: IListTokens[],
+  positionTile: number,
+): { playerIndex: number; tokenIndexes: number[] } | null => {
+  if (validateSafeArea(positionTile)) return null;
+
+  for (let playerIndex = 0; playerIndex < listTokens.length; playerIndex++) {
+    const tokenIndexes = getJointTokenIndexesAtCell(
+      listTokens,
+      playerIndex,
+      positionTile,
+    );
+
+    if (tokenIndexes.length >= 2) {
+      return { playerIndex, tokenIndexes };
+    }
+  }
+
+  return null;
+};
+
+const getMasterMoveDistance = ({
+  diceValue,
+  isJointMove,
+}: {
+  diceValue: TDicevalues;
+  isJointMove: boolean;
+}): number => {
+  if (!isJointMove) return diceValue;
+
+  if (diceValue % 2 !== 0) return 0;
+
+  return Math.floor(diceValue / 2) as 1 | 2 | 3;
+};
+
+const normalizeTokenCellDistribution = (listTokens: IListTokens[]) => {
+  const copyListTokens = cloneDeep(listTokens);
+  const nextTotalTokens: TShowTotalTokens = {};
+  const normalCells: Record<
+    number,
+    Array<{ playerIndex: number; tokenIndex: number }>
+  > = {};
+
+  for (
+    let playerIndex = 0;
+    playerIndex < copyListTokens.length;
+    playerIndex++
+  ) {
+    for (const token of copyListTokens[playerIndex].tokens) {
+      token.totalTokens = 1;
+      token.position = 1;
+      token.isJointToken = false;
+
+      if (token.typeTile === EtypeTile.NORMAL) {
+        normalCells[token.positionTile] = normalCells[token.positionTile] || [];
+        normalCells[token.positionTile].push({
+          playerIndex,
+          tokenIndex: token.index,
+        });
+      }
+    }
+  }
+
+  Object.entries(normalCells).forEach(([positionTile, entries]) => {
+    if (entries.length <= 1) return;
+
+    entries.forEach((entry, index) => {
+      copyListTokens[entry.playerIndex].tokens[entry.tokenIndex].totalTokens =
+        entries.length;
+      copyListTokens[entry.playerIndex].tokens[entry.tokenIndex].position =
+        index + 1;
+    });
+
+    /* ────────── Master joint token mark ──────────
+       একই player/color-এর ২টা token একই normal cell-এ থাকলে
+       এগুলোকে joint/double হিসেবে mark করা হচ্ছে।
+       Note: block/lock sign token-এর উপর না, home lane-এ দেখানো হয়।
+    ─────────────────────────────────────────────── */
+    const numericPositionTile = Number(positionTile);
+
+    if (!validateSafeArea(numericPositionTile)) {
+      const entriesByPlayer = entries.reduce<Record<number, number[]>>(
+        (acc, entry) => {
+          acc[entry.playerIndex] = acc[entry.playerIndex] || [];
+          acc[entry.playerIndex].push(entry.tokenIndex);
+          return acc;
+        },
+        {},
+      );
+
+      Object.entries(entriesByPlayer).forEach(([playerIndex, tokenIndexes]) => {
+        if (tokenIndexes.length < 2) return;
+
+        tokenIndexes.slice(0, 2).forEach((tokenIndex) => {
+          copyListTokens[Number(playerIndex)].tokens[tokenIndex].isJointToken =
+            true;
+        });
+      });
+    }
+
+    if (entries.length > MAXIMUM_VISIBLE_TOKENS_PER_CELL) {
+      nextTotalTokens[Number(positionTile)] = entries.length;
+    }
+  });
+
+  for (
+    let playerIndex = 0;
+    playerIndex < copyListTokens.length;
+    playerIndex++
+  ) {
+    const exitCells: Record<number, number[]> = {};
+
+    for (const token of copyListTokens[playerIndex].tokens) {
+      if (token.typeTile !== EtypeTile.EXIT) continue;
+      exitCells[token.positionTile] = exitCells[token.positionTile] || [];
+      exitCells[token.positionTile].push(token.index);
+    }
+
+    Object.values(exitCells).forEach((tokenIndexes) => {
+      if (tokenIndexes.length <= 1) return;
+
+      tokenIndexes.forEach((tokenIndex, index) => {
+        copyListTokens[playerIndex].tokens[tokenIndex].totalTokens =
+          tokenIndexes.length;
+        copyListTokens[playerIndex].tokens[tokenIndex].position = index + 1;
+      });
+    });
+  }
+
+  return { copyListTokens, nextTotalTokens };
+};
+
+const predictMasterNormalMove = ({
+  currentTurn,
+  diceValue,
+  gameMode,
+  isJointMove,
+  listTokens,
+  players,
+  positionGame,
+  positionTile,
+}: {
+  currentTurn: number;
+  diceValue: TDicevalues;
+  gameMode?: TGameMode;
+  isJointMove: boolean;
+  listTokens: IListTokens[];
+  players: IPlayer[];
+  positionGame: TPositionGame;
+  positionTile: number;
+}) => {
+  const moveDistance = getMasterMoveDistance({ diceValue, isJointMove });
+
+  if (moveDistance <= 0) {
+    return {
+      isValid: false,
+      targetTypeTile: EtypeTile.NORMAL,
+      targetPositionTile: positionTile,
+    };
+  }
+
+  const { exitTileIndex } = POSITION_ELEMENTS_BOARD[positionGame];
+  let newPositionTile = positionTile;
+  let targetTypeTile: TtypeTile = EtypeTile.NORMAL;
+
+  for (let i = 0; i < moveDistance; i++) {
+    if (newPositionTile !== exitTileIndex) {
+      newPositionTile = validateIncrementTokenMovement(newPositionTile);
+      const wall = getJointWallOnCell(listTokens, newPositionTile);
+      const isOwnMovingJointStart =
+        wall?.playerIndex === currentTurn &&
+        wall.tokenIndexes.every((tokenIndex) =>
+          getJointTokenIndexesAtCell(
+            listTokens,
+            currentTurn,
+            positionTile,
+          ).includes(tokenIndex),
+        );
+
+      if (wall && !isOwnMovingJointStart) {
+        const isFinalStep = i === moveDistance - 1;
+        const canJointKillJoint =
+          isMasterMode(gameMode) &&
+          isJointMove &&
+          isFinalStep &&
+          wall.playerIndex !== currentTurn;
+
+        if (!canJointKillJoint) {
+          return {
+            isValid: false,
+            targetTypeTile: EtypeTile.NORMAL,
+            targetPositionTile: newPositionTile,
+          };
+        }
+      }
+
+      continue;
+    }
+
+    if (
+      isMasterMode(gameMode) &&
+      getPlayerKillCount(players, currentTurn) <= 0
+    ) {
+      return {
+        isValid: false,
+        targetTypeTile: EtypeTile.EXIT,
+        targetPositionTile: 0,
+      };
+    }
+
+    const remainingCells = moveDistance - i;
+
+    if (remainingCells <= 0 || remainingCells > TOTAL_EXIT_TILES) {
+      return {
+        isValid: false,
+        targetTypeTile: EtypeTile.EXIT,
+        targetPositionTile: 0,
+      };
+    }
+
+    targetTypeTile = EtypeTile.EXIT;
+    newPositionTile = remainingCells - 1;
+    break;
+  }
+
+  return { isValid: true, targetTypeTile, targetPositionTile: newPositionTile };
+};
+
 interface ValidateMovementTokenWithValueDice {
   currentTurn: number;
   diceValue: TDicevalues;
+  gameMode?: TGameMode;
+  isJointMove?: boolean;
   listTokens: IListTokens[];
+  players: IPlayer[];
   positionGame: TPositionGame;
   positionTile: number;
 }
@@ -442,54 +730,51 @@ interface ValidateMovementTokenWithValueDice {
 const validateMovementTokenWithValueDice = ({
   currentTurn,
   diceValue,
+  gameMode,
+  isJointMove = false,
   listTokens,
+  players,
   positionGame,
   positionTile,
 }: ValidateMovementTokenWithValueDice) => {
-  const { exitTileIndex } = POSITION_ELEMENTS_BOARD[positionGame];
-  let isValid = true;
-  let newPositionTile = positionTile;
+  const predictedMove = predictMasterNormalMove({
+    currentTurn,
+    diceValue,
+    gameMode,
+    isJointMove,
+    listTokens,
+    players,
+    positionGame,
+    positionTile,
+  });
 
-  for (let i = 0; i < diceValue; i++) {
-    if (newPositionTile !== exitTileIndex) {
-      newPositionTile = validateIncrementTokenMovement(newPositionTile);
+  if (!predictedMove.isValid) return false;
 
-      if (i === diceValue - 1) {
-        const totalTokensInCell = getTotalTokensInNormalCell(
-          newPositionTile,
-          listTokens,
-        );
+  if (predictedMove.targetTypeTile === EtypeTile.EXIT) return true;
 
-        if (
-          totalTokensInCell.total >= 2 &&
-          !validateSafeArea(newPositionTile)
-        ) {
-          const tokensSameTurn =
-            totalTokensInCell.distribution[currentTurn] ?? [];
+  const targetPositionTile = predictedMove.targetPositionTile;
+  const totalTokensInCell = getTotalTokensInNormalCell(
+    targetPositionTile,
+    listTokens,
+  );
 
-          if (tokensSameTurn.length === 0) {
-            isValid = false;
-          }
-        }
-      }
-    } else {
-      const remainingCells = diceValue - i;
+  if (totalTokensInCell.total >= 2 && !validateSafeArea(targetPositionTile)) {
+    const tokensSameTurn = totalTokensInCell.distribution[currentTurn] ?? [];
 
-      if (remainingCells <= 0 || remainingCells > TOTAL_EXIT_TILES) {
-        isValid = false;
-      }
-
-      break;
+    if (tokensSameTurn.length === 0 && !isJointMove) {
+      return false;
     }
   }
 
-  return isValid;
+  return true;
 };
 
 interface ValidateDiceForTokenMovement {
   currentTurn: number;
   listTokens: IListTokens[];
   diceList: IDiceList[];
+  players: IPlayer[];
+  gameMode?: TGameMode;
 }
 
 /**
@@ -502,6 +787,8 @@ const validateDiceForTokenMovement = ({
   currentTurn,
   listTokens,
   diceList,
+  players,
+  gameMode,
 }: ValidateDiceForTokenMovement) => {
   const copyListTokens = cloneDeep(listTokens);
   const { positionGame } = copyListTokens[currentTurn];
@@ -544,16 +831,32 @@ const validateDiceForTokenMovement = ({
 
           if (!evaluated) {
             if (evaluatedIndex === 0) {
+              const tokenIndex = positionAndToken[positionTile];
+              const token = copyListTokens[currentTurn].tokens[tokenIndex];
+              const isJointMove =
+                isMasterMode(gameMode) &&
+                isTokenInJoint(copyListTokens, currentTurn, token);
+
               isValid = validateMovementTokenWithValueDice({
                 currentTurn,
                 diceValue,
+                gameMode,
+                isJointMove,
                 listTokens,
+                players,
                 positionGame,
                 positionTile: +positionTile,
               });
             } else {
               const remainingCells = TOTAL_EXIT_TILES - +positionTile - 1;
               isValid = diceValue <= remainingCells;
+
+              if (
+                isMasterMode(gameMode) &&
+                getPlayerKillCount(players, currentTurn) <= 0
+              ) {
+                isValid = false;
+              }
             }
 
             diceEvaluated.push({ diceValue, isValid });
@@ -580,9 +883,21 @@ const validateDiceForTokenMovement = ({
           }
 
           const indexToken = positionAndToken[positionTile];
+          const token = copyListTokens[currentTurn].tokens[indexToken];
 
-          copyListTokens[currentTurn].tokens[indexToken].diceAvailable =
-            finalDiceAvailable;
+          if (
+            isMasterMode(gameMode) &&
+            isTokenInJoint(copyListTokens, currentTurn, token)
+          ) {
+            finalDiceAvailable = finalDiceAvailable.filter(
+              (dice) => dice.value % 2 === 0,
+            );
+          }
+
+          if (finalDiceAvailable.length !== 0) {
+            copyListTokens[currentTurn].tokens[indexToken].diceAvailable =
+              finalDiceAvailable;
+          }
         }
       }
     }
@@ -826,6 +1141,7 @@ export const getInitialDataPlayers = (
       isMuted: false,
       chatMessage: "",
       counterMessage: 0,
+      killedTokensCount: 0,
       ranking: 0,
     } as IPlayer);
   }
@@ -1221,14 +1537,18 @@ export const getOfflineWeightedDice = ({
   actionsTurn,
   currentTurn,
   listTokens,
+  players,
   favoredBotIndex,
+  gameMode,
   currentRollCount = 0,
   assistOpeningDelay = 2,
 }: {
   actionsTurn: IActionsTurn;
   currentTurn: number;
   listTokens: IListTokens[];
+  players: IPlayer[];
   favoredBotIndex: number;
+  gameMode?: TGameMode;
   currentRollCount?: number;
   assistOpeningDelay?: number;
 }): TDicevalues => {
@@ -1267,6 +1587,8 @@ export const getOfflineWeightedDice = ({
       currentTurn,
       listTokens,
       diceList,
+      players,
+      gameMode,
     });
 
     if (!evaluated.canMoveTokens) {
@@ -1406,6 +1728,7 @@ export const getInitialPositionTokens = (
 interface ValidateDicesForTokens {
   actionsTurn: IActionsTurn;
   currentTurn: number;
+  gameMode?: TGameMode;
   listTokens: IListTokens[];
   players: IPlayer[];
   totalTokens: TShowTotalTokens;
@@ -1426,6 +1749,7 @@ interface ValidateDicesForTokens {
 export const validateDicesForTokens = ({
   actionsTurn,
   currentTurn,
+  gameMode,
   listTokens,
   players,
   totalTokens,
@@ -1492,6 +1816,8 @@ export const validateDicesForTokens = ({
     currentTurn,
     listTokens,
     diceList: copyActionsTurn.diceList,
+    players,
+    gameMode,
   });
 
   if (moveAutomatically) {
@@ -1499,6 +1825,7 @@ export const validateDicesForTokens = ({
       actionsTurn: copyActionsTurn,
       currentTurn,
       diceIndex,
+      gameMode,
       listTokens: copyListTokens,
       tokenIndex,
       totalTokens,
@@ -1533,6 +1860,7 @@ interface ValidateSelectToken {
   actionsTurn: IActionsTurn;
   currentTurn: number;
   diceIndex: number;
+  gameMode?: TGameMode;
   listTokens: IListTokens[];
   tokenIndex: number;
   totalTokens: TShowTotalTokens;
@@ -1550,6 +1878,7 @@ export const validateSelectToken = ({
   actionsTurn,
   currentTurn,
   diceIndex,
+  gameMode,
   listTokens,
   tokenIndex,
   totalTokens,
@@ -1559,7 +1888,7 @@ export const validateSelectToken = ({
   setListTokens,
 }: ValidateSelectToken) => {
   const copyActionsTurn = cloneDeep(actionsTurn);
-  let totalCellsMove = copyActionsTurn.diceList[diceIndex].value;
+  let totalCellsMove: number = copyActionsTurn.diceList[diceIndex].value;
 
   copyActionsTurn.diceList.splice(diceIndex, 1);
   copyActionsTurn.disabledDice = true;
@@ -1571,6 +1900,22 @@ export const validateSelectToken = ({
   let copyListTokens = cloneDeep(listTokens);
   const tokenSelected = copyListTokens[currentTurn].tokens[tokenIndex];
 
+  /* ────────── Master joint token selection ──────────
+     একই ঘরে নিজের ২টা token থাকলে এটাকে joint/double ধরা হচ্ছে।
+     even dice হলে dice/2 ঘর দুই token একসাথে move করবে।
+  ─────────────────────────────────────────────────── */
+  const jointTokenIndexes = isMasterMode(gameMode)
+    ? getJointTokenIndexesAtCell(
+        copyListTokens,
+        currentTurn,
+        tokenSelected.positionTile,
+      )
+    : [];
+  const isJointMove =
+    tokenSelected.typeTile === EtypeTile.NORMAL &&
+    jointTokenIndexes.includes(tokenIndex);
+  const movingTokenIndexes = isJointMove ? jointTokenIndexes : [tokenIndex];
+
   for (let i = 0; i < copyListTokens[currentTurn].tokens.length; i++) {
     if (copyListTokens[currentTurn].tokens[i].diceAvailable.length !== 0) {
       copyListTokens[currentTurn].tokens[i].diceAvailable = [];
@@ -1580,12 +1925,21 @@ export const validateSelectToken = ({
     }
   }
 
-  copyListTokens[currentTurn].tokens[tokenIndex].isMoving = true;
-  copyListTokens[currentTurn].tokens[tokenIndex].totalTokens = 1;
-  copyListTokens[currentTurn].tokens[tokenIndex].position = 1;
+  movingTokenIndexes.forEach((movingTokenIndex) => {
+    copyListTokens[currentTurn].tokens[movingTokenIndex].isMoving = true;
+    copyListTokens[currentTurn].tokens[movingTokenIndex].totalTokens = 1;
+    copyListTokens[currentTurn].tokens[movingTokenIndex].position = 1;
+  });
 
   if (tokenSelected.typeTile === EtypeTile.JAIL) {
     totalCellsMove = 1;
+  }
+
+  if (isJointMove) {
+    totalCellsMove = getMasterMoveDistance({
+      diceValue: totalCellsMove as TDicevalues,
+      isJointMove: true,
+    });
   }
 
   if (
@@ -1593,14 +1947,9 @@ export const validateSelectToken = ({
       tokenSelected.typeTile as EtypeTile,
     )
   ) {
-    copyListTokens = validateTokenDistributionCell({
-      token: tokenSelected,
-      listTokens: copyListTokens,
-      currentTurn,
-      totalTokens,
-      removeTokenFromCell: true,
-      setTotalTokens,
-    });
+    const normalized = normalizeTokenCellDistribution(copyListTokens);
+    copyListTokens = normalized.copyListTokens;
+    setTotalTokens(normalized.nextTotalTokens);
   }
 
   setListTokens(copyListTokens);
@@ -1608,6 +1957,8 @@ export const validateSelectToken = ({
   setActionsMoveToken({
     isRunning: true,
     tokenIndex,
+    tokenIndexes: movingTokenIndexes,
+    isJointMove,
     totalCellsMove,
     cellsCounter: 0,
   });
@@ -1617,6 +1968,7 @@ interface ValidateMovementToken {
   actionsMoveToken: IActionsMoveToken;
   actionsTurn: IActionsTurn;
   currentTurn: number;
+  gameMode?: TGameMode;
   listTokens: IListTokens[];
   players: IPlayer[];
   totalTokens: TShowTotalTokens;
@@ -1640,6 +1992,7 @@ export const validateMovementToken = ({
   actionsMoveToken,
   actionsTurn,
   currentTurn,
+  gameMode,
   listTokens,
   players,
   totalTokens,
@@ -1663,46 +2016,59 @@ export const validateMovementToken = ({
     POSITION_ELEMENTS_BOARD[positionGame];
 
   const { tokenIndex } = copyActionsMoveToken;
+  const movingTokenIndexes =
+    copyActionsMoveToken.tokenIndexes &&
+    copyActionsMoveToken.tokenIndexes.length
+      ? copyActionsMoveToken.tokenIndexes
+      : [tokenIndex];
   const tokenMove = copyListTokens[currentTurn].tokens[tokenIndex];
   let positionTile = 0;
+  let targetTypeTile = tokenMove.typeTile;
   let goNextTurn = false;
 
   if (tokenMove.typeTile === EtypeTile.EXIT) {
     positionTile = tokenMove.positionTile + 1;
 
     if (positionTile === TOTAL_EXIT_TILES - 1) {
-      positionTile = tokenMove.index;
-      copyListTokens[currentTurn].tokens[tokenIndex].typeTile = EtypeTile.END;
+      targetTypeTile = EtypeTile.END;
     }
   }
 
   if (tokenMove.typeTile === EtypeTile.NORMAL) {
     if (tokenMove.positionTile !== exitTileIndex) {
       positionTile = validateIncrementTokenMovement(tokenMove.positionTile);
+      targetTypeTile = EtypeTile.NORMAL;
     } else {
       positionTile = 0;
-      copyListTokens[currentTurn].tokens[tokenIndex].typeTile = EtypeTile.EXIT;
+      targetTypeTile = EtypeTile.EXIT;
     }
   }
 
   if (tokenMove.typeTile === EtypeTile.JAIL) {
     positionTile = startTileIndex;
-    copyListTokens[currentTurn].tokens[tokenIndex].animated = true;
-    copyListTokens[currentTurn].tokens[tokenIndex].typeTile = EtypeTile.NORMAL;
+    targetTypeTile = EtypeTile.NORMAL;
   }
 
-  copyListTokens[currentTurn].tokens[tokenIndex].positionTile = positionTile;
-  copyListTokens[currentTurn].tokens[tokenIndex].coordinate =
-    getCoordinatesByTileType(
-      copyListTokens[currentTurn].tokens[tokenIndex].typeTile,
-      positionGame,
-      positionTile,
-    );
+  movingTokenIndexes.forEach((movingTokenIndex) => {
+    const finalPositionTile =
+      targetTypeTile === EtypeTile.END ? movingTokenIndex : positionTile;
+
+    copyListTokens[currentTurn].tokens[movingTokenIndex].animated =
+      tokenMove.typeTile === EtypeTile.JAIL ||
+      copyListTokens[currentTurn].tokens[movingTokenIndex].animated;
+    copyListTokens[currentTurn].tokens[movingTokenIndex].typeTile =
+      targetTypeTile;
+    copyListTokens[currentTurn].tokens[movingTokenIndex].positionTile =
+      finalPositionTile;
+    copyListTokens[currentTurn].tokens[movingTokenIndex].coordinate =
+      getCoordinatesByTileType(targetTypeTile, positionGame, finalPositionTile);
+  });
 
   copyActionsMoveToken.cellsCounter++;
 
   let typeNextStep: ENextStepGame | null = null;
   let isGameOver = false;
+  let updatedPlayersAfterKill: IPlayer[] | null = null;
 
   if (
     copyActionsMoveToken.cellsCounter === copyActionsMoveToken.totalCellsMove
@@ -1711,7 +2077,9 @@ export const validateMovementToken = ({
     let moveTokensAgain = false;
 
     copyActionsMoveToken.isRunning = false;
-    copyListTokens[currentTurn].tokens[tokenIndex].isMoving = false;
+    movingTokenIndexes.forEach((movingTokenIndex) => {
+      copyListTokens[currentTurn].tokens[movingTokenIndex].isMoving = false;
+    });
 
     const { END } = getTokensValueByCellType(copyListTokens[currentTurn]);
 
@@ -1734,7 +2102,7 @@ export const validateMovementToken = ({
       rollDiceAgain = !finished;
 
       if (finished) {
-        let copyPlayers = cloneDeep(players);
+        let copyPlayers = updatedPlayersAfterKill || cloneDeep(players);
 
         const totalPlayers = copyPlayers.filter(
           (v) => !v.isOffline || v.finished,
@@ -1794,47 +2162,71 @@ export const validateMovementToken = ({
               .map((v) => +v)
               .filter((v) => v !== currentTurn)[0];
 
-            const tokenIndexToJail =
-              totalTokensInCell.distribution[playerIndexToJail][0];
-
-            const { positionGame: positionGameToJail } =
-              copyListTokens[playerIndexToJail];
-
-            copyListTokens[playerIndexToJail].tokens[
-              tokenIndexToJail
-            ].animated = true;
-
-            copyListTokens[playerIndexToJail].tokens[
-              tokenIndexToJail
-            ].typeTile = EtypeTile.JAIL;
-
-            copyListTokens[playerIndexToJail].tokens[
-              tokenIndexToJail
-            ].positionTile = tokenIndexToJail;
-
-            copyListTokens[playerIndexToJail].tokens[
-              tokenIndexToJail
-            ].coordinate = getCoordinatesByTileType(
-              EtypeTile.JAIL,
-              positionGameToJail,
-              tokenIndexToJail,
+            const opponentTokenIndexes =
+              totalTokensInCell.distribution[playerIndexToJail] || [];
+            const opponentJointIndexes = getJointTokenIndexesAtCell(
+              copyListTokens,
+              playerIndexToJail,
+              positionTile,
             );
 
-            rollDiceAgain = true;
-            playSound(ESounds.TOKEN_JAIL);
+            /* ────────── Master kill rule ──────────
+               single token joint/double কাটতে পারবে না।
+               joint token opponent joint কাটলে দুই token-ই jail যাবে।
+            ─────────────────────────────────────── */
+            const tokensToJail =
+              isMasterMode(gameMode) && opponentJointIndexes.length >= 2
+                ? copyActionsMoveToken.isJointMove
+                  ? opponentJointIndexes
+                  : []
+                : [opponentTokenIndexes[0]].filter(
+                    (value): value is number => typeof value === "number",
+                  );
+
+            if (tokensToJail.length !== 0) {
+              const { positionGame: positionGameToJail } =
+                copyListTokens[playerIndexToJail];
+
+              tokensToJail.forEach((tokenIndexToJail) => {
+                copyListTokens[playerIndexToJail].tokens[
+                  tokenIndexToJail
+                ].animated = true;
+
+                copyListTokens[playerIndexToJail].tokens[
+                  tokenIndexToJail
+                ].typeTile = EtypeTile.JAIL;
+
+                copyListTokens[playerIndexToJail].tokens[
+                  tokenIndexToJail
+                ].positionTile = tokenIndexToJail;
+
+                copyListTokens[playerIndexToJail].tokens[
+                  tokenIndexToJail
+                ].coordinate = getCoordinatesByTileType(
+                  EtypeTile.JAIL,
+                  positionGameToJail,
+                  tokenIndexToJail,
+                );
+              });
+
+              updatedPlayersAfterKill = cloneDeep(
+                updatedPlayersAfterKill || players,
+              );
+              updatedPlayersAfterKill[currentTurn].killedTokensCount =
+                getPlayerKillCount(updatedPlayersAfterKill, currentTurn) +
+                tokensToJail.length;
+
+              rollDiceAgain = true;
+              playSound(ESounds.TOKEN_JAIL);
+            }
           }
         }
       }
 
-      if (distributeTokensCell) {
-        copyListTokens = validateTokenDistributionCell({
-          token: tokenMove,
-          listTokens: copyListTokens,
-          currentTurn,
-          totalTokens,
-          removeTokenFromCell: false,
-          setTotalTokens,
-        });
+      if (distributeTokensCell || isMasterMode(gameMode)) {
+        const normalized = normalizeTokenCellDistribution(copyListTokens);
+        copyListTokens = normalized.copyListTokens;
+        setTotalTokens(normalized.nextTotalTokens);
       }
     }
 
@@ -1851,6 +2243,8 @@ export const validateMovementToken = ({
         currentTurn,
         listTokens: copyListTokens,
         diceList: actionsTurn.diceList,
+        players,
+        gameMode,
       });
 
       if (moveAutomatically) {
@@ -1858,6 +2252,7 @@ export const validateMovementToken = ({
           actionsTurn,
           currentTurn,
           diceIndex: newDiceIndex,
+          gameMode,
           listTokens: copyListTokens,
           tokenIndex: newTokenIndex,
           totalTokens,
@@ -1895,6 +2290,10 @@ export const validateMovementToken = ({
         setCurrentTurn,
       });
     }
+  }
+
+  if (updatedPlayersAfterKill && !isGameOver) {
+    setPlayers(updatedPlayersAfterKill);
   }
 
   setListTokens(copyListTokens);

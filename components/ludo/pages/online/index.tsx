@@ -3,7 +3,7 @@
 import { useUserContext } from "@/context/userContext";
 
 import useGetRoomURL from "@/hooks/useGetRoomURL";
-import { IDataSocket } from "@/interfaces";
+import { IDataSocket, TGameMode } from "@/interfaces";
 import { TYPES_ONLINE_GAMEPLAY } from "@/utils/constants";
 import { guid, randomNumber } from "@/utils/helpers";
 import { useCallback, useState } from "react";
@@ -17,7 +17,11 @@ import {
   TotalPlayers,
 } from "./components";
 
-const OnlinePage = () => {
+interface OnlinePageProps {
+  gameMode?: TGameMode;
+}
+
+const OnlinePage = ({ gameMode = "CLASSIC" }: OnlinePageProps) => {
   const { isAuthenticated } = useSelector((state: any) => state.auth);
   const { user: reduxUser } = useSelector((state: any) => state.auth);
   const { user, authOptions = [] } = useUserContext();
@@ -36,6 +40,7 @@ const OnlinePage = () => {
     totalPlayers: 0,
     playAsGuest: false,
     roomName: "",
+    gameMode,
     user: {
       id: user?.id || guid(),
       name: user?.name || `Player ${randomNumber(1000, 9999)}`,

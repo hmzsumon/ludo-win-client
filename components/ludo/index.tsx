@@ -22,6 +22,7 @@ import type {
   TBoardColors,
   TColors,
   TDicevalues,
+  TGameMode,
   TOfflineBotMode,
   TShowTotalTokens,
   TTotalPlayers,
@@ -30,6 +31,7 @@ import type {
 import {
   EActionsBoardGame,
   EBoardColors,
+  EGameMode,
   EPositionProfiles,
   ESounds,
   ETypeGame,
@@ -57,6 +59,7 @@ import {
   validateSelectToken,
   validateSelectTokenRandomly,
 } from "./helpers";
+import MasterHomeLocks from "./masterHomeLocks";
 import ProfileSection from "./profileSection";
 import ShowTotalTokens from "./showTotalTokens";
 import Tokens from "./tokens";
@@ -156,6 +159,7 @@ interface GameProps {
   currentUserId?: string;
   betAmount?: number;
   botMode?: TOfflineBotMode;
+  gameMode?: TGameMode;
 }
 
 const Game = ({
@@ -170,6 +174,7 @@ const Game = ({
   currentUserId = "",
   betAmount = 0,
   botMode = "EASY",
+  gameMode = EGameMode.CLASSIC,
 }: GameProps) => {
   const { playSound } = useOptionsContext();
   const [refreshWallet] = useLazyGetWalletQuery();
@@ -338,6 +343,7 @@ const Game = ({
             actionsTurn,
             currentTurn,
             diceIndex,
+            gameMode,
             listTokens,
             tokenIndex,
             totalTokens,
@@ -364,6 +370,7 @@ const Game = ({
         actionsTurn,
         currentTurn,
         diceIndex,
+        gameMode,
         listTokens,
         tokenIndex,
         totalTokens,
@@ -456,7 +463,9 @@ const Game = ({
                   actionsTurn,
                   currentTurn,
                   listTokens,
+                  players,
                   favoredBotIndex: onlineBotIndex,
+                  gameMode,
                   currentRollCount,
                   assistOpeningDelay: assistOpeningDelayRef.current,
                 })
@@ -511,6 +520,7 @@ const Game = ({
           validateDicesForTokens({
             actionsTurn,
             currentTurn,
+            gameMode,
             listTokens,
             players,
             totalTokens,
@@ -536,6 +546,7 @@ const Game = ({
       validateDicesForTokens({
         actionsTurn,
         currentTurn,
+        gameMode,
         listTokens,
         players,
         totalTokens,
@@ -678,6 +689,7 @@ const Game = ({
         actionsMoveToken,
         actionsTurn,
         currentTurn,
+        gameMode,
         listTokens,
         players,
         totalTokens,
@@ -741,6 +753,12 @@ const Game = ({
 
         <Board boardColor={resolvedBoardColor}>
           {debug && <Debug.Tiles />}
+
+          <MasterHomeLocks
+            gameMode={gameMode}
+            players={players}
+            listTokens={listTokens}
+          />
 
           <Tokens
             debug={debug}

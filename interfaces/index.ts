@@ -3,6 +3,7 @@ import {
   EActionsBoardGame,
   EBoardColors,
   EColors,
+  EGameMode,
   ENextStepGame,
   EOptionsGame,
   EPositionGame,
@@ -28,6 +29,7 @@ export type TPositionProfiles = keyof typeof EPositionProfiles;
 export type TPositionProfile = keyof typeof EPositionProfile;
 export type TActionsBoardGame = keyof typeof EActionsBoardGame;
 export type TTypeGame = keyof typeof ETypeGame;
+export type TGameMode = keyof typeof EGameMode;
 export type TOfflineBotMode = "EASY" | "ASSIST";
 export type TTotalPlayers = 2 | 3 | 4;
 export type TTypesOnlineGameplay = keyof typeof TYPES_ONLINE_GAMEPLAY;
@@ -107,6 +109,7 @@ export interface IUser {
 }
 
 export interface IPlayer extends IUser {
+  killedTokensCount?: number;
   isOffline: boolean;
   index: number;
   finished: boolean;
@@ -137,6 +140,8 @@ export interface IToken {
   enableTooltip: boolean;
   isMoving: boolean;
   animated: boolean;
+  /** Master mode: একই cell-এ নিজের ২টা token থাকলে true হবে */
+  isJointToken?: boolean;
 }
 
 export interface IListTokens {
@@ -162,6 +167,8 @@ export type TTokenByPositionType = Record<TtypeTile, IToken[]>;
 export interface IActionsMoveToken {
   isRunning: boolean;
   tokenIndex: number;
+  tokenIndexes?: number[];
+  isJointMove?: boolean;
   totalCellsMove: number;
   cellsCounter: number;
 }
@@ -179,6 +186,7 @@ export interface DataOfflineGame {
   users: IUser[];
   totalPlayers: TTotalPlayers;
   boardColor: TBoardColors;
+  gameMode?: TGameMode;
 }
 
 export interface IAuthOptions {
@@ -217,6 +225,7 @@ export interface IDataSocket {
   initialColor?: TColors;
   playAsGuest: boolean;
   user: IDataSocketUser;
+  gameMode?: TGameMode;
   betAmount?: number;
   reservationId?: string;
 }
@@ -240,6 +249,7 @@ export interface IDataRoom {
   roomName: string;
   users: IUserSocket[];
   totalPlayers: TTotalPlayers;
+  gameMode?: TGameMode;
   betAmount?: number;
   feePercent?: number;
   botMode?: TOfflineBotMode;
@@ -253,6 +263,7 @@ export interface IDataOnline {
   boardColor: TBoardColors;
   roomName: string;
   typeGame: TTypeGame;
+  gameMode?: TGameMode;
   socket: Socket;
   currentUserId?: string;
   betAmount?: number;

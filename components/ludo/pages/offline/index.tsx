@@ -3,14 +3,18 @@
 import { Suspense, lazy, useState } from "react";
 
 import PageWrapper from "@/components/wrapper/page";
-import type { DataOfflineGame } from "@/interfaces";
+import type { DataOfflineGame, TGameMode } from "@/interfaces";
 import Loading from "../../loading";
 import Logo from "../../logo";
 import ConfigGame from "./configGame";
 
 const Game = lazy(() => import("../../index"));
 
-const OfflinePage = () => {
+interface OfflinePageProps {
+  gameMode?: TGameMode;
+}
+
+const OfflinePage = ({ gameMode }: OfflinePageProps) => {
   const [dataGame, setDataGame] = useState<DataOfflineGame | null>(null);
 
   /**
@@ -31,7 +35,10 @@ const OfflinePage = () => {
   return (
     <PageWrapper>
       <Logo />
-      <ConfigGame handlePlay={(data) => setDataGame(data)} />
+      <ConfigGame
+        gameMode={gameMode}
+        handlePlay={(data) => setDataGame(data)}
+      />
     </PageWrapper>
   );
 };

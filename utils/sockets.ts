@@ -162,7 +162,7 @@ export const getDataOnlineGame = (
   dataRoom: IDataRoom,
 ) => {
   const { totalPlayers, orderPlayers, boardColor } = dataRoomSocket;
-  const { initialTurnUserID, roomName, botMode } = dataRoom;
+  const { initialTurnUserID, roomName, botMode, gameMode } = dataRoom;
 
   console.log("dataRoom", dataRoom);
 
@@ -176,6 +176,7 @@ export const getDataOnlineGame = (
     boardColor,
     roomName,
     typeGame: ETypeGame.ONLINE,
+    gameMode,
     botMode,
   };
 };

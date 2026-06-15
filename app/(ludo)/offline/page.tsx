@@ -1,10 +1,20 @@
 import OfflinePage from "@/components/ludo/pages/offline";
+import { EGameMode } from "@/utils/constants";
 import React from "react";
 
-const Offline = () => {
+interface OfflineProps {
+  searchParams?: {
+    mode?: string;
+  };
+}
+
+const Offline = ({ searchParams }: OfflineProps) => {
+  const gameMode =
+    searchParams?.mode === "master" ? EGameMode.MASTER : EGameMode.CLASSIC;
+
   return (
     <div>
-      <OfflinePage />
+      <OfflinePage gameMode={gameMode} />
     </div>
   );
 };

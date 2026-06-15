@@ -20,6 +20,7 @@ import type {
   DataOfflineGame,
   TBoardColors,
   TColors,
+  TGameMode,
   TTotalPlayers,
 } from "@/interfaces";
 import Switch from "react-switch";
@@ -66,6 +67,7 @@ const Player = ({
 );
 
 interface ConfigGameProps {
+  gameMode?: TGameMode;
   handlePlay: (data: DataOfflineGame) => void;
 }
 
@@ -74,26 +76,26 @@ interface ConfigGameProps {
  * @param param0
  * @returns
  */
-const ConfigGame = ({ handlePlay }: ConfigGameProps) => {
+const ConfigGame = ({ gameMode, handlePlay }: ConfigGameProps) => {
   /**
    * Guarda la totalidad de jugadores de 2 a 4...
    */
   const [totalPlayers, setTotalPlayers] = useState<TTotalPlayers>(() =>
-    getInitialTotalPlayers()
+    getInitialTotalPlayers(),
   );
 
   /**
    * Guardar la información de los jugadores para la jugabilidad offline...
    */
   const [players, setPlayers] = useState<PlayersOffline[]>(() =>
-    getInitialDataPlayers(totalPlayers)
+    getInitialDataPlayers(totalPlayers),
   );
 
   /**
    * Estado que guarda la distrubución de colores del board...
    */
   const [boardColor, setboardColor] = useState<TBoardColors>(() =>
-    getInitialColorsBoard()
+    getInitialColorsBoard(),
   );
 
   /**
@@ -119,7 +121,7 @@ const ConfigGame = ({ handlePlay }: ConfigGameProps) => {
   const handleChangedata = (
     index: number,
     property: TProperty,
-    value: never
+    value: never,
   ) => {
     changeDataPlayers({
       index,
@@ -157,7 +159,10 @@ const ConfigGame = ({ handlePlay }: ConfigGameProps) => {
     /**
      * Función que sube la data generada para iniciar el juego...
      */
-    handlePlay(getGameData(totalPlayers, players, boardColor));
+    handlePlay({
+      ...getGameData(totalPlayers, players, boardColor),
+      gameMode,
+    });
   };
 
   return (
