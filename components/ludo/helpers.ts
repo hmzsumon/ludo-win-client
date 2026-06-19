@@ -237,15 +237,14 @@ const validateDisabledDice = (
  * @param diceList
  * @returns
  */
-const validateThreeConsecutiveRolls = (diceList: IDiceList[]) => {
-  let isConsecutiveDice = false;
-
-  if (diceList.length === MAXIMUM_DICE_PER_TURN) {
-    const firstDice = diceList[0].value;
-    isConsecutiveDice = diceList.every((v) => v.value === firstDice);
-  }
-
-  return isConsecutiveDice;
+const validateThreeConsecutiveRolls = (sixRollStreak = 0) => {
+  /* ────────── 3 Six Rule ──────────
+     শুধু লাগাতার ৩ বার ৬ উঠলে turn cancel হবে।
+     ৬, ৬, ৩ হলে streak reset হবে; এরপর আবার ৬, ৬, ১ হলে move করা যাবে।
+     diceList দিয়ে validate করলে kill/extra chance-এর আগের unused dice mix হয়ে যায়,
+     তাই আলাদা sixRollStreak রাখা হয়েছে।
+  ───────────────────────────────── */
+  return sixRollStreak >= MAXIMUM_DICE_PER_TURN;
 };
 
 /* ────────── validate next turn params ────────── */
@@ -505,6 +504,75 @@ const getJointWallOnCell = (
   return null;
 };
 
+const getTokensCountByPlayerOnNormalCell = (
+  listTokens: IListTokens[],
+  positionTile: number,
+): Record<number, number[]> => {
+  const result: Record<number, number[]> = {};
+
+  listTokens.forEach((playerTokens, playerIndex) => {
+    playerTokens.tokens.forEach((token) => {
+      if (token.typeTile !== EtypeTile.NORMAL) return;
+      if (token.positionTile !== positionTile) return;
+
+      result[playerIndex] = result[playerIndex] || [];
+      result[playerIndex].push(token.index);
+    });
+  });
+
+  return result;
+};
+
+const validateMasterTargetCell = ({
+  currentTurn,
+  isJointMove,
+  listTokens,
+  targetPositionTile,
+}: {
+  currentTurn: number;
+  isJointMove: boolean;
+  listTokens: IListTokens[];
+  targetPositionTile: number;
+}) => {
+  if (validateSafeArea(targetPositionTile)) return true;
+
+  const wall = getJointWallOnCell(listTokens, targetPositionTile);
+
+  if (wall) {
+    return Boolean(isJointMove && wall.playerIndex !== currentTurn);
+  }
+
+  const tokensByPlayer = getTokensCountByPlayerOnNormalCell(
+    listTokens,
+    targetPositionTile,
+  );
+  const ownTokens = tokensByPlayer[currentTurn] || [];
+  const totalTokens = Object.values(tokensByPlayer).reduce(
+    (total, tokenIndexes) => total + tokenIndexes.length,
+    0,
+  );
+
+  if (totalTokens === 0) return true;
+
+  /* ────────── Master no-three-token rule ──────────
+     joint token নিজের/opponent single-এর উপর বসে ৩ token করতে পারবে না।
+     নিজের single থাকলে joint move invalid হবে।
+     opponent single থাকলে joint final cell-এ kill করবে, তাই ৩ token থাকবে না।
+  ───────────────────────────────────────────────── */
+  if (isJointMove) {
+    if (ownTokens.length > 0) return false;
+    return totalTokens === 1;
+  }
+
+  // single token নিজের ১টা token-এর সাথে joint হতে পারবে, কিন্তু ৩টা হবে না
+  if (ownTokens.length === 1 && totalTokens === 1) return true;
+
+  // single token opponent single kill করতে পারবে
+  if (ownTokens.length === 0 && totalTokens === 1) return true;
+
+  return false;
+};
+
 const getMasterMoveDistance = ({
   diceValue,
   isJointMove,
@@ -721,6 +789,23 @@ const predictMasterNormalMove = ({
     break;
   }
 
+  if (
+    isMasterMode(gameMode) &&
+    targetTypeTile === EtypeTile.NORMAL &&
+    !validateMasterTargetCell({
+      currentTurn,
+      isJointMove,
+      listTokens,
+      targetPositionTile: newPositionTile,
+    })
+  ) {
+    return {
+      isValid: false,
+      targetTypeTile,
+      targetPositionTile: newPositionTile,
+    };
+  }
+
   return { isValid: true, targetTypeTile, targetPositionTile: newPositionTile };
 };
 
@@ -771,18 +856,19 @@ const validateMovementTokenWithValueDice = ({
     listTokens,
   );
 
+  if (
+    isMasterMode(gameMode) &&
+    predictedMove.targetTypeTile === EtypeTile.NORMAL
+  ) {
+    return validateMasterTargetCell({
+      currentTurn,
+      isJointMove,
+      listTokens,
+      targetPositionTile,
+    });
+  }
+
   if (totalTokensInCell.total >= 2 && !validateSafeArea(targetPositionTile)) {
-    const wall = getJointWallOnCell(listTokens, targetPositionTile);
-
-    /* ────────── Master joint wall validation ──────────
-       joint/double token-এর উপর কোনো single token বসবে না।
-       নিজের token হলেও ৩টা token একসাথে হবে না।
-       শুধু joint token opponent joint-এর final cell-এ land করে kill করতে পারবে।
-    ─────────────────────────────────────────────────── */
-    if (isMasterMode(gameMode) && wall) {
-      return Boolean(isJointMove && wall.playerIndex !== currentTurn);
-    }
-
     const tokensSameTurn = totalTokensInCell.distribution[currentTurn] ?? [];
 
     if (tokensSameTurn.length === 0 && !isJointMove) {
@@ -1185,6 +1271,7 @@ export const getInitialActionsTurnValue = (
   diceValue: 0,
   diceList: [],
   diceRollNumber: 0,
+  sixRollStreak: 0,
   isDisabledUI: false,
   actionsBoardGame: EActionsBoardGame.ROLL_DICE,
 });
@@ -1794,7 +1881,19 @@ export const validateDicesForTokens = ({
   });
 
   const newTotalDicesAvailable = copyActionsTurn.diceList.length;
-  const isThreeRolls = validateThreeConsecutiveRolls(copyActionsTurn.diceList);
+
+  /* ────────── consecutive six count ──────────
+     diceList-এ kill/extra chance-এর আগের unused dice থাকতে পারে।
+     তাই শুধু real roll sequence ধরে six streak count করা হচ্ছে।
+  ───────────────────────────────────────────── */
+  copyActionsTurn.sixRollStreak =
+    diceValue === DICE_VALUE_GET_OUT_JAIL
+      ? Number(copyActionsTurn.sixRollStreak || 0) + 1
+      : 0;
+
+  const isThreeRolls = validateThreeConsecutiveRolls(
+    copyActionsTurn.sixRollStreak,
+  );
 
   if (diceValue === DICE_VALUE_GET_OUT_JAIL) {
     playSound(ESounds.GET_SIX);
@@ -1805,7 +1904,6 @@ export const validateDicesForTokens = ({
       currentTurn,
       players,
       currentUserId,
-      addLastDice: true,
       addDelayNextTurn: true,
       setActionsTurn,
       setCurrentTurn,
