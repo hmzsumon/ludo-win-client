@@ -1,337 +1,72 @@
-import {
-  EActionsBoardGame,
-  EBoardColors,
-  EColors,
-  EGameMode,
-  ENextStepGame,
-  EOptionsGame,
-  EPositionGame,
-  EPositionProfile,
-  EPositionProfiles,
-  ESounds,
-  ESufixColors,
-  ETypeGame,
-  EtypeTile,
-  SocketErrors,
-  TYPES_CHAT_MESSAGES,
-  TYPES_ONLINE_GAMEPLAY,
-} from "@/utils/constants";
-import { Socket } from "socket.io-client";
+import type { IListTokens, IPlayer, TGameMode } from "@/interfaces";
+import { EGameMode, SIZE_TILE } from "@/utils/constants";
+import { POSITION_ELEMENTS_BOARD } from "@/utils/positions-board";
+import React from "react";
+import { MdBlockFlipped } from "react-icons/md";
 
-/* ────────── base types ────────── */
-export type TBoardColors = keyof typeof EBoardColors;
-export type TColors = keyof typeof EColors;
-export type TSufixColors = keyof typeof ESufixColors;
-export type TDicevalues = 1 | 2 | 3 | 4 | 5 | 6;
-export type TPositionGame = keyof typeof EPositionGame;
-export type TtypeTile = keyof typeof EtypeTile;
-export type TPositionProfiles = keyof typeof EPositionProfiles;
-export type TPositionProfile = keyof typeof EPositionProfile;
-export type TActionsBoardGame = keyof typeof EActionsBoardGame;
-export type TTypeGame = keyof typeof ETypeGame;
-export type TGameMode = keyof typeof EGameMode;
-export type TOfflineBotMode = "EASY" | "ASSIST";
-export type TTotalPlayers = 2 | 3 | 4;
-export type TTypesOnlineGameplay = keyof typeof TYPES_ONLINE_GAMEPLAY;
-export type TSocketErrors = keyof typeof SocketErrors;
-export type ISocketError = Record<TSocketErrors, string>;
-export type ITypeChatMessage = keyof typeof TYPES_CHAT_MESSAGES;
-export type IEOptionsGame = keyof typeof EOptionsGame;
-export type IESounds = keyof typeof ESounds;
-export type IENextStepGame = keyof typeof ENextStepGame;
-
-/* ────────── misc shared types ────────── */
-export type IPredefinedChatMessages = Record<
-  ITypeChatMessage,
-  { index: number; value: string }[]
->;
-
-export interface ICoordinate {
-  x: number;
-  y: number;
-}
-
-export interface IPositionsItems {
-  index: number;
-  coordinate: ICoordinate;
-}
-
-export interface IPoint {
-  x: number;
-  y: number;
-  increaseX: number;
-  increaseY: number;
-  total: number;
-  indexBase: number;
-}
-
-export type TFinalPositionsValues = Record<TPositionGame, IPositionsItems[]>;
-export type TExitTilesValues = Record<TPositionGame, IPoint>;
-
-export interface IPositionGame {
-  exitTileIndex: number;
-  exitTiles: IPositionsItems[];
-  finalPositions: IPositionsItems[];
-  startPositions: IPositionsItems[];
-  startTileIndex: number;
-}
-
-export type TLocationBoardElements = Record<TPositionGame, IPositionGame>;
-
-/* ────────── profile handlers ────────── */
-export type ThandleTimer = (ends: boolean, playerIndex?: number) => void;
-export type ThandleSelectDice = (
-  diceValue?: TDicevalues,
-  isActionSocket?: boolean,
-) => void;
-export type ThandleMuteChat = (playerIndex: number) => void;
-export type ThandleDoneDice = (isActionSocket?: boolean) => void;
-
-export interface IProfileHandlers {
-  handleTimer: ThandleTimer;
-  handleSelectDice: ThandleSelectDice;
-  handleDoneDice: ThandleDoneDice;
-  handleMuteChat: ThandleMuteChat;
-}
-
-/* ────────── users ────────── */
-export interface IUser {
-  id: string;
-  name: string;
-  email: string;
-  isBot?: boolean;
-  isOnline?: boolean;
-  avatar?: string;
-  photo?: string;
-  socketID?: string;
-  color?: TColors;
-  mobile?: string;
-}
-
-export interface IPlayer extends IUser {
-  killedTokensCount?: number;
-  isOffline: boolean;
-  index: number;
-  finished: boolean;
-  ranking: number;
-  color: TColors;
-  isMuted?: boolean;
-  chatMessage?: string;
-  typeMessage?: ITypeChatMessage;
-  counterMessage: number;
-}
-
-/* ────────── dice and token types ────────── */
-export interface IDiceList {
-  key: number;
-  value: TDicevalues;
-}
-
-export interface IToken {
-  color: TColors;
-  coordinate: ICoordinate;
-  typeTile: TtypeTile;
-  positionTile: number;
-  index: number;
-  diceAvailable: IDiceList[];
-  canSelectToken: boolean;
-  totalTokens: number;
-  position: number;
-  enableTooltip: boolean;
-  isMoving: boolean;
-  animated: boolean;
-  /** Master mode: একই cell-এ নিজের ২টা token থাকলে true হবে */
-  isJointToken?: boolean;
-}
-
-export interface IListTokens {
-  index: number;
-  positionGame: TPositionGame;
-  tokens: IToken[];
-}
-
-/* ────────── turn state ────────── */
-export interface IActionsTurn {
-  timerActivated: boolean;
-  disabledDice: boolean;
-  showDice: boolean;
-  diceValue: 0 | TDicevalues;
-  diceList: IDiceList[];
-  diceRollNumber: number;
-  /** Master/Classic dice rule: শুধু লাগাতার ৩ বার ৬ হলে turn cancel হবে */
-  sixRollStreak?: number;
-  isDisabledUI: boolean;
-  actionsBoardGame?: TActionsBoardGame;
-}
-
-export type TTokenByPositionType = Record<TtypeTile, IToken[]>;
-
-export interface IActionsMoveToken {
-  isRunning: boolean;
-  tokenIndex: number;
-  tokenIndexes?: number[];
-  isJointMove?: boolean;
-  totalCellsMove: number;
-  cellsCounter: number;
-}
-
-export type TShowTotalTokens = Record<number, number>;
-
-export interface IGameOver {
-  showModal: boolean;
-  gameOver: boolean;
-}
-
-/* ────────── game data ────────── */
-export interface DataOfflineGame {
-  initialTurn: number;
-  users: IUser[];
-  totalPlayers: TTotalPlayers;
-  boardColor: TBoardColors;
+interface MasterHomeLocksProps {
   gameMode?: TGameMode;
+  players: IPlayer[];
+  listTokens: IListTokens[];
 }
 
-export interface IAuthOptions {
-  socialName: string;
-  routerURL: string;
-}
+/* ════════════════════════════════════════════════════════════════
+   Master Home Entry Block Sign
+   কাজ:
+   - Master mode শুরুতে প্রত্যেক active player-এর home lane entry বন্ধ থাকবে।
+   - যে player opponent-এর token kill করবে, শুধু তার entry block sign উঠে যাবে।
+   - এটা joint/double token sign না; এটা kill-required home-entry block sign।
+   - react-icons দিয়ে red block sign দেখানো হচ্ছে, তাই clear দেখাবে।
+════════════════════════════════════════════════════════════════ */
+const MasterHomeLocks = ({
+  gameMode,
+  players,
+  listTokens,
+}: MasterHomeLocksProps) => {
+  if (gameMode !== EGameMode.MASTER) return null;
 
-export interface IAuth {
-  isAuth: boolean;
-  authOptions: IAuthOptions[];
-  user?: IUser | null;
-  serviceError?: boolean;
-  email: string;
-}
+  return (
+    <React.Fragment>
+      {listTokens.map(({ index, positionGame }) => {
+        const player = players[index];
+        const hasKilledOpponent = Number(player?.killedTokensCount || 0) > 0;
 
-export interface IDataPlayWithFriends {
-  type: TTypesOnlineGameplay;
-  roomName: string;
-  totalPlayers: TTotalPlayers;
-  initialColor?: TColors;
-}
+        // ────────── player না থাকলে / finish হলে / kill করলে sign দেখাবে না ──────────
+        if (!player || player.finished || hasKilledOpponent) return null;
 
-/* ────────── socket auth payload ────────── */
-export interface IDataSocketUser {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  photo?: string;
-}
+        // ────────── home lane-এর entry cell-এ sign বসানো হবে ──────────
+        const lockCoordinate =
+          POSITION_ELEMENTS_BOARD[positionGame].exitTiles[0]?.coordinate;
 
-export interface IDataSocket {
-  type: TTypesOnlineGameplay;
-  totalPlayers: TTotalPlayers | 0;
-  roomName: string;
-  initialColor?: TColors;
-  playAsGuest: boolean;
-  user: IDataSocketUser;
-  gameMode?: TGameMode;
-  betAmount?: number;
-  reservationId?: string;
-}
+        if (!lockCoordinate) return null;
 
-/* ────────── socket room users ────────── */
-export interface IUserSocket {
-  id: string;
-  name: string;
-  avatar?: string;
-  photo?: string;
-  socketID: string;
-  color: TColors;
-  isBot?: boolean;
-  isOnline?: boolean;
-}
+        return (
+          <div
+            key={`master-home-entry-block-${index}`}
+            className="pointer-events-none absolute z-[60] flex items-center justify-center"
+            style={{
+              left: lockCoordinate.x + SIZE_TILE / 2 - 14,
+              top: lockCoordinate.y + SIZE_TILE / 2 - 14,
+              width: 28,
+              height: 28,
+            }}
+            title="Master mode: kill required before home entry"
+          >
+            {/* ────────── Ludo Star style red block sign ────────── */}
+            <MdBlockFlipped
+              size={30}
+              color="#ff0000"
+              aria-hidden="true"
+              style={{
+                filter:
+                  "drop-shadow(0 2px 1px rgba(0,0,0,0.65)) drop-shadow(0 0 4px rgba(255,255,255,0.9))",
+              }}
+            />
+          </div>
+        );
+      })}
+    </React.Fragment>
+  );
+};
 
-/* ────────── socket room data ────────── */
-export interface IDataRoom {
-  initialTurnUserID: string;
-  isFull: boolean;
-  roomName: string;
-  users: IUserSocket[];
-  totalPlayers: TTotalPlayers;
-  gameMode?: TGameMode;
-  betAmount?: number;
-  feePercent?: number;
-  botMode?: TOfflineBotMode;
-}
-
-/* ────────── online game props ────────── */
-export interface IDataOnline {
-  totalPlayers: TTotalPlayers;
-  initialTurn: number;
-  users: IUser[];
-  boardColor: TBoardColors;
-  roomName: string;
-  typeGame: TTypeGame;
-  gameMode?: TGameMode;
-  socket: Socket;
-  currentUserId?: string;
-  betAmount?: number;
-  botMode?: TOfflineBotMode;
-}
-
-/* ────────── ui room ordering ────────── */
-export type TDataRoomUserOrder = Record<number, IUserSocket>;
-
-export interface IDataRoomSocket {
-  isFull: boolean;
-  boardColor: TBoardColors;
-  totalPlayers: TTotalPlayers;
-  orderPlayers: TDataRoomUserOrder;
-}
-
-export interface ISelectTokenValues {
-  diceIndex: number;
-  tokenIndex: number;
-}
-
-/* ────────── socket actions ────────── */
-export interface ISocketListenChatMessage {
-  userID: string;
-  type: ITypeChatMessage;
-  messageIndex: number;
-}
-
-export interface ISocketListenData {
-  [EActionsBoardGame.ROLL_DICE]: TDicevalues;
-  [EActionsBoardGame.SELECT_TOKEN]: ISelectTokenValues;
-  [EActionsBoardGame.OPPONENT_LEAVE]: string;
-  [EActionsBoardGame.CHAT_MESSAGE]: ISocketListenChatMessage;
-  [EActionsBoardGame.DONE_DICE]: boolean;
-  [EActionsBoardGame.DONE_TOKEN_MOVEMENT]: IENextStepGame;
-}
-
-export interface ISocketListenActions {
-  change: boolean;
-  type: TActionsBoardGame;
-  data: ISocketListenData;
-}
-
-export interface ISocketActions {
-  type: TActionsBoardGame;
-  roomName: string;
-  [EActionsBoardGame.ROLL_DICE]: TDicevalues;
-  [EActionsBoardGame.SELECT_TOKEN]: ISelectTokenValues;
-  [EActionsBoardGame.OPPONENT_LEAVE]: string;
-  [EActionsBoardGame.CHAT_MESSAGE]: ISocketListenChatMessage;
-  [EActionsBoardGame.DONE_DICE]: boolean;
-  [EActionsBoardGame.DONE_TOKEN_MOVEMENT]: IENextStepGame;
-}
-
-/* ────────── options context ────────── */
-export type IOptionsGame = Record<IEOptionsGame, boolean>;
-
-export interface IOptionsContext {
-  optionsGame: IOptionsGame;
-  toogleOptions: (type: IEOptionsGame) => void;
-  playSound: (type: IESounds) => void;
-}
-
-/* ────────── service worker ────────── */
-export interface IServiceWorker {
-  serviceWorkerInitialized?: boolean;
-  serviceWorkerUpdated?: boolean;
-  serviceWorkerRegistration?: ServiceWorkerRegistration;
-}
+export default React.memo(MasterHomeLocks);
