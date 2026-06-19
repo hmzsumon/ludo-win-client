@@ -158,6 +158,8 @@ export interface IActionsTurn {
   diceValue: 0 | TDicevalues;
   diceList: IDiceList[];
   diceRollNumber: number;
+  /** Master/Classic dice rule: শুধু লাগাতার ৩ বার ৬ হলে turn cancel হবে */
+  sixRollStreak?: number;
   isDisabledUI: boolean;
   actionsBoardGame?: TActionsBoardGame;
 }
