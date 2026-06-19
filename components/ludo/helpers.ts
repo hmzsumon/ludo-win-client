@@ -432,10 +432,11 @@ const validateSafeArea = (positionTile: number) =>
    Master mode helpers
    কাজ:
    - Ludo STAR style kill-required home entry
-   - kill না করা পর্যন্ত home lane locked থাকবে
+   - kill না করা পর্যন্ত home lane locked থাকবে, token normal path ধরে আবার ঘুরবে
    - দুই token এক ঘরে থাকলে joint/double token wall হবে
    - joint token শুধু even dice দিয়ে dice/2 ঘর move করবে
    - safe/star cell-এ joint wall হিসেবে কাজ করবে না
+   - joint wall-এর উপর নিজের/opponent কোনো single token বসবে না
 ════════════════════════════════════════════════════════════════ */
 const isMasterMode = (gameMode?: TGameMode) => gameMode === EGameMode.MASTER;
 
@@ -682,15 +683,27 @@ const predictMasterNormalMove = ({
       continue;
     }
 
+    /* ────────── Master locked home entry rule ──────────
+       kill না হলে token home lane-এ ঢুকবে না।
+       কিন্তু token থেমে থাকবে না; normal path ধরে আবার board ঘুরবে।
+    ───────────────────────────────────────────────────── */
     if (
       isMasterMode(gameMode) &&
       getPlayerKillCount(players, currentTurn) <= 0
     ) {
-      return {
-        isValid: false,
-        targetTypeTile: EtypeTile.EXIT,
-        targetPositionTile: 0,
-      };
+      newPositionTile = validateIncrementTokenMovement(newPositionTile);
+
+      const wall = getJointWallOnCell(listTokens, newPositionTile);
+
+      if (wall) {
+        return {
+          isValid: false,
+          targetTypeTile: EtypeTile.NORMAL,
+          targetPositionTile: newPositionTile,
+        };
+      }
+
+      continue;
     }
 
     const remainingCells = moveDistance - i;
@@ -759,6 +772,17 @@ const validateMovementTokenWithValueDice = ({
   );
 
   if (totalTokensInCell.total >= 2 && !validateSafeArea(targetPositionTile)) {
+    const wall = getJointWallOnCell(listTokens, targetPositionTile);
+
+    /* ────────── Master joint wall validation ──────────
+       joint/double token-এর উপর কোনো single token বসবে না।
+       নিজের token হলেও ৩টা token একসাথে হবে না।
+       শুধু joint token opponent joint-এর final cell-এ land করে kill করতে পারবে।
+    ─────────────────────────────────────────────────── */
+    if (isMasterMode(gameMode) && wall) {
+      return Boolean(isJointMove && wall.playerIndex !== currentTurn);
+    }
+
     const tokensSameTurn = totalTokensInCell.distribution[currentTurn] ?? [];
 
     if (tokensSameTurn.length === 0 && !isJointMove) {
@@ -2039,8 +2063,17 @@ export const validateMovementToken = ({
       positionTile = validateIncrementTokenMovement(tokenMove.positionTile);
       targetTypeTile = EtypeTile.NORMAL;
     } else {
-      positionTile = 0;
-      targetTypeTile = EtypeTile.EXIT;
+      /* ────────── Master locked home entry movement ──────────
+         kill না থাকলে entry block থাকবে, কিন্তু token আটকে থাকবে না।
+         home lane বাদ দিয়ে normal path ধরে আবার ঘুরবে।
+      ─────────────────────────────────────────────────────── */
+      const isHomeEntryLocked =
+        isMasterMode(gameMode) && getPlayerKillCount(players, currentTurn) <= 0;
+
+      positionTile = isHomeEntryLocked
+        ? validateIncrementTokenMovement(tokenMove.positionTile)
+        : 0;
+      targetTypeTile = isHomeEntryLocked ? EtypeTile.NORMAL : EtypeTile.EXIT;
     }
   }
 
