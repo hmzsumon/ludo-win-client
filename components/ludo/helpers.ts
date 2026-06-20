@@ -1900,6 +1900,56 @@ export const validateDicesForTokens = ({
   }
 
   if (isThreeRolls) {
+    /* ────────── 3 Six Cancel Rule ──────────
+       লাগাতার ৩টা ৬ হলে শুধু এই শেষের ৩টা ৬ cancel হবে।
+       আগের valid dice যেমন ৬, ৬, ২ থেকে থাকা ৬, ৬ নষ্ট হবে না।
+       যদি আগের dice বাকি থাকে তাহলে turn যাবে না, আগে ওই dice দিয়ে move করতে পারবে।
+    ───────────────────────────────────────── */
+    copyActionsTurn.diceList = copyActionsTurn.diceList.slice(0, -3);
+    copyActionsTurn.sixRollStreak = 0;
+
+    if (copyActionsTurn.diceList.length !== 0) {
+      const {
+        canMoveTokens,
+        copyListTokens,
+        moveAutomatically,
+        tokenIndex,
+        diceIndex,
+      } = validateDiceForTokenMovement({
+        currentTurn,
+        listTokens,
+        diceList: copyActionsTurn.diceList,
+        players,
+        gameMode,
+      });
+
+      if (moveAutomatically) {
+        return validateSelectToken({
+          actionsTurn: copyActionsTurn,
+          currentTurn,
+          diceIndex,
+          gameMode,
+          listTokens: copyListTokens,
+          tokenIndex,
+          totalTokens,
+          setActionsMoveToken,
+          setActionsTurn,
+          setTotalTokens,
+          setListTokens,
+        });
+      }
+
+      if (canMoveTokens) {
+        copyActionsTurn.timerActivated = true;
+        copyActionsTurn.disabledDice = true;
+        copyActionsTurn.showDice = false;
+        copyActionsTurn.actionsBoardGame = EActionsBoardGame.SELECT_TOKEN;
+
+        setActionsTurn(copyActionsTurn);
+        return setListTokens(copyListTokens);
+      }
+    }
+
     return validateNextTurn({
       currentTurn,
       players,
