@@ -1730,7 +1730,7 @@ div {
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 }
 
-/* ────────── Ludo: stacked token badge ────────── */
+/* ────────── Ludo: stacked token badge styles new ────────── */
 .game-token-stack-badge {
   position: absolute;
   right: -4px;
