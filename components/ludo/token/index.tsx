@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useRef, useState } from "react";
 
 import useOnClickOutside from "@/hooks/useOnClickOutside";
@@ -78,6 +79,7 @@ const Token = ({
        * de acuerdo al dado que tiene disponible el token...
        */
       const diceIndex = getDiceIndexSelected(diceList, diceAvailable[0].key);
+
       /**
        * Se envía el indice del único dado que hay disponible...
        */
@@ -146,14 +148,31 @@ const Token = ({
     !isMoving &&
     !isDisabledUI;
 
+  /**
+   * ────────── Stack Badge ──────────
+   * Same cell-এ একাধিক token থাকলে ছোট badge দেখাবে।
+   * Example: 2 token থাকলে x2, 3 token থাকলে x3.
+   *
+   * position === totalTokens ব্যবহার করা হয়েছে যাতে একই cell-এর
+   * সব token-এর উপর badge না আসে, শুধু শেষ/top token-এ badge আসে।
+   * ────────────────────────────────
+   */
+  const showStackBadge = totalTokens > 1 && position === totalTokens;
+
   return (
     <React.Fragment>
       <div className={className} style={styleWrapper}>
         <Piece color={color} style={stylePiece} debug={debug} index={index} />
+
+        {showStackBadge && (
+          <span className="game-token-stack-badge">x{totalTokens}</span>
+        )}
+
         {showButton && (
           <button className="game-token-button" onClick={handleClickDice} />
         )}
       </div>
+
       {canSelectToken && showTooltip && (
         <Tooltip
           ref={tooltipRef}

@@ -1715,20 +1715,48 @@ div {
 
 .game-token-button {
   position: absolute;
-  width: 120%;
-  height: 120%;
-  left: -10%;
-  top: -10%;
+  width: 125%;
+  height: 125%;
+  left: -12.5%;
+  top: -12.5%;
   z-index: 1;
+
   cursor: pointer;
-  border: none;
-  border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(1.4px);
   border: 2px dashed rgba(255, 255, 255, 1);
+  border-radius: 50%;
+  background: transparent;
+
   animation: rotation 5s normal linear infinite;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+}
+
+/* ────────── Ludo: stacked token badge ────────── */
+.game-token-stack-badge {
+  position: absolute;
+  right: -4px;
+  top: -6px;
+  z-index: 10;
+
+  display: flex;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+
+  background: #facc15;
+  color: #111827;
+
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
 }
 
 @keyframes rotation {
