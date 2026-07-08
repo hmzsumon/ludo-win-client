@@ -43,7 +43,7 @@ const METHOD_META: Record<
 > = {
   Bkash: {
     image: Bkash,
-    label: "Bkash VIP",
+    label: "BKASH VIP",
     color: "#E2136E",
     glow: "rgba(226,19,110,0.35)",
   },
