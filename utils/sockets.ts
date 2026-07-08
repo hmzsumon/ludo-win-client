@@ -164,7 +164,7 @@ export const getDataOnlineGame = (
   const { totalPlayers, orderPlayers, boardColor } = dataRoomSocket;
   const { initialTurnUserID, roomName, botMode, gameMode } = dataRoom;
 
-  console.log("dataRoom", dataRoom);
+  // console.log("dataRoom", dataRoom);
 
   const users = getUsersPlay(orderPlayers, totalPlayers);
   const initialTurn = users.findIndex((v) => v.id === initialTurnUserID);

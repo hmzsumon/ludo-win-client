@@ -1,5 +1,6 @@
 "use client";
 
+import { markLudoManualLeaveIntent } from "@/utils/ludoActiveGame";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 import Icon from "../icon";
@@ -72,7 +73,9 @@ const BackButton = ({
       openExitConfirmation(
         () => {
           isHandlingBackRef.current = true;
-          goBack();
+          markLudoManualLeaveIntent();
+          (window as any).__ludoManualLeave?.();
+          setTimeout(goBack, 120);
         },
         () => {
           pushGuardState();
@@ -98,7 +101,13 @@ const BackButton = ({
   return (
     <button
       className="button blue game-back-button"
-      onClick={() => openExitConfirmation(goBack)}
+      onClick={() =>
+        openExitConfirmation(() => {
+          markLudoManualLeaveIntent();
+          (window as any).__ludoManualLeave?.();
+          setTimeout(goBack, 120);
+        })
+      }
     >
       <Icon type="back" />
     </button>

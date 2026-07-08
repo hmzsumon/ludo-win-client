@@ -273,6 +273,10 @@ export default function AuthTopBar() {
                     fill
                     className="object-cover"
                     sizes="96px"
+                    unoptimized
+                    onError={(event) => {
+                      event.currentTarget.style.display = "none";
+                    }}
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-[44px]">

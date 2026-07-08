@@ -93,6 +93,10 @@ export default function WinResultModal({
                       width={50}
                       height={50}
                       className="lw-avatar-img"
+                      unoptimized
+                      onError={(event) => {
+                        event.currentTarget.style.display = "none";
+                      }}
                     />
                   ) : (
                     <div className="lw-avatar-fallback">

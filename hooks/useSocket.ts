@@ -23,6 +23,10 @@ import {
   SocketErrors,
   TYPES_ONLINE_GAMEPLAY,
 } from "@/utils/constants";
+import {
+  clearLudoActiveSocketSession,
+  saveLudoActiveSocketSession,
+} from "@/utils/ludoActiveGame";
 import { getDataOnlineGame, updateDataRoomSocket } from "@/utils/sockets";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -287,6 +291,12 @@ const useSocket = (connectionData: IDataSocket) => {
                 }).then(() => window.location.reload());
               }
 
+              /* ────────── stale room/session হলে local resume cache clear ────────── */
+              if (error === SocketErrors.INVALID_ROOM) {
+                clearLudoActiveSocketSession();
+                reservationIdRef.current = "";
+              }
+
               setRedirect({
                 message: {
                   title:
@@ -319,6 +329,15 @@ const useSocket = (connectionData: IDataSocket) => {
               dataRoom,
             );
 
+            saveLudoActiveSocketSession({
+              ...connectionDataRef.current,
+              type: TYPES_ONLINE_GAMEPLAY.JOIN_ROOM,
+              roomName: dataRoom.roomName,
+              totalPlayers: dataRoom.totalPlayers,
+              betAmount: dataRoom.betAmount,
+              gameMode: dataRoom.gameMode,
+            });
+
             setDataOnlineGame({
               ...newDataOnlineGame,
               socket: newSocket as Socket,
@@ -348,8 +367,10 @@ const useSocket = (connectionData: IDataSocket) => {
         /* ────────────────────────────────────────────────────────────
            🔧 BUG FIX #2 (error path): reserve fail হলে
            reservationId clear করুন যাতে retry সম্ভব হয়।
+           stale local room/session cache-ও clear করুন।
         ──────────────────────────────────────────────────────────── */
         reservationIdRef.current = "";
+        clearLudoActiveSocketSession();
 
         const errorMessage =
           error?.data?.message ||

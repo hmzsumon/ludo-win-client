@@ -12,6 +12,17 @@ type AvatarProps = {
   size?: number;
 };
 
+/* ────────── safe dynamic avatar helper ────────── */
+const getSafeAvatarSrc = (value?: string): string | StaticImageData => {
+  const src = value?.trim();
+
+  if (!src || src === "null" || src === "undefined") {
+    return defaultAvatar;
+  }
+
+  return src;
+};
+
 const Avatar: React.FC<AvatarProps> = ({
   avatar = "",
   photo = "",
@@ -19,7 +30,7 @@ const Avatar: React.FC<AvatarProps> = ({
   className = "",
   size = 40,
 }) => {
-  const resolvedSrc = avatar || photo || defaultAvatar;
+  const resolvedSrc = getSafeAvatarSrc(avatar || photo);
 
   const [src, setSrc] = React.useState<string | StaticImageData>(resolvedSrc);
 
@@ -35,6 +46,7 @@ const Avatar: React.FC<AvatarProps> = ({
       src={src}
       width={size}
       height={size}
+      unoptimized={typeof src === "string"}
       onError={() => setSrc(defaultAvatar)}
     />
   );

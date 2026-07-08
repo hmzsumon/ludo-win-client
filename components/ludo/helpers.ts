@@ -1663,7 +1663,7 @@ export const getOfflineWeightedDice = ({
   currentRollCount?: number;
   assistOpeningDelay?: number;
 }): TDicevalues => {
-  console.log("actionsTurn", actionsTurn);
+  // console.log("actionsTurn", actionsTurn);
   const currentTokens = listTokens[currentTurn];
   const usedValues = actionsTurn.diceList.map((dice) => dice.value);
   const sixesInRow = usedValues.every(

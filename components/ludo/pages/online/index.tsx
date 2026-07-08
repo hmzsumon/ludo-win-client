@@ -6,6 +6,10 @@ import useGetRoomURL from "@/hooks/useGetRoomURL";
 import { IDataSocket, TGameMode } from "@/interfaces";
 import { TYPES_ONLINE_GAMEPLAY } from "@/utils/constants";
 import { guid, randomNumber } from "@/utils/helpers";
+import {
+  clearLudoActiveSocketSession,
+  getLudoReconnectCooldownRemaining,
+} from "@/utils/ludoActiveGame";
 import { useCallback, useState } from "react";
 import { useSelector } from "react-redux";
 import swal from "sweetalert";
@@ -171,6 +175,7 @@ const OnlinePage = ({ gameMode = "CLASSIC" }: OnlinePageProps) => {
     return (
       <BetAmount
         onBack={() => {
+          clearLudoActiveSocketSession();
           setSelectedBetAmount(null);
           setDataSocket((current) => ({
             ...current,
@@ -180,6 +185,21 @@ const OnlinePage = ({ gameMode = "CLASSIC" }: OnlinePageProps) => {
           }));
         }}
         onConfirm={(amount) => {
+          const remainingMs = getLudoReconnectCooldownRemaining();
+
+          if (remainingMs > 0) {
+            const remainingSeconds = Math.max(1, Math.ceil(remainingMs / 1000));
+
+            swal({
+              title: "Match reconnect in progress",
+              text: `Your previous game is still being protected for reconnect. Please try again after ${remainingSeconds} seconds.`,
+              icon: "info",
+            });
+            return;
+          }
+
+          /* ────────── new wager search শুরু হলে পুরনো room resume cache clear ────────── */
+          clearLudoActiveSocketSession();
           setSelectedBetAmount(amount);
           setDataSocket((current) => ({
             ...current,

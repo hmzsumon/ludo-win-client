@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Logo from "@/components/branding/logo";
 import LsButton from "@/components/ui/LsButton";
 import PageWrapper from "@/components/wrapper/page";
 import { useGetWalletQuery } from "@/redux/features/wallet/walletApi";
+import { getLudoReconnectCooldownRemaining } from "@/utils/ludoActiveGame";
 import { useSelector } from "react-redux";
 import swal from "sweetalert";
 
@@ -112,6 +113,21 @@ const BetAmount = ({ onBack, onConfirm }: BetAmountProps) => {
   /* ────────── input value state ────────── */
   const [amountInput, setAmountInput] = useState<string>("50");
 
+  /* ────────── reconnect cooldown state ────────── */
+  const [cooldownRemainingMs, setCooldownRemainingMs] = useState(0);
+
+  /* ────────── update reconnect cooldown countdown ────────── */
+  useEffect(() => {
+    const updateCooldown = () => {
+      setCooldownRemainingMs(getLudoReconnectCooldownRemaining());
+    };
+
+    updateCooldown();
+    const interval = window.setInterval(updateCooldown, 1_000);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
   /* ────────── derived wallet balance ────────── */
   const walletBalance = useMemo(() => Number(data?.balance || 0), [data, user]);
 
@@ -138,15 +154,31 @@ const BetAmount = ({ onBack, onConfirm }: BetAmountProps) => {
 
   /* ────────── button disabled state ────────── */
   const isConfirmDisabled = useMemo(() => {
+    if (cooldownRemainingMs > 0) return true;
     if (!isFinalAmountValid) return true;
     if (finalAmount <= 0) return true;
     if (walletBalance < finalAmount) return true;
     return false;
-  }, [finalAmount, isFinalAmountValid, walletBalance]);
+  }, [cooldownRemainingMs, finalAmount, isFinalAmountValid, walletBalance]);
+
+  /* ────────── reconnect cooldown seconds ────────── */
+  const cooldownRemainingSeconds = useMemo(() => {
+    return Math.max(1, Math.ceil(cooldownRemainingMs / 1000));
+  }, [cooldownRemainingMs]);
 
   /* ────────── confirm selected amount ────────── */
   const handleConfirm = () => {
     const normalizedAmount = Number(amountInput || 0);
+
+    /* ────────── reconnect grace check before submit ────────── */
+    if (cooldownRemainingMs > 0) {
+      swal({
+        title: "Match reconnect in progress",
+        text: `Your previous game is still protected for reconnect. Please try again after ${cooldownRemainingSeconds} seconds.`,
+        icon: "info",
+      });
+      return;
+    }
 
     /* ────────── strict validity check before submit ────────── */
     if (!isAllowedAmount(normalizedAmount)) {
@@ -299,6 +331,13 @@ const BetAmount = ({ onBack, onConfirm }: BetAmountProps) => {
               </p>
 
               {/* ────────── low balance helper ────────── */}
+              {cooldownRemainingMs > 0 && (
+                <p className="mb-0 mt-2 text-center text-xs font-bold text-[#ffdf8a]">
+                  Previous match is reconnecting. Try again after{" "}
+                  {cooldownRemainingSeconds} seconds.
+                </p>
+              )}
+
               {isFinalAmountValid && walletBalance < finalAmount && (
                 <p className="mb-0 mt-2 text-center text-xs font-bold text-[#ffb3b3]">
                   Insufficient balance for this wager amount.
@@ -324,7 +363,9 @@ const BetAmount = ({ onBack, onConfirm }: BetAmountProps) => {
                 fullWidth
                 disabled={isConfirmDisabled}
               >
-                Search Same Amount Player
+                {cooldownRemainingMs > 0
+                  ? `Try Again in ${cooldownRemainingSeconds}s`
+                  : "Search Same Amount Player"}
               </LsButton>
             </div>
           </div>

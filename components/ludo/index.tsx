@@ -11,6 +11,14 @@ import { useOptionsContext } from "@/context/optionContext";
 import useInterval from "@/hooks/useInterval";
 import useWait from "@/hooks/useWait";
 import { useLazyGetWalletQuery } from "@/redux/features/wallet/walletApi";
+import {
+  clearLudoActiveSocketSession,
+  consumeLudoManualLeaveIntent,
+  markLudoManualLeaveIntent,
+  readLudoActiveGameState,
+  saveLudoActiveGameState,
+  saveLudoReconnectCooldown,
+} from "@/utils/ludoActiveGame";
 import type {
   IActionsMoveToken,
   IActionsTurn,
@@ -180,6 +188,15 @@ const Game = ({
   const [refreshWallet] = useLazyGetWalletQuery();
   const didEmitMatchResultRef = useRef(false);
 
+  /* ────────── restore local board state after refresh/TWA reload ────────── */
+  const restoredGameState = useMemo(
+    () =>
+      typeGame === ETypeGame.ONLINE
+        ? readLudoActiveGameState({ roomName, currentUserId })
+        : null,
+    [currentUserId, roomName, typeGame],
+  );
+
   const { resolvedBoardColor, forcePlayerColors } = useMemo(
     () =>
       getResolvedTwoPlayerView({
@@ -205,16 +222,20 @@ const Game = ({
   );
 
   /* ────────── players state init ────────── */
-  const [players, setPlayers] = useState<IPlayer[]>(initialPlayers);
+  const [players, setPlayers] = useState<IPlayer[]>(
+    () => restoredGameState?.players || initialPlayers,
+  );
 
   /* ────────── tokens state init ────────── */
-  const [listTokens, setListTokens] = useState<IListTokens[]>(() =>
-    getInitialPositionTokens(
-      resolvedBoardColor,
-      totalPlayers,
-      initialPlayers,
-      currentUserId,
-    ),
+  const [listTokens, setListTokens] = useState<IListTokens[]>(
+    () =>
+      restoredGameState?.listTokens ||
+      getInitialPositionTokens(
+        resolvedBoardColor,
+        totalPlayers,
+        initialPlayers,
+        currentUserId,
+      ),
   );
 
   /* ────────── settlement state init ────────── */
@@ -225,19 +246,32 @@ const Game = ({
   } | null>(null);
 
   /* ────────── turn init ────────── */
-  const [actionsTurn, setActionsTurn] = useState<IActionsTurn>(() =>
-    getInitialActionsTurnValue(initialTurn, initialPlayers, currentUserId),
+  const [actionsTurn, setActionsTurn] = useState<IActionsTurn>(
+    () =>
+      restoredGameState?.actionsTurn ||
+      getInitialActionsTurnValue(initialTurn, initialPlayers, currentUserId),
   );
 
-  const [currentTurn, setCurrentTurn] = useState(initialTurn);
-  const [actionsMoveToken, setActionsMoveToken] = useState<IActionsMoveToken>(
-    INITIAL_ACTIONS_MOVE_TOKEN,
+  const [currentTurn, setCurrentTurn] = useState(
+    () => restoredGameState?.currentTurn ?? initialTurn,
   );
-  const [totalTokens, setTotalTokens] = useState<TShowTotalTokens>({});
-  const [isGameOver, setIsGameOver] = useState<IGameOver>({
-    showModal: false,
-    gameOver: false,
-  });
+
+  const [actionsMoveToken, setActionsMoveToken] = useState<IActionsMoveToken>(
+    () => restoredGameState?.actionsMoveToken || INITIAL_ACTIONS_MOVE_TOKEN,
+  );
+
+  const [totalTokens, setTotalTokens] = useState<TShowTotalTokens>(
+    () => restoredGameState?.totalTokens || {},
+  );
+
+  const [isGameOver, setIsGameOver] = useState<IGameOver>(
+    () =>
+      restoredGameState?.isGameOver || {
+        showModal: false,
+        gameOver: false,
+      },
+  );
+
   const offlineBotRollCountRef = useRef<Record<number, number>>({});
   const assistOpeningDelayRef = useRef<number>(
     Math.floor(Math.random() * 3) + 2,
@@ -257,22 +291,27 @@ const Game = ({
 
   /* ────────── turn ownership ────────── */
   const isCurrentTurnBot = Boolean(players[currentTurn]?.isBot);
+
   const onlineBotIndex = useMemo(
     () => players.findIndex((player) => player.isBot),
     [players],
   );
+
   const onlineBotMode = useMemo<TOfflineBotMode>(
     () => (botMode === "ASSIST" ? "ASSIST" : "EASY"),
     [botMode],
   );
+
   const hasOnlineBotControl = useMemo(
     () => isOnlineGame && totalPlayers === 2 && onlineBotIndex >= 0,
     [isOnlineGame, onlineBotIndex, totalPlayers],
   );
+
   const isMyOnlineTurn =
     isOnlineGame &&
     currentPlayerIndex >= 0 &&
     currentTurn === currentPlayerIndex;
+
   const canControlCurrentTurn = isMyOnlineTurn || isCurrentTurnBot;
 
   /* ────────── room action emit ────────── */
@@ -382,9 +421,10 @@ const Game = ({
     },
     [
       actionsTurn,
+      canControlCurrentTurn,
       currentTurn,
       emitRoomAction,
-      canControlCurrentTurn,
+      gameMode,
       isCurrentTurnBot,
       isOnlineGame,
       listTokens,
@@ -435,16 +475,16 @@ const Game = ({
     [
       actionsTurn.actionsBoardGame,
       actionsTurn.diceList,
+      canControlCurrentTurn,
       currentTurn,
       handleSelectedToken,
-      canControlCurrentTurn,
+      hasOnlineBotControl,
       isCurrentTurnBot,
       isOnlineGame,
       listTokens,
       onlineBotIndex,
       onlineBotMode,
       players,
-      hasOnlineBotControl,
     ],
   );
 
@@ -457,6 +497,7 @@ const Game = ({
         if (isCurrentTurnBot) {
           const currentRollCount =
             offlineBotRollCountRef.current[currentTurn] || 0;
+
           const resolvedDiceValue =
             onlineBotMode === "ASSIST" && onlineBotIndex >= 0
               ? getOfflineWeightedDice({
@@ -472,9 +513,11 @@ const Game = ({
               : diceValue;
 
           offlineBotRollCountRef.current[currentTurn] = currentRollCount + 1;
+
           setActionsTurn((current) =>
             getRandomValueDice(current, resolvedDiceValue),
           );
+
           playSound(ESounds.ROLL_DICE);
           return;
         }
@@ -492,6 +535,7 @@ const Game = ({
 
       const currentRollCount = offlineBotRollCountRef.current[currentTurn] || 0;
       offlineBotRollCountRef.current[currentTurn] = currentRollCount + 1;
+
       setActionsTurn((current) => getRandomValueDice(current, diceValue));
       playSound(ESounds.ROLL_DICE);
     },
@@ -500,11 +544,13 @@ const Game = ({
       canControlCurrentTurn,
       currentTurn,
       emitRoomAction,
+      gameMode,
       isCurrentTurnBot,
       isOnlineGame,
       listTokens,
       onlineBotIndex,
       onlineBotMode,
+      players,
       playSound,
       roomName,
     ],
@@ -561,10 +607,11 @@ const Game = ({
     },
     [
       actionsTurn,
+      canControlCurrentTurn,
       currentTurn,
       currentUserId,
       emitRoomAction,
-      canControlCurrentTurn,
+      gameMode,
       isCurrentTurnBot,
       isOnlineGame,
       listTokens,
@@ -579,6 +626,41 @@ const Game = ({
   const handleMuteChat = useCallback((playerIndex: number) => {
     console.log("handleMuteChat: ", { playerIndex });
   }, []);
+
+  /* ────────── persist live online board for refresh/TWA reload ────────── */
+  useEffect(() => {
+    if (!isOnlineGame || !roomName || !currentUserId) return;
+
+    saveLudoActiveGameState({
+      roomName,
+      currentUserId,
+      players,
+      listTokens,
+      actionsTurn,
+      currentTurn,
+      actionsMoveToken,
+      totalTokens,
+      isGameOver,
+      savedAt: Date.now(),
+    });
+  }, [
+    actionsMoveToken,
+    actionsTurn,
+    currentTurn,
+    currentUserId,
+    isGameOver,
+    isOnlineGame,
+    listTokens,
+    players,
+    roomName,
+    totalTokens,
+  ]);
+
+  /* ────────── clear active session after match end ────────── */
+  useEffect(() => {
+    if (!isOnlineGame || !isGameOver.gameOver) return;
+    clearLudoActiveSocketSession();
+  }, [isGameOver.gameOver, isOnlineGame]);
 
   /* ────────── settle wager when game over ────────── */
   useEffect(() => {
@@ -600,10 +682,12 @@ const Game = ({
     if (!winner || !isGameOver.gameOver) return;
 
     didEmitMatchResultRef.current = true;
+
     socket.emit("MATCH_RESULT", {
       roomName,
       winnerUserId: winner.id,
     });
+
     refreshWallet();
   }, [
     betAmount,
@@ -713,6 +797,44 @@ const Game = ({
     WAIT_SHOW_MODAL_GAME_OVER,
     useCallback(() => setIsGameOver({ showModal: true, gameOver: true }), []),
   );
+
+  /* ────────── expose manual leave bridge for back button ────────── */
+  useEffect(() => {
+    if (!isOnlineGame || isGameOver.gameOver || !socket) return;
+
+    (window as any).__ludoManualLeave = () => {
+      markLudoManualLeaveIntent();
+      socket.emit("LEAVE_ROOM");
+    };
+
+    return () => {
+      if ((window as any).__ludoManualLeave) {
+        delete (window as any).__ludoManualLeave;
+      }
+    };
+  }, [isGameOver.gameOver, isOnlineGame, socket]);
+
+  /* ────────── ask confirmation before manual refresh/close while game live ────────── */
+  useEffect(() => {
+    if (!isOnlineGame || isGameOver.gameOver || !roomName) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      const isManualLeave = consumeLudoManualLeaveIntent();
+
+      if (!isManualLeave) {
+        saveLudoReconnectCooldown(roomName);
+      }
+
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [roomName, isGameOver.gameOver, isOnlineGame]);
 
   /* ────────── profile props ────────── */
   const profileHandlers = {

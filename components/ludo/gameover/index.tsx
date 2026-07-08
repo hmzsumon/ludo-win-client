@@ -174,6 +174,10 @@ const GameOver = ({
                     fill
                     sizes="50px"
                     className="rounded-full object-cover"
+                    unoptimized
+                    onError={(event) => {
+                      event.currentTarget.src = FALLBACK_AVATAR_1;
+                    }}
                   />
                 </div>
 
@@ -238,6 +242,10 @@ const GameOver = ({
                       fill
                       sizes="50px"
                       className="rounded-full object-cover"
+                      unoptimized
+                      onError={(event) => {
+                        event.currentTarget.src = FALLBACK_AVATAR_2;
+                      }}
                     />
                   </div>
 
