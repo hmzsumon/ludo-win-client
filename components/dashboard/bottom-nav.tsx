@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const TELEGRAM_SUPPORT_URL = "https://t.me/ludo_party";
+const TELEGRAM_SUPPORT_URL = "https://t.me/ludowin365";
 
 type NavItem =
   | {
