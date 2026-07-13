@@ -73,8 +73,17 @@ const TotalPlayers = ({
         <div className="page-total-players-section">
           <h2>OR</h2>
           <button
+            type="button"
+            disabled
+            aria-disabled="true"
             className="button yellow page-total-players-friends"
-            onClick={handlePlayWithFriends}
+            title="This feature is temporarily unavailable"
+            style={{
+              opacity: 0.8,
+              cursor: "not-allowed",
+              pointerEvents: "none",
+              filter: "grayscale(0.7)",
+            }}
           >
             <Icon type="play" fill="#8b5f00" />
             <span>Play with Friends</span>
