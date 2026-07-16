@@ -264,6 +264,7 @@ export default function WithdrawPage() {
       pass,
     }).unwrap();
   };
+  
 
   useEffect(() => {
     if (isError) toast.error((createError as fetchBaseQueryError).data?.error);
