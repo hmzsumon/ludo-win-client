@@ -152,6 +152,7 @@ export const API_URL = `${LUDO_BACKEND_URL}/api/me`;
 export const API_LOGIN = `${LUDO_BACKEND_URL}/api/login`;
 export const API_REGISTER = `${LUDO_BACKEND_URL}/api/register`;
 export const API_LOGOUT = `${LUDO_BACKEND_URL}/api/logout`;
+export const LUDO_BOT_CONFIG_URL = `${LUDO_BACKEND_URL}/api/ludo-bot-config`;
 
 /* ────────── online gameplay types ────────── */
 export enum TYPES_ONLINE_GAMEPLAY {

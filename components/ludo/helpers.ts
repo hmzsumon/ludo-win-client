@@ -1753,6 +1753,97 @@ export const getOfflineWeightedDice = ({
   return weightedPick(weightedCandidates, fallback);
 };
 
+/* ────────── smart balance dice ────────── */
+const getPlayerProgressScore = (tokens: IToken[]) =>
+  tokens.reduce((total, token) => {
+    if (token.typeTile === EtypeTile.JAIL) return total;
+    if (token.typeTile === EtypeTile.END) return total + 65;
+    return total + Math.max(1, token.position + 1);
+  }, 0);
+
+export const getSmartBalancedDice = ({
+  actionsTurn,
+  currentTurn,
+  listTokens,
+  players,
+  botIndex,
+  gameMode,
+}: {
+  actionsTurn: IActionsTurn;
+  currentTurn: number;
+  listTokens: IListTokens[];
+  players: IPlayer[];
+  botIndex: number;
+  gameMode?: TGameMode;
+}): TDicevalues => {
+  const usedValues = actionsTurn.diceList.map((dice) => dice.value);
+  const consecutiveSixes = usedValues.every((value) => value === 6)
+    ? usedValues.length
+    : 0;
+  const humanIndex = players.findIndex(
+    (player, index) => !player.isBot && index !== botIndex,
+  );
+  const isBotTurn = currentTurn === botIndex;
+  const botProgress = getPlayerProgressScore(
+    listTokens[botIndex]?.tokens || [],
+  );
+  const humanProgress = getPlayerProgressScore(
+    listTokens[humanIndex]?.tokens || [],
+  );
+  const lead = botProgress - humanProgress;
+  const currentTokens = listTokens[currentTurn]?.tokens || [];
+  const allInJail = currentTokens.every(
+    (token) => token.typeTile === EtypeTile.JAIL,
+  );
+  const candidates: TDicevalues[] = [1, 2, 3, 4, 5, 6];
+
+  const weighted = candidates
+    .filter((value) => !(value === 6 && consecutiveSixes >= 2))
+    .map((value) => {
+      let weight = 1;
+      const diceList = [{ key: Number(value), value }];
+      const evaluated = validateDiceForTokenMovement({
+        currentTurn,
+        listTokens,
+        diceList,
+        players,
+        gameMode,
+      });
+
+      if (!evaluated.canMoveTokens) weight *= 0.55;
+      if (allInJail && value === 6) weight += 0.9;
+
+      if (isBotTurn) {
+        /* Bot এগিয়ে থাকলে dice পুরোপুরি natural-এর কাছাকাছি থাকে। */
+        if (lead > 35) weight *= value >= 5 ? 0.7 : 1.08;
+        if (lead > 70) weight *= value === 6 ? 0.45 : 1.05;
+
+        const bestMove = getBestControlledMove(
+          currentTurn,
+          evaluated.copyListTokens,
+          diceList,
+          botIndex,
+          "ASSIST",
+        );
+        if (bestMove && lead < 35) {
+          weight += Math.min(1.25, Math.max(0, bestMove.score) / 180);
+        }
+      } else {
+        /* Human অনেক পিছিয়ে গেলে guaranteed result নয়, শুধু soft catch-up chance। */
+        if (lead > 25) weight *= value >= 5 ? 1.25 : 0.95;
+        if (lead > 55 && value === 6) weight += 1.15;
+        if (lead < -35) weight *= value === 6 ? 0.75 : 1.05;
+      }
+
+      const repeatedCount = usedValues.filter((used) => used === value).length;
+      if (repeatedCount > 0) weight *= 1 / (1 + repeatedCount * 0.45);
+
+      return { item: value, weight: Math.max(0.05, weight) };
+    });
+
+  return weightedPick(weighted, randomNumber(1, 6) as TDicevalues);
+};
+
 export const getOfflineControlledTokenSelection = (
   currentTurn: number,
   listTokens: IListTokens[],
@@ -1765,7 +1856,7 @@ export const getOfflineControlledTokenSelection = (
     listTokens,
     diceList,
     favoredBotIndex,
-    mode,
+    mode === "SMART" ? "ASSIST" : mode,
   );
 
   if (!bestMove) {
