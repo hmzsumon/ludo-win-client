@@ -137,7 +137,7 @@ export default function RegisterForm(): JSX.Element {
             placeholder={
               emailRequired
                 ? "Code will be sent to this email"
-                : "Optional for Bangladesh"
+                : "Enter your email"
             }
             error={errors.email?.message}
             {...register("email", {
