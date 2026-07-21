@@ -54,7 +54,7 @@ export default function AuthShell({ children }: AuthShellProps): JSX.Element {
       /> */}
 
       {/* ── Content ── */}
-      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-6 pb-10 pt-3">
+      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-3 pb-10 pt-3">
         {children}
       </div>
     </main>

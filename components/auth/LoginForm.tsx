@@ -42,7 +42,7 @@ const LoginForm = () => {
       // 🔹 backend এ আমরা phone দিয়ে login করছি
       const body = { phone: mobile, password };
 
-      const res = await loginUser(body).unwrap();
+      const res = await loginUser(body as any).unwrap();
 
       // চাইলে success alert দিবে, না চাইলে সরাসরি redirect
       await Swal.fire({

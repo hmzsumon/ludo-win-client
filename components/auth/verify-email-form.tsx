@@ -1,238 +1,153 @@
 "use client";
 
-import { CircleAlert, Mail } from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { toast } from "react-hot-toast";
-
 import Logo from "@/components/branding/logo";
 import {
-  useResendVerificationEmailMutation,
-  useVerifyEmailMutation,
+  useResendRegistrationCodeMutation,
+  useVerifyRegistrationMutation,
 } from "@/redux/features/auth/authApi";
+import { CircleAlert, Mail, MessageSquareText } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useRef, useState } from "react";
+import { toast } from "react-hot-toast";
 
-type Props = {
-  email?: string;
-};
+const getError = (error: any) =>
+  error?.data?.error ||
+  error?.data?.message ||
+  error?.message ||
+  "Something went wrong";
 
-function getApiError(error: any): string {
-  return (
-    error?.data?.message ||
-    error?.message ||
-    "Something went wrong. Please try again."
-  );
-}
-
-export default function VerifyEmailForm({ email = "" }: Props): JSX.Element {
+export default function VerifyEmailForm(): JSX.Element {
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const queryEmail = searchParams.get("email");
-  const queryCode = searchParams.get("code");
-  const currentEmail = queryEmail || email;
-
+  const params = useSearchParams();
+  const identifier = params.get("identifier") || params.get("email") || "";
+  const channel = (params.get("channel") || "EMAIL").toUpperCase();
+  const isSms = channel === "SMS";
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [otpError, setOtpError] = useState("");
+  const [error, setError] = useState("");
+  const refs = useRef<Array<HTMLInputElement | null>>([]);
+  const [verify, { isLoading }] = useVerifyRegistrationMutation();
+  const [resend, { isLoading: isResending }] =
+    useResendRegistrationCodeMutation();
 
-  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-
-  const [verifyEmail, { isLoading: isVerifying }] = useVerifyEmailMutation();
-  const [resendVerificationEmail, { isLoading: isResending }] =
-    useResendVerificationEmailMutation();
-
-  useEffect(() => {
-    if (!queryCode) return;
-
-    const cleaned = queryCode.replace(/\D/g, "").slice(0, 6);
-    if (!cleaned) return;
-
-    const next = ["", "", "", "", "", ""];
-    cleaned.split("").forEach((char, index) => {
-      next[index] = char;
-    });
-
-    setOtp(next);
-  }, [queryCode]);
-
-  /* ────────── Handle OTP Change ────────── */
-  const handleChange = (value: string, index: number) => {
-    const digit = value.replace(/\D/g, "").slice(-1);
-    const next = [...otp];
-    next[index] = digit;
-    setOtp(next);
-
-    if (otpError) setOtpError("");
-
-    if (digit && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  /* ────────── Handle OTP Backspace ────────── */
-  const handleKeyDown = (
-    event: React.KeyboardEvent<HTMLInputElement>,
-    index: number,
-  ) => {
-    if (event.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  /* ────────── Handle OTP Paste ────────── */
-  const handlePaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
+  const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-
-    const pasted = event.clipboardData
-      .getData("text")
-      .replace(/\D/g, "")
-      .slice(0, 6);
-
-    if (!pasted) return;
-
-    const next = ["", "", "", "", "", ""];
-    pasted.split("").forEach((char, index) => {
-      next[index] = char;
-    });
-
-    setOtp(next);
-    setOtpError("");
-  };
-
-  /* ────────── Submit Verify Email ────────── */
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
     const code = otp.join("");
-
-    if (!currentEmail) {
-      setOtpError("Email address is missing");
-      return;
-    }
-
-    if (code.length !== 6) {
-      setOtpError("Please enter the 6-digit verification code");
-      return;
-    }
+    if (!identifier) return setError("Verification destination is missing");
+    if (code.length !== 6)
+      return setError("Enter the 6-digit verification code");
 
     try {
-      const response = await verifyEmail({
-        email: currentEmail.trim().toLowerCase(),
-        code,
-      }).unwrap();
-
-      toast.success(response?.message || "Email verified successfully");
+      const result = await verify({ identifier, code }).unwrap();
+      toast.success(result.message);
+      if (result.welcomeBonusGranted === false) {
+        toast(
+          "Account verified. Welcome bonus was already used on this device.",
+        );
+      }
       router.push("/login");
-    } catch (error: any) {
-      setOtpError(getApiError(error));
+    } catch (err) {
+      setError(getError(err));
     }
   };
 
-  /* ────────── Resend Verification Email ────────── */
-  const handleResend = async () => {
+  const resendCode = async () => {
     try {
-      if (!currentEmail) {
-        setOtpError("Email address is missing");
-        return;
-      }
-
-      const response = await resendVerificationEmail({
-        email: currentEmail.trim().toLowerCase(),
-      }).unwrap();
-
-      toast.success(response?.message || "Verification code sent");
-      setOtpError("");
-    } catch (error: any) {
-      setOtpError(getApiError(error));
+      const result = await resend({ identifier }).unwrap();
+      toast.success(result.message);
+      setError("");
+    } catch (err) {
+      setError(getError(err));
     }
   };
 
   return (
     <div className="flex flex-1 flex-col items-center">
-      <div className="scale-90 sm:scale-100">
+      <div className="scale-90">
         <Logo />
       </div>
-
-      <h1 className="mt-2 text-center text-2xl font-extrabold leading-none tracking-tight text-white drop-shadow-[0_4px_6px_rgba(0,0,0,0.45)]">
-        Verify your email
+      <h1 className="mt-2 text-center text-2xl font-extrabold text-white">
+        Verify your account
       </h1>
 
       <form
-        onSubmit={handleSubmit}
-        className="mt-4 w-full rounded-2xl border border-white/10 bg-[rgba(7,10,24,0.78)] p-4 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-[2px]"
+        onSubmit={submit}
+        className="mt-4 w-full rounded-2xl border border-white/10 bg-[rgba(7,10,24,0.82)] p-4 shadow-2xl"
       >
-        <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-[rgba(10,14,30,0.88)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-          <Mail className="h-5 w-5 text-white/65" />
-          <span className="truncate text-sm font-medium text-white">
-            {currentEmail || "No email found"}
-          </span>
-        </div>
-
-        <div className="mt-4 rounded-xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-emerald-300">
-          <div className="flex items-start gap-2">
-            <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
-            <p className="text-[0.70rem] leading-7">
-              Please check your inbox and enter the 6-digit verification code.
+        <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-4">
+          {isSms ? (
+            <MessageSquareText className="h-5 w-5 text-cyan-300" />
+          ) : (
+            <Mail className="h-5 w-5 text-cyan-300" />
+          )}
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-wider text-white/45">
+              Code sent by {isSms ? "SMS" : "Email"}
+            </p>
+            <p className="truncate text-sm font-bold text-white">
+              {identifier || "No destination found"}
             </p>
           </div>
         </div>
 
-        <div className="mt-6">
-          <h2 className="text-[1.05rem] font-bold text-white">
-            Verification code
-          </h2>
-
-          <div className="mt-5 flex items-center justify-between gap-2 sm:gap-3">
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                ref={(el) => {
-                  inputRefs.current[index] = el;
-                }}
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(e.target.value, index)}
-                onKeyDown={(e) => handleKeyDown(e, index)}
-                onPaste={handlePaste}
-                className={`h-10 w-10 rounded-[.70rem] border bg-[rgba(10,14,30,0.88)] text-center text-sm font-bold outline-none transition ${
-                  otpError
-                    ? "border-red-500 text-red-200 focus:border-red-500 focus:shadow-[0_0_0_2px_rgba(239,68,68,0.20)]"
-                    : "border-white/15 text-white focus:border-[#6b8cff] focus:shadow-[0_0_0_2px_rgba(107,140,255,0.20)]"
-                }`}
-              />
-            ))}
-          </div>
-
-          {otpError ? (
-            <p className="mt-2 text-xs font-semibold text-red-400">
-              {otpError}
-            </p>
-          ) : null}
-
-          <button
-            type="button"
-            className="mx-auto mt-5 block text-center text-[1rem] font-bold text-[#f4b400] underline underline-offset-4 transition hover:text-[#ffd45a] disabled:cursor-not-allowed disabled:opacity-60"
-            onClick={handleResend}
-            disabled={isResending}
-          >
-            {isResending ? "Sending..." : "Get a new code"}
-          </button>
+        <div className="mt-4 flex gap-2 rounded-xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-emerald-200">
+          <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+          <p className="text-xs leading-5">
+            Enter the 6-digit code. The code expires in 5 minutes.
+          </p>
         </div>
+
+        <div className="mt-6 flex justify-between gap-2">
+          {otp.map((digit, index) => (
+            <input
+              key={index}
+              ref={(node) => {
+                refs.current[index] = node;
+              }}
+              value={digit}
+              inputMode="numeric"
+              maxLength={1}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "").slice(-1);
+                const next = [...otp];
+                next[index] = value;
+                setOtp(next);
+                setError("");
+                if (value) refs.current[index + 1]?.focus();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Backspace" && !otp[index])
+                  refs.current[index - 1]?.focus();
+              }}
+              className={`h-11 w-11 rounded-xl border bg-white/5 text-center text-lg font-black text-white outline-none ${error ? "border-red-500" : "border-white/15 focus:border-cyan-400"}`}
+            />
+          ))}
+        </div>
+
+        {error ? (
+          <p className="mt-2 text-xs font-bold text-red-400">{error}</p>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={resendCode}
+          disabled={isResending}
+          className="mx-auto mt-5 block font-bold text-yellow-400 underline disabled:opacity-50"
+        >
+          {isResending ? "Sending..." : "Get a new code"}
+        </button>
 
         <button
           type="submit"
-          disabled={isVerifying}
-          className="mt-6 w-full rounded-xl border border-lime-300/30 bg-[linear-gradient(180deg,#8cf61e_0%,#46c81d_56%,#0a991f_100%)] py-3 text-lg font-extrabold tracking-tight text-white shadow-[inset_0_8px_14px_rgba(255,255,255,0.12),inset_0_-6px_10px_rgba(0,0,0,0.16),0_8px_22px_rgba(0,0,0,0.34)] transition hover:-translate-y-[1px] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={isLoading}
+          className="ls-btn ls-btn-green mt-6 w-full py-3.5 text-lg font-black disabled:opacity-50"
         >
-          {isVerifying ? "Verifying..." : "Verify Email"}
+          {isLoading ? "Verifying..." : "Verify Account"}
         </button>
 
         <Link
           href="/login"
-          className="mt-3 flex w-full items-center justify-center rounded-xl border border-[#5f72d5]/40 bg-[rgba(8,14,40,0.24)] py-3 text-sm font-extrabold tracking-tight text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_18px_rgba(0,0,0,0.2)] transition hover:bg-[rgba(12,20,56,0.32)]"
+          className="mt-3 flex justify-center rounded-xl border border-white/10 py-3 text-sm font-bold text-white"
         >
           Back to Sign In
         </Link>
