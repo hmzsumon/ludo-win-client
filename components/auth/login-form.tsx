@@ -5,6 +5,10 @@ import AuthInput from "@/components/auth/auth-input";
 import Logo from "@/components/branding/logo";
 import { Country } from "@/components/profile/CountrySelectDrawer";
 import { useLoginUserMutation } from "@/redux/features/auth/authApi";
+import {
+  getMarketingAttribution,
+  trackMetaCustomEvent,
+} from "@/utils/marketingAttribution";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -37,8 +41,18 @@ export default function LoginForm(): JSX.Element {
         countryName: country.name,
         password: data.password,
       }).unwrap();
+
+      const attribution = getMarketingAttribution();
+      trackMetaCustomEvent("LoginSuccess", {
+        content_name: "LudoWin login",
+        traffic_source: attribution?.source || "direct",
+        campaign_id: attribution?.campaignId || "",
+        ad_id: attribution?.adId || "",
+      });
+
       toast.success("Welcome back!");
-      router.push("/");
+      router.replace("/dashboard");
+      router.refresh();
     } catch (error: any) {
       const message =
         error?.data?.error || error?.data?.message || "Login failed";

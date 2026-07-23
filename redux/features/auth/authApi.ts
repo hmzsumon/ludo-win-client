@@ -1,5 +1,6 @@
 /* ────────── imports ────────── */
 import { removeAccessToken, saveAccessToken } from "@/utils/authToken";
+import type { MarketingAttribution } from "@/utils/marketingAttribution";
 import { apiSlice } from "../api/apiSlice";
 import { loadUser, logoutUser, setUser } from "./authSlice";
 
@@ -88,6 +89,7 @@ export const authApi = apiSlice.injectEndpoints({
         password: string;
         partnerCode?: string;
         deviceFingerprint: string;
+        marketingAttribution?: MarketingAttribution;
       }
     >({
       query: (body) => ({

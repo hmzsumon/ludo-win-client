@@ -5,6 +5,7 @@ import {
   useResendRegistrationCodeMutation,
   useVerifyRegistrationMutation,
 } from "@/redux/features/auth/authApi";
+import { trackMetaEvent } from "@/utils/marketingAttribution";
 import { CircleAlert, Mail, MessageSquareText } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -45,6 +46,10 @@ export default function VerifyEmailForm(): JSX.Element {
           "Account verified. Welcome bonus was already used on this device.",
         );
       }
+      trackMetaEvent("CompleteRegistration", {
+        content_name: "LudoWin verified registration",
+        verification_channel: channel,
+      });
       router.push("/login");
     } catch (err) {
       setError(getError(err));

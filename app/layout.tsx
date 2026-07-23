@@ -1,5 +1,7 @@
 import DisableZoom from "@/components/DisableZoom";
 import MaintenanceGate from "@/components/MaintenanceGate";
+import AttributionCapture from "@/components/marketing/attribution-capture";
+import MetaPixel from "@/components/marketing/meta-pixel";
 import SocketProvider from "@/providers/SocketProvider";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
@@ -22,7 +24,8 @@ const geistMono = localFont({
 });
 
 const appName = "Ludo Win";
-const appUrl = "https://ludowinapp.vercel.app";
+const appUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ludowin365.com";
+const shareImage = "/icons/icon-512.png";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -47,9 +50,12 @@ export const metadata: Metadata = {
 
   manifest: "/manifest.json",
 
+  alternates: {
+    canonical: "/",
+  },
+
   icons: {
     icon: [
-      { url: "/favicon.ico" },
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
@@ -75,9 +81,9 @@ export const metadata: Metadata = {
     siteName: appName,
     images: [
       {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
+        url: shareImage,
+        width: 512,
+        height: 512,
         alt: appName,
       },
     ],
@@ -86,10 +92,10 @@ export const metadata: Metadata = {
   },
 
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: appName,
     description: "Play Ludo Win on mobile with a fast, responsive experience",
-    images: ["/og-image.png"],
+    images: [shareImage],
   },
 };
 
@@ -105,6 +111,8 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         <DisableZoom />
+        <MetaPixel />
+        <AttributionCapture />
 
         <StoreProvider>
           <SocketProvider>

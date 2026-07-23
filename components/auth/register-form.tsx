@@ -6,6 +6,10 @@ import Logo from "@/components/branding/logo";
 import { Country } from "@/components/profile/CountrySelectDrawer";
 import { useRegisterUserMutation } from "@/redux/features/auth/authApi";
 import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
+import {
+  getMarketingAttribution,
+  trackMetaEvent,
+} from "@/utils/marketingAttribution";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -66,8 +70,13 @@ export default function RegisterForm(): JSX.Element {
         password: data.password,
         partnerCode: data.partnerCode.trim() || undefined,
         deviceFingerprint: getDeviceFingerprint(),
+        marketingAttribution: getMarketingAttribution(),
       }).unwrap();
 
+      trackMetaEvent("Lead", {
+        content_name: "LudoWin registration",
+        verification_channel: result.verificationChannel,
+      });
       toast.success(result.message);
       router.push(
         `/verify-email?identifier=${encodeURIComponent(result.identifier)}&channel=${result.verificationChannel}`,
