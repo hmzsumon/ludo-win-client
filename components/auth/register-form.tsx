@@ -86,7 +86,7 @@ export default function RegisterForm(): JSX.Element {
         Join the Game!
       </h1>
       <p className="mt-1 text-sm font-semibold text-white/50">
-        Create your account &amp; start winning
+        Create your account &amp; start playing!
       </p>
 
       <div className="mt-4 flex w-full items-center gap-3">
