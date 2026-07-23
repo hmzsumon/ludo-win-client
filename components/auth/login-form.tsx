@@ -72,7 +72,7 @@ export default function LoginForm(): JSX.Element {
       </div>
       <h1 className="text-2xl font-black uppercase text-white">Welcome Back</h1>
       <p className="mt-1 text-sm font-semibold text-white/50">
-        Sign in and continue playing
+        Sign in to continue playing
       </p>
 
       <div className="mt-5 w-full rounded-2xl border border-yellow-400/15 bg-gradient-to-br from-purple-900/60 to-indigo-950/70 p-5 shadow-2xl">
