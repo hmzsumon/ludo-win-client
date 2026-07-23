@@ -27,7 +27,7 @@ export default function PublicHomePage(): JSX.Element {
           <h1 className="text-base  font-black text-center uppercase italic leading-[0.95] tracking-[-0.03em]">
             <span className="text-white"></span>{" "}
             <span className="brand-highlight-text">
-              PLAY LUDO WIN BIG REWARDS!
+              PLAY LUDO WIN WITH FRIENDS!
             </span>{" "}
             <span className="text-white"></span>
           </h1>
