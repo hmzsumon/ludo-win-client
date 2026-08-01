@@ -4167,3 +4167,315 @@ input[type="radio"]:focus {
     font-size: 112px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   NEW ▸ Shared smart game modal theme
+   SweetAlert, SweetAlert2 and the Ludo option/share dialogs now use
+   the same purple, magenta and gold visual language.
+   ═══════════════════════════════════════════════════════════════ */
+.swal-overlay,
+.swal2-container {
+  background: rgba(1, 8, 24, 0.78) !important;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  z-index: 100000 !important;
+}
+
+.swal-modal,
+.swal2-popup {
+  width: min(90vw, 370px) !important;
+  overflow: hidden;
+  border: 3px solid #ffc928 !important;
+  border-radius: 17px !important;
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(255, 76, 197, 0.22),
+      transparent 46%
+    ),
+    linear-gradient(180deg, #49105f 0%, #26083c 55%, #160521 100%) !important;
+  box-shadow:
+    0 7px 0 #8a4a00,
+    0 22px 55px rgba(0, 0, 0, 0.68),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+  color: white !important;
+}
+
+.swal-title,
+.swal2-title {
+  margin: 0 !important;
+  padding: 14px 48px !important;
+  border-bottom: 2px solid #ffcf3f;
+  background: linear-gradient(180deg, #cf2786 0%, #8e145d 100%);
+  color: white !important;
+  font-size: 20px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.035em;
+  line-height: 1.15 !important;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 rgba(74, 0, 48, 0.75);
+}
+
+.swal-text,
+.swal-content,
+.swal2-html-container {
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 22px 22px 10px !important;
+  color: #fff7dc !important;
+  font-size: 14px !important;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center !important;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.swal-icon {
+  margin-bottom: 10px;
+}
+
+.swal-footer,
+.swal2-actions {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 !important;
+  padding: 14px 18px 20px !important;
+  text-align: center;
+}
+
+.swal-button-container {
+  flex: 1 1 0;
+  margin: 0 !important;
+}
+
+.swal-button,
+.swal2-styled {
+  min-width: 100px;
+  min-height: 40px;
+  margin: 0 !important;
+  padding: 9px 20px !important;
+  border: 2px solid rgba(255, 255, 255, 0.85) !important;
+  border-radius: 999px !important;
+  color: white !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  box-shadow:
+    0 4px 0 rgba(66, 17, 0, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.48) !important;
+}
+
+.swal-button--confirm,
+.swal2-confirm {
+  background: linear-gradient(180deg, #ff4a62 0%, #c51035 100%) !important;
+}
+
+.swal-button--cancel,
+.swal2-cancel {
+  background: linear-gradient(180deg, #55ef42 0%, #079c2c 100%) !important;
+}
+
+.swal-button:focus,
+.swal2-styled:focus {
+  box-shadow:
+    0 4px 0 rgba(66, 17, 0, 0.72),
+    0 0 0 3px rgba(255, 225, 91, 0.42) !important;
+}
+
+.swal-button:active,
+.swal2-styled:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(66, 17, 0, 0.72) !important;
+}
+
+/* NEW ▸ Exit reference shows YES on the left and the safe NO on the right. */
+.lw-exit-modal .swal-footer {
+  flex-direction: row-reverse;
+}
+
+.lw-exit-modal .swal-title {
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+}
+
+.lw-exit-modal .swal-text {
+  padding-top: 25px !important;
+}
+
+/* NEW ▸ Existing in-game Options modal follows the same smart modal skin. */
+.options-game {
+  background: rgba(1, 8, 24, 0.78);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.options-game-container {
+  width: min(86%, 370px);
+  overflow: hidden;
+  border: 3px solid #ffc928;
+  border-radius: 17px;
+  background: linear-gradient(180deg, #49105f 0%, #26083c 100%);
+  box-shadow:
+    0 7px 0 #8a4a00,
+    0 22px 55px rgba(0, 0, 0, 0.62);
+}
+
+.options-game-header {
+  border-radius: 0;
+  border-bottom: 2px solid #ffcf3f;
+  background: linear-gradient(180deg, #cf2786 0%, #8e145d 100%);
+  color: white;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.options-game-close {
+  border: 2px solid rgba(255, 255, 255, 0.82);
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ff4a62, #c51035);
+}
+
+.options-game-option {
+  border-bottom-color: rgba(255, 214, 71, 0.34);
+}
+
+.options-game-option-label {
+  font-size: clamp(20px, 6vw, 28px);
+}
+
+/* NEW ▸ Share sheet uses the same branded surface instead of plain white. */
+.modal-share-container {
+  background: rgba(1, 8, 24, 0.78);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.modal-share-wrapper {
+  border: 3px solid #ffc928;
+  border-bottom: 0;
+  background: linear-gradient(180deg, #49105f 0%, #26083c 100%);
+  color: white;
+}
+
+.modal-share-header {
+  color: white;
+  font-weight: 900;
+}
+
+/* NEW ▸ Custom profile, payment and record dialogs share the same modal skin. */
+.lw-smart-overlay {
+  background: rgba(1, 8, 24, 0.78) !important;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px) !important;
+}
+
+.lw-smart-surface {
+  overflow: hidden;
+  border: 3px solid #ffc928 !important;
+  border-radius: 17px !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 76, 197, 0.2), transparent 45%),
+    linear-gradient(180deg, #49105f 0%, #26083c 58%, #160521 100%) !important;
+  box-shadow:
+    0 7px 0 #8a4a00,
+    0 22px 55px rgba(0, 0, 0, 0.68),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+  color: white !important;
+}
+
+.lw-smart-surface h2,
+.lw-smart-surface h3 {
+  color: white !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 0 rgba(74, 0, 48, 0.7);
+}
+
+.lw-smart-surface p {
+  color: rgba(255, 247, 220, 0.72) !important;
+}
+
+.lw-smart-sheet {
+  border: 3px solid #ffc928 !important;
+  border-bottom: 0 !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 76, 197, 0.2), transparent 45%),
+    linear-gradient(180deg, #49105f 0%, #26083c 58%, #160521 100%) !important;
+  box-shadow: 0 -16px 45px rgba(0, 0, 0, 0.56);
+  color: white;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NEW ▸ Responsive Play With Friends wager screen
+   ═══════════════════════════════════════════════════════════════ */
+.page-with-friends-scroll {
+  display: flex;
+  width: 100%;
+  min-height: 100dvh;
+  max-height: 100dvh;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  padding: 64px 0 max(28px, env(safe-area-inset-bottom));
+  -webkit-overflow-scrolling: touch;
+}
+
+.page-with-friends-scroll .page-with-friends-section {
+  width: min(92%, 430px);
+  padding: 10px 0;
+}
+
+.page-with-friends-scroll .page-with-friends-section h2 {
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.page-with-friends-code {
+  background: #fff !important;
+  color: #18243b !important;
+  caret-color: #1557d5;
+  -webkit-text-fill-color: #18243b !important;
+}
+
+.page-with-friends-code::placeholder {
+  color: #697386;
+  -webkit-text-fill-color: #697386;
+  opacity: 1;
+}
+
+.page-with-friends-create:disabled,
+.page-with-friends-join:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.45);
+  opacity: 0.58;
+}
+
+@media (max-width: 380px) {
+  .swal-title,
+  .swal2-title {
+    padding: 12px 36px !important;
+    font-size: 18px !important;
+  }
+
+  .swal-button,
+  .swal2-styled {
+    min-width: 88px;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .page-with-friends-new-config {
+    gap: 10px;
+  }
+
+  .page-with-friends-create {
+    font-size: 16px;
+  }
+}

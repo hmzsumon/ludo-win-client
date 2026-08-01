@@ -1,15 +1,11 @@
 "use client";
 
-import { isAValidRoom, validateLastValueRoomName } from "@/utils/helpers";
+import { ROOM_RANGE } from "@/utils/constants";
+import { isAValidRoom } from "@/utils/helpers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import type { IDataPlayWithFriends, TTotalPlayers } from "../interfaces";
-import { TYPES_ONLINE_GAMEPLAY } from "../utils/constants";
 
-const useGetRoomURL = (
-  isAuth = false,
-  cb: (data: IDataPlayWithFriends) => void
-) => {
+const useGetRoomURL = (isAuth = false, cb: (roomCode: string) => void) => {
   const searchParams = useSearchParams(); // Read-only
   const router = useRouter();
   const pathname = usePathname();
@@ -21,7 +17,11 @@ const useGetRoomURL = (
     const roomName = searchParams.get("room") ?? "";
     if (!roomName) return;
 
-    // Remove `room` from the URL (no full reload, no history entry)
+    /* FIX ▸ Keep invite URL until login; otherwise the room code was lost. */
+    if (!isAuth || !isAValidRoom(roomName) || roomName.length !== ROOM_RANGE)
+      return;
+
+    // Remove `room` only after the authenticated user captured it.
     const params = new URLSearchParams(searchParamsStr);
     params.delete("room");
     const newUrl = params.toString()
@@ -29,17 +29,8 @@ const useGetRoomURL = (
       : pathname;
     router.replace(newUrl, { scroll: false });
 
-    // Business logic
-    if (isAValidRoom(roomName) && isAuth) {
-      const { isValid, numPlayers } = validateLastValueRoomName(roomName);
-      if (isValid) {
-        cb({
-          type: TYPES_ONLINE_GAMEPLAY.JOIN_ROOM,
-          roomName,
-          totalPlayers: numPlayers as TTotalPlayers,
-        });
-      }
-    }
+    /* NEW ▸ Preview screen decides Free/Wager before any reservation. */
+    cb(roomName);
   }, [searchParamsStr, pathname, router, isAuth, cb]);
 };
 

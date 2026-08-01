@@ -58,12 +58,12 @@ export default function AddFieldModal({
       {/* ── Backdrop ── */}
       <div
         onClick={onClose}
-        className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+        className="lw-smart-overlay fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
       />
 
       {/* ── Modal Card ── */}
       <div
-        className="fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[360px] rounded-2xl p-5"
+        className="lw-smart-surface fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[360px] rounded-2xl p-5"
         style={{
           background:
             "linear-gradient(145deg, rgba(29,8,65,0.98) 0%, rgba(14,3,38,0.99) 100%)",

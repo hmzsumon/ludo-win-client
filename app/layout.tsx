@@ -2,6 +2,8 @@ import DisableZoom from "@/components/DisableZoom";
 import MaintenanceGate from "@/components/MaintenanceGate";
 import AttributionCapture from "@/components/marketing/attribution-capture";
 import MetaPixel from "@/components/marketing/meta-pixel";
+import PublicSupportButton from "@/components/support/PublicSupportButton";
+import TawkToWidget from "@/components/support/TawkToWidget";
 import SocketProvider from "@/providers/SocketProvider";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
@@ -123,6 +125,10 @@ export default function RootLayout({
         </StoreProvider>
 
         <Toaster />
+
+        {/* NEW ▸ Hidden tawk engine + project-owned support launchers. */}
+        <TawkToWidget />
+        <PublicSupportButton />
       </body>
     </html>
   );

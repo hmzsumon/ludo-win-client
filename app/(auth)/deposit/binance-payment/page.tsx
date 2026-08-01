@@ -250,8 +250,8 @@ export default function BinancePaymentPage() {
           confirm payment modal
       ════════════════════════════════════════════════════════════════ */}
       {isConfirmModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-sm rounded-[24px] border border-white/10 bg-[#1d2635] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+        <div className="lw-smart-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="lw-smart-surface w-full max-w-sm rounded-[24px] border border-white/10 bg-[#1d2635] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
             {/* title */}
             <h2 className="text-center text-base font-extrabold uppercase tracking-[0.12em] text-[#f0b90b]">
               Confirm Payment

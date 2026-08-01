@@ -62,6 +62,7 @@ import {
   getOfflineControlledTokenSelection,
   getOfflineWeightedDice,
   getRandomValueDice,
+  getSmartBalancedDice,
   validateDicesForTokens,
   validateMovementToken,
   validateSelectToken,
@@ -168,6 +169,7 @@ interface GameProps {
   betAmount?: number;
   botMode?: TOfflineBotMode;
   gameMode?: TGameMode;
+  friendMatchType?: "free" | "wager";
 }
 
 const Game = ({
@@ -183,10 +185,16 @@ const Game = ({
   betAmount = 0,
   botMode = "EASY",
   gameMode = EGameMode.CLASSIC,
+  friendMatchType,
 }: GameProps) => {
   const { playSound } = useOptionsContext();
   const [refreshWallet] = useLazyGetWalletQuery();
   const didEmitMatchResultRef = useRef(false);
+  /* NEW ▸ One authoritative friend action may be in-flight at a time. */
+  const pendingRoomActionRef = useRef(false);
+  const pendingRoomActionTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
 
   /* ────────── restore local board state after refresh/TWA reload ────────── */
   const restoredGameState = useMemo(
@@ -297,10 +305,18 @@ const Game = ({
     [players],
   );
 
-  const onlineBotMode = useMemo<TOfflineBotMode>(
-    () => (botMode === "ASSIST" ? "ASSIST" : "EASY"),
-    [botMode],
-  );
+  /* ──────────────────────────────────────────────────────────────
+     FIX ▸ Preserve the SMART mode received from the socket room.
+
+     Previously every mode except ASSIST was converted to EASY, so an
+     Admin-selected SMART mode reached the client but never reached the
+     Smart dice/movement logic.
+  ─────────────────────────────────────────────────────────────── */
+  const onlineBotMode = useMemo<TOfflineBotMode>(() => {
+    if (botMode === "ASSIST") return "ASSIST";
+    if (botMode === "SMART") return "SMART";
+    return "EASY";
+  }, [botMode]);
 
   const hasOnlineBotControl = useMemo(
     () => isOnlineGame && totalPlayers === 2 && onlineBotIndex >= 0,
@@ -314,13 +330,38 @@ const Game = ({
 
   const canControlCurrentTurn = isMyOnlineTurn || isCurrentTurnBot;
 
+  const clearPendingRoomAction = useCallback(() => {
+    pendingRoomActionRef.current = false;
+    if (pendingRoomActionTimeoutRef.current) {
+      clearTimeout(pendingRoomActionTimeoutRef.current);
+      pendingRoomActionTimeoutRef.current = null;
+    }
+  }, []);
+
   /* ────────── room action emit ────────── */
   const emitRoomAction = useCallback(
     (payload: Record<string, unknown>) => {
       if (!socket || !roomName) return;
+
+      /*
+       * NEW ▸ Double tap/animation callback used to emit the same wager action
+       * twice before the first server response. The second request then reached
+       * the next server phase and produced "It is not your turn to roll".
+       * Lock only authoritative Friend wager actions; legacy/free play is
+       * unchanged. A timeout unlocks safely if a network response is lost.
+       */
+      if (friendMatchType === "wager") {
+        if (pendingRoomActionRef.current) return;
+        pendingRoomActionRef.current = true;
+        pendingRoomActionTimeoutRef.current = setTimeout(
+          clearPendingRoomAction,
+          5000,
+        );
+      }
+
       socket.emit("ACTIONS", payload);
     },
-    [roomName, socket],
+    [clearPendingRoomAction, friendMatchType, roomName, socket],
   );
 
   /* ────────── handle opponent leave result ────────── */
@@ -498,19 +539,41 @@ const Game = ({
           const currentRollCount =
             offlineBotRollCountRef.current[currentTurn] || 0;
 
-          const resolvedDiceValue =
-            onlineBotMode === "ASSIST" && onlineBotIndex >= 0
-              ? getOfflineWeightedDice({
-                  actionsTurn,
-                  currentTurn,
-                  listTokens,
-                  players,
-                  favoredBotIndex: onlineBotIndex,
-                  gameMode,
-                  currentRollCount,
-                  assistOpeningDelay: assistOpeningDelayRef.current,
-                })
-              : diceValue;
+          /* ──────────────────────────────────────────────────────
+             FIX ▸ Run the correct dice engine for the active mode.
+
+             ASSIST: existing bot-favoring weighted dice.
+             SMART : progress-aware balanced dice.
+             EASY  : existing natural random dice fallback.
+
+             This block only runs on the bot's turn. Human vs Human
+             matches and the human roll flow remain unchanged.
+          ─────────────────────────────────────────────────────── */
+          let resolvedDiceValue = diceValue;
+
+          if (onlineBotIndex >= 0 && onlineBotMode === "ASSIST") {
+            resolvedDiceValue = getOfflineWeightedDice({
+              actionsTurn,
+              currentTurn,
+              listTokens,
+              players,
+              favoredBotIndex: onlineBotIndex,
+              gameMode,
+              currentRollCount,
+              assistOpeningDelay: assistOpeningDelayRef.current,
+            });
+          }
+
+          if (onlineBotIndex >= 0 && onlineBotMode === "SMART") {
+            resolvedDiceValue = getSmartBalancedDice({
+              actionsTurn,
+              currentTurn,
+              listTokens,
+              players,
+              botIndex: onlineBotIndex,
+              gameMode,
+            });
+          }
 
           offlineBotRollCountRef.current[currentTurn] = currentRollCount + 1;
 
@@ -669,6 +732,7 @@ const Game = ({
       !socket ||
       !roomName ||
       !betAmount ||
+      friendMatchType === "wager" ||
       didEmitMatchResultRef.current
     ) {
       return;
@@ -691,6 +755,7 @@ const Game = ({
     refreshWallet();
   }, [
     betAmount,
+    friendMatchType,
     isGameOver.gameOver,
     isOnlineGame,
     players,
@@ -704,12 +769,14 @@ const Game = ({
     if (!isOnlineGame || !socket) return;
 
     const onRollDice = (payload: any) => {
+      clearPendingRoomAction();
       const value = payload?.[EActionsBoardGame.ROLL_DICE] as TDicevalues;
       if (!value) return;
       handleSelectDice(value, true);
     };
 
     const onSelectToken = (payload: any) => {
+      clearPendingRoomAction();
       const data = payload?.[EActionsBoardGame.SELECT_TOKEN] as
         | ISelectTokenValues
         | undefined;
@@ -719,7 +786,16 @@ const Game = ({
     };
 
     const onDoneDice = () => {
+      clearPendingRoomAction();
       handleDoneDice(true);
+    };
+
+    const onFriendActionRejected = () => {
+      clearPendingRoomAction();
+    };
+
+    const onWagerMatchCancelled = () => {
+      clearPendingRoomAction();
     };
 
     const onOpponentLeave = (payload: any) => {
@@ -748,6 +824,8 @@ const Game = ({
     socket.on(EActionsBoardGame.DONE_DICE, onDoneDice);
     socket.on(EActionsBoardGame.OPPONENT_LEAVE, onOpponentLeave);
     socket.on("WAGER_SETTLED", onWagerSettled);
+    socket.on("FRIEND_ACTION_REJECTED", onFriendActionRejected);
+    socket.on("WAGER_MATCH_CANCELLED", onWagerMatchCancelled);
 
     return () => {
       socket.off(EActionsBoardGame.ROLL_DICE, onRollDice);
@@ -755,8 +833,12 @@ const Game = ({
       socket.off(EActionsBoardGame.DONE_DICE, onDoneDice);
       socket.off(EActionsBoardGame.OPPONENT_LEAVE, onOpponentLeave);
       socket.off("WAGER_SETTLED", onWagerSettled);
+      socket.off("FRIEND_ACTION_REJECTED", onFriendActionRejected);
+      socket.off("WAGER_MATCH_CANCELLED", onWagerMatchCancelled);
+      clearPendingRoomAction();
     };
   }, [
+    clearPendingRoomAction,
     handleDoneDice,
     handleOpponentLeaveResult,
     handleSelectDice,

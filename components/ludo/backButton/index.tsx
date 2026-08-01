@@ -29,6 +29,30 @@ const BackButton = ({
     router.push(to);
   }, [router, to]);
 
+  /* NEW ▸ Skip the artificial history guard after one confirmed click. */
+  const leaveGame = useCallback(
+    (guardIsStillActive: boolean) => {
+      isHandlingBackRef.current = true;
+      markLudoManualLeaveIntent();
+      (window as any).__ludoManualLeave?.();
+
+      const startingUrl = window.location.href;
+      const historySteps = guardIsStillActive ? -2 : -1;
+
+      window.setTimeout(() => {
+        window.history.go(historySteps);
+
+        /* NEW ▸ Direct-opened games may have no earlier history entry. */
+        window.setTimeout(() => {
+          if (window.location.href === startingUrl) {
+            router.replace(to);
+          }
+        }, 300);
+      }, 120);
+    },
+    [router, to],
+  );
+
   const openExitConfirmation = useCallback(
     (onConfirm?: () => void, onCancel?: () => void) => {
       handleBack((action) => {
@@ -72,10 +96,8 @@ const BackButton = ({
 
       openExitConfirmation(
         () => {
-          isHandlingBackRef.current = true;
-          markLudoManualLeaveIntent();
-          (window as any).__ludoManualLeave?.();
-          setTimeout(goBack, 120);
+          /* Guard was already popped by the browser-back action. */
+          leaveGame(false);
         },
         () => {
           pushGuardState();
@@ -88,7 +110,7 @@ const BackButton = ({
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [goBack, openExitConfirmation, withConfirmation]);
+  }, [leaveGame, openExitConfirmation, withConfirmation]);
 
   if (!withConfirmation) {
     return (
@@ -103,9 +125,8 @@ const BackButton = ({
       className="button blue game-back-button"
       onClick={() =>
         openExitConfirmation(() => {
-          markLudoManualLeaveIntent();
-          (window as any).__ludoManualLeave?.();
-          setTimeout(goBack, 120);
+          /* Header click still has the guard, so leave it and the game entry. */
+          leaveGame(true);
         })
       }
     >

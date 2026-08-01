@@ -108,13 +108,14 @@ const ModeCards = () => {
       />
 
       <ModeCard
-        title="Play Offline"
-        subtitle="Play with friends on one device"
-        icon="🎮"
+        /* NEW ▸ Keep the alternate dashboard layout consistent too. */
+        title="Play With Friends"
+        subtitle="Create or join a private Free/Wager room"
+        icon="🤝"
         gradient="linear-gradient(135deg, #b71c1c 0%, #7f0000 100%)"
         shadowColor="#5c0000"
         borderColor="rgba(255,107,107,0.3)"
-        href="/offline"
+        href="/online?friends=1"
       />
 
       <ModeCard

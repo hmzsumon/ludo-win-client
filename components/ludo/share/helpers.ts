@@ -19,17 +19,24 @@ export const successMessage = () => {
 /** Fallback: copy link (SSR-safe) */
 export const copyLinkFallback = async (text: string) => {
   if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return true;
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      /* NEW ▸ Permission-denied clipboard falls through to legacy copy. */
+    }
   }
   if (typeof document !== "undefined") {
     const ta = document.createElement("textarea");
     ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
     document.body.appendChild(ta);
     ta.select();
-    document.execCommand?.("copy");
+    const copied = document.execCommand?.("copy") ?? false;
     ta.remove();
-    return true;
+    return copied;
   }
   return false;
 };

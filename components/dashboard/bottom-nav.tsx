@@ -1,10 +1,9 @@
 "use client";
 
+import { openSupportChat } from "@/components/support/tawk-chat";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const TELEGRAM_SUPPORT_URL = "https://t.me/ludowin365";
 
 type NavItem =
   | {
@@ -16,8 +15,7 @@ type NavItem =
   | {
       label: string;
       icon: string;
-      href: string;
-      type: "external";
+      type: "support";
     };
 
 const navItems: NavItem[] = [
@@ -36,8 +34,7 @@ const navItems: NavItem[] = [
   {
     label: "Support",
     icon: "/icons/support.png",
-    href: TELEGRAM_SUPPORT_URL,
-    type: "external",
+    type: "support",
   },
   {
     label: "Referral",
@@ -178,19 +175,19 @@ const BottomNav = () => {
           const className =
             "relative flex h-full flex-col items-center justify-center overflow-hidden px-1 pt-[4px] transition-transform active:scale-95";
 
-          if (item.type === "external") {
+          /* NEW ▸ Use the existing bottom-nav icon to open tawk.to in-place. */
+          if (item.type === "support") {
             return (
-              <a
+              <button
                 key={item.label}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Contact support on Telegram"
-                title="Contact support"
+                type="button"
+                onClick={openSupportChat}
+                aria-label="Open Ludo Win support chat"
+                title="Support"
                 className={className}
               >
                 {content}
-              </a>
+              </button>
             );
           }
 

@@ -190,12 +190,6 @@ export default function RegisterForm(): JSX.Element {
             })}
           />
 
-          <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-xs font-semibold leading-5 text-cyan-100">
-            {country.iso === "BD"
-              ? "Verification code will be sent by SMS. Enter only the number after +880."
-              : "Verification code will be sent by email. Enter only the local mobile number after the selected country code."}
-          </div>
-
           <button
             type="submit"
             disabled={isLoading}

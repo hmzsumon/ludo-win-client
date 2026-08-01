@@ -1,12 +1,16 @@
 import Logo from "@/components/branding/logo";
 import Icon from "@/components/ludo/icon";
+import SelectTokenColor from "@/components/ludo/selectTokenColor";
 import PageWrapper from "@/components/wrapper/page";
-import type { TTotalPlayers } from "@/interfaces";
+import type { TColors, TTotalPlayers } from "@/interfaces";
 
 interface TotalPlayersProps {
   playAsGuest: boolean;
   handlePlayWithFriends: () => void;
   handleTotalPlayers: (total: TTotalPlayers) => void;
+  playWithFriendsEnabled: boolean;
+  selectedColor: TColors;
+  handleColor: (color: TColors) => void;
 }
 
 /* ────────── player distribution list ────────── */
@@ -30,10 +34,25 @@ const TotalPlayers = ({
   playAsGuest = false,
   handlePlayWithFriends,
   handleTotalPlayers,
+  playWithFriendsEnabled,
+  selectedColor,
+  handleColor,
 }: TotalPlayersProps) => {
   return (
     <PageWrapper>
       <Logo />
+
+      {/* NEW ▸ Quick online colour preference; server prevents duplicates. */}
+      <div className="page-total-players-section">
+        <h2>Choose Token Color</h2>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <SelectTokenColor
+            disabled={false}
+            color={selectedColor}
+            handleColor={handleColor}
+          />
+        </div>
+      </div>
 
       {/* ────────── total players buttons ────────── */}
       <div className="page-total-players-section">
@@ -69,21 +88,14 @@ const TotalPlayers = ({
       </div>
 
       {/* ────────── play with friends section ────────── */}
-      {!playAsGuest && (
+      {!playAsGuest && playWithFriendsEnabled && (
         <div className="page-total-players-section">
           <h2>OR</h2>
           <button
             type="button"
-            disabled
-            aria-disabled="true"
             className="button yellow page-total-players-friends"
-            title="This feature is temporarily unavailable"
-            style={{
-              opacity: 0.8,
-              cursor: "not-allowed",
-              pointerEvents: "none",
-              filter: "grayscale(0.7)",
-            }}
+            onClick={handlePlayWithFriends}
+            title="Create or join a Free/Wager friend room"
           >
             <Icon type="play" fill="#8b5f00" />
             <span>Play with Friends</span>

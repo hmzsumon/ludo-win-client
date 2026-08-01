@@ -20,6 +20,12 @@ const COLOR_SUFFIX_MAP: Record<TColors, string> = {
 };
 
 const ALL_COLORS: TColors[] = ["GREEN", "YELLOW", "BLUE", "RED"];
+const TWO_PLAYER_BOARD: Record<TColors, TBoardColors> = {
+  RED: "RGYB",
+  GREEN: "GYBR",
+  YELLOW: "YBRG",
+  BLUE: "BRGY",
+};
 
 /* ────────── current user finder ────────── */
 export const getCurrentUser = (
@@ -64,12 +70,8 @@ const buildBoardColorFromUsers = (
   let orderedBoardColors: TColors[] = [];
 
   if (totalPlayers === 2) {
-    orderedBoardColors = [
-      playerColors[0] || "RED",
-      remainingColors[0] || "GREEN",
-      playerColors[1] || "YELLOW",
-      remainingColors[1] || "BLUE",
-    ];
+    /* NEW ▸ Always return one of the four valid opposite-home board presets. */
+    return TWO_PLAYER_BOARD[playerColors[0] || "RED"];
   } else if (totalPlayers === 3) {
     orderedBoardColors = [
       playerColors[0] || "RED",
@@ -162,7 +164,14 @@ export const getDataOnlineGame = (
   dataRoom: IDataRoom,
 ) => {
   const { totalPlayers, orderPlayers, boardColor } = dataRoomSocket;
-  const { initialTurnUserID, roomName, botMode, gameMode } = dataRoom;
+  const {
+    initialTurnUserID,
+    roomName,
+    botMode,
+    gameMode,
+    friendMatchType,
+    isServerAuthoritative,
+  } = dataRoom;
 
   // console.log("dataRoom", dataRoom);
 
@@ -178,5 +187,7 @@ export const getDataOnlineGame = (
     typeGame: ETypeGame.ONLINE,
     gameMode,
     botMode,
+    friendMatchType,
+    isServerAuthoritative,
   };
 };

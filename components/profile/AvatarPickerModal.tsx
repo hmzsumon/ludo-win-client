@@ -23,8 +23,8 @@ export default function AvatarPickerModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-[#34104f] p-4 shadow-2xl">
+    <div className="lw-smart-overlay fixed inset-0 z-[999] flex items-center justify-center bg-black/60 p-4">
+      <div className="lw-smart-surface w-full max-w-md rounded-2xl bg-[#34104f] p-4 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-white">Choose Avatar</h2>
           <button

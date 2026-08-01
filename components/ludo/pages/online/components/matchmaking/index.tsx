@@ -49,7 +49,11 @@ const Matchmaking = ({ dataSocket }: { dataSocket: IDataSocket }) => {
       rightOption={<ProfilePicture />}
     >
       {dataSocket.roomName ? (
-        <RoomInfo roomName={dataSocket.roomName} />
+        <RoomInfo
+          roomName={dataSocket.roomName}
+          friendMatchType={dataSocket.friendMatchType}
+          betAmount={dataSocket.betAmount}
+        />
       ) : (
         <Logo />
       )}

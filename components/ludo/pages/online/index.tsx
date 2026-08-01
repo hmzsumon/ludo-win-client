@@ -4,13 +4,15 @@ import { useUserContext } from "@/context/userContext";
 
 import useGetRoomURL from "@/hooks/useGetRoomURL";
 import { IDataSocket, TGameMode } from "@/interfaces";
-import { TYPES_ONLINE_GAMEPLAY } from "@/utils/constants";
+import { useGetPublicLudoRuntimeConfigQuery } from "@/redux/features/ludoWager/ludoWagerApi";
+import { EColors, TYPES_ONLINE_GAMEPLAY } from "@/utils/constants";
 import { guid, randomNumber } from "@/utils/helpers";
 import {
   clearLudoActiveSocketSession,
   getLudoReconnectCooldownRemaining,
 } from "@/utils/ludoActiveGame";
-import { useCallback, useState } from "react";
+import { getValueFromCache, savePropierties } from "@/utils/storage";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import swal from "sweetalert";
 import {
@@ -23,15 +25,29 @@ import {
 
 interface OnlinePageProps {
   gameMode?: TGameMode;
+  initialFriends?: boolean;
 }
 
-const OnlinePage = ({ gameMode = "CLASSIC" }: OnlinePageProps) => {
+const OnlinePage = ({
+  gameMode = "CLASSIC",
+  initialFriends = false,
+}: OnlinePageProps) => {
   const { isAuthenticated } = useSelector((state: any) => state.auth);
   const { user: reduxUser } = useSelector((state: any) => state.auth);
   const { user, authOptions = [] } = useUserContext();
+  const { data: runtimeConfig } = useGetPublicLudoRuntimeConfigQuery(
+    undefined,
+    {
+      /* NEW ▸ Admin on/off changes reach an already-open lobby within 30 seconds. */
+      pollingInterval: 30_000,
+      refetchOnFocus: true,
+    },
+  );
 
   /* ────────── play with friends flag ────────── */
-  const [playWithFriends, setPlayWithFriends] = useState(false);
+  /* NEW ▸ /online?friends=1 can open Friends directly from the home card. */
+  const [playWithFriends, setPlayWithFriends] = useState(initialFriends);
+  const [inviteRoomCode, setInviteRoomCode] = useState("");
 
   /* ────────── selected bet amount for quick match ────────── */
   const [selectedBetAmount, setSelectedBetAmount] = useState<number | null>(
@@ -44,6 +60,8 @@ const OnlinePage = ({ gameMode = "CLASSIC" }: OnlinePageProps) => {
     totalPlayers: 0,
     playAsGuest: false,
     roomName: "",
+    /* NEW ▸ Every quick-online user chooses a colour before matchmaking. */
+    initialColor: getValueFromCache("colorOnlineRoom", EColors.RED),
     gameMode,
     user: {
       id: user?.id || guid(),
@@ -57,10 +75,26 @@ const OnlinePage = ({ gameMode = "CLASSIC" }: OnlinePageProps) => {
   /* ────────── auto join room from url ────────── */
   useGetRoomURL(
     isAuthenticated,
-    useCallback((data) => {
-      setDataSocket((current) => ({ ...current, ...data }));
+    useCallback((roomCode) => {
+      setInviteRoomCode(roomCode);
+      setPlayWithFriends(true);
     }, []),
   );
+
+  const friendsEnabled =
+    runtimeConfig?.config?.playWithFriendsEnabled !== false;
+  const freeFriendsEnabled =
+    runtimeConfig?.config?.freeFriendsEnabled !== false;
+  const wagerFriendsEnabled =
+    runtimeConfig?.config?.wagerFriendsEnabled !== false;
+
+  /* NEW ▸ If Admin turns Friends off while this page is open, exit that flow. */
+  useEffect(() => {
+    if (!friendsEnabled && playWithFriends) {
+      setPlayWithFriends(false);
+      setInviteRoomCode("");
+    }
+  }, [friendsEnabled, playWithFriends]);
 
   /* ════════════════════════════════════════════════════════════════
      account inactive block — online game সম্পূর্ণ বন্ধ
@@ -123,6 +157,8 @@ const OnlinePage = ({ gameMode = "CLASSIC" }: OnlinePageProps) => {
       <Authenticate
         authOptions={authOptions}
         handlePlayGuest={() => {
+          /* NEW ▸ Friends rooms require an account; guest continues to normal lobby. */
+          setPlayWithFriends(false);
           setDataSocket({ ...dataSocket, playAsGuest: true });
         }}
       />
@@ -134,6 +170,14 @@ const OnlinePage = ({ gameMode = "CLASSIC" }: OnlinePageProps) => {
     return (
       <TotalPlayers
         playAsGuest={dataSocket.playAsGuest}
+        playWithFriendsEnabled={
+          friendsEnabled && (freeFriendsEnabled || wagerFriendsEnabled)
+        }
+        selectedColor={dataSocket.initialColor || EColors.RED}
+        handleColor={(color) => {
+          setDataSocket((current) => ({ ...current, initialColor: color }));
+          savePropierties("colorOnlineRoom", color);
+        }}
         handlePlayWithFriends={() => setPlayWithFriends(true)}
         handleTotalPlayers={(total) => {
           /* ────────── wager flow only for authenticated two-player quick match ────────── */
@@ -216,6 +260,10 @@ const OnlinePage = ({ gameMode = "CLASSIC" }: OnlinePageProps) => {
   if (playWithFriends && !dataSocket.roomName) {
     return (
       <PlayWithFriends
+        initialRoomCode={inviteRoomCode}
+        gameMode={gameMode}
+        freeEnabled={freeFriendsEnabled}
+        wagerEnabled={wagerFriendsEnabled}
         handlePlayWithFriends={(data) =>
           setDataSocket({ ...dataSocket, ...data })
         }

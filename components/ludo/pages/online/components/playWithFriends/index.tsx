@@ -1,209 +1,370 @@
-import { getValueFromCache, savePropierties } from "@/utils/storage";
+"use client";
 
-import { EColors, ROOM_RANGE, TYPES_ONLINE_GAMEPLAY } from "@/utils/constants";
-import {
-  isAValidRoom,
-  randomNumber,
-  validateLastValueRoomName,
-} from "@/utils/helpers";
-import { useState } from "react";
-
+import BackButton from "@/components/ludo/backButton";
 import Icon from "@/components/ludo/icon";
 import Logo from "@/components/ludo/logo";
 import ProfilePicture from "@/components/ludo/profilePicture";
-import SelectNumberPlayers from "@/components/ludo/selectNumberPlayers";
 import SelectTokenColor from "@/components/ludo/selectTokenColor";
 import PageWrapper from "@/components/wrapper/page";
 import type {
   IDataPlayWithFriends,
+  ILudoFriendRoomPreview,
   TColors,
-  TTotalPlayers,
+  TGameMode,
 } from "@/interfaces";
+import {
+  useCreateLudoFriendRoomMutation,
+  useJoinLudoFriendRoomMutation,
+  useLazyPreviewLudoFriendRoomQuery,
+} from "@/redux/features/ludoWager/ludoWagerApi";
+import { useGetWalletQuery } from "@/redux/features/wallet/walletApi";
+import { EColors, ROOM_RANGE, TYPES_ONLINE_GAMEPLAY } from "@/utils/constants";
+import { getValueFromCache, savePropierties } from "@/utils/storage";
+import { useEffect, useMemo, useState } from "react";
 import swal from "sweetalert";
+import WagerAmountPicker, {
+  getWagerAmountValidationMessage,
+  isAllowedWagerAmount,
+} from "../wagerAmountPicker";
 
 interface PlayWithFriendsProps {
   handlePlayWithFriends: (data: IDataPlayWithFriends) => void;
+  initialRoomCode?: string;
+  gameMode?: TGameMode;
+  freeEnabled?: boolean;
+  wagerEnabled?: boolean;
 }
 
-/**
- * Renderiza el formulario para unirse a una sala...
- * @param param0
- * @returns
- */
-const JoinRoom = ({ handlePlayWithFriends }: PlayWithFriendsProps) => {
-  const [roomNumber, setRoomNumber] = useState("");
+const getErrorMessage = (error: any) =>
+  error?.data?.message || error?.message || "Unable to prepare friend match";
 
-  /**
-   * Maneja el ingreso del valor de la sala...
-   * @param event
-   */
-  const handleRoomNumber = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
+const toSocketData = (
+  room: ILudoFriendRoomPreview,
+  type:
+    | typeof TYPES_ONLINE_GAMEPLAY.CREATE_ROOM
+    | typeof TYPES_ONLINE_GAMEPLAY.JOIN_ROOM,
+): IDataPlayWithFriends => ({
+  type,
+  roomName: room.roomCode,
+  totalPlayers: 2,
+  initialColor: room.initialColor,
+  friendMatchType: room.matchType,
+  gameMode: room.gameMode,
+  betAmount: room.matchType === "wager" ? room.betAmount : undefined,
+  reservationId: room.reservationId,
+});
 
-    if (isAValidRoom(value) || value === "") {
-      setRoomNumber(value);
+const PlayWithFriends = ({
+  handlePlayWithFriends,
+  initialRoomCode = "",
+  gameMode = "CLASSIC",
+  freeEnabled = true,
+  wagerEnabled = true,
+}: PlayWithFriendsProps) => {
+  const [matchType, setMatchType] = useState<"free" | "wager">(
+    freeEnabled ? "free" : "wager",
+  );
+  /* NEW ▸ Keep raw text so manual entry can be empty while the user is typing. */
+  const [betAmountInput, setBetAmountInput] = useState("50");
+  const [roomNumber, setRoomNumber] = useState(initialRoomCode);
+  const [preview, setPreview] = useState<ILudoFriendRoomPreview | null>(null);
+  const [initialColor, setInitialColor] = useState<TColors>(
+    () => getValueFromCache("colorNewRoom", EColors.RED) as TColors,
+  );
+
+  const [createRoom, { isLoading: isCreating }] =
+    useCreateLudoFriendRoomMutation();
+  const [previewRoom, { isFetching: isPreviewing }] =
+    useLazyPreviewLudoFriendRoomQuery();
+  const [joinRoom, { isLoading: isJoining }] = useJoinLudoFriendRoomMutation();
+  const { data: walletData } = useGetWalletQuery();
+
+  /* NEW ▸ Friends Wager uses the exact Quick Match validation and balance rule. */
+  const walletBalance = useMemo(
+    () => Number(walletData?.balance || 0),
+    [walletData],
+  );
+  const betAmount = useMemo(
+    () => Number(betAmountInput || 0),
+    [betAmountInput],
+  );
+  const wagerValidationMessage = useMemo(
+    () => getWagerAmountValidationMessage(betAmountInput),
+    [betAmountInput],
+  );
+  const isWagerAmountReady =
+    wagerValidationMessage === "" &&
+    isAllowedWagerAmount(betAmount) &&
+    walletBalance >= betAmount;
+
+  const inspectRoom = async (code: string) => {
+    try {
+      const response = await previewRoom(code).unwrap();
+      setPreview(response.room);
+      return response.room;
+    } catch (error) {
+      setPreview(null);
+      await swal({
+        title: "Room unavailable",
+        text: getErrorMessage(error),
+        icon: "error",
+      });
+      return null;
     }
   };
 
-  /**
-   * Se hace el envío del formulario, además se valida que la sala tenga asociado
-   * el número de jugadores, lo cual se encuentra en el último digito del nombre de la
-   * sala...
-   * @param event
-   * @returns
-   */
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  /* NEW ▸ Shared URL opens a price/type preview; it never auto-debits balance. */
+  useEffect(() => {
+    if (initialRoomCode.length === ROOM_RANGE)
+      void inspectRoom(initialRoomCode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialRoomCode]);
+
+  /* NEW ▸ Keep the selected tab on an Admin-enabled Friends type. */
+  useEffect(() => {
+    if (matchType === "free" && !freeEnabled && wagerEnabled) {
+      setMatchType("wager");
+    }
+    if (matchType === "wager" && !wagerEnabled && freeEnabled) {
+      setMatchType("free");
+    }
+  }, [freeEnabled, matchType, wagerEnabled]);
+
+  const handleJoin = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (roomNumber.length !== ROOM_RANGE) return;
 
-    const { isValid, numPlayers } = validateLastValueRoomName(roomNumber);
+    const selectedRoom =
+      preview?.roomCode === roomNumber
+        ? preview
+        : await inspectRoom(roomNumber);
+    if (!selectedRoom) return;
 
-    if (!isValid) {
-      return swal({
-        title: "Error",
-        text: "The room code is not valid.",
+    if (selectedRoom.matchType === "wager") {
+      const confirmed = await swal({
+        title: "Join wager match?",
+        text: `${selectedRoom.betAmount} will be reserved. Winner receives the pot after the game fee.`,
+        icon: "warning",
+        buttons: ["Cancel", "Reserve & Join"],
+      });
+      if (!confirmed) return;
+    }
+
+    try {
+      const response = await joinRoom({
+        roomCode: selectedRoom.roomCode,
+      }).unwrap();
+      handlePlayWithFriends(
+        toSocketData(response.room, TYPES_ONLINE_GAMEPLAY.JOIN_ROOM),
+      );
+    } catch (error) {
+      await swal({
+        title: "Unable to join",
+        text: getErrorMessage(error),
         icon: "error",
-        closeOnClickOutside: false,
-        closeOnEsc: false,
       });
     }
-
-    handlePlayWithFriends({
-      type: TYPES_ONLINE_GAMEPLAY.JOIN_ROOM,
-      roomName: roomNumber,
-      totalPlayers: numPlayers as TTotalPlayers,
-    });
   };
+
+  const handleCreate = async () => {
+    /* NEW ▸ Paid Friends now uses the same authoritative Classic/Master engine. */
+    const resolvedMode = gameMode;
+    if (matchType === "wager") {
+      if (!isAllowedWagerAmount(betAmount)) {
+        await swal({
+          title: "Invalid amount",
+          text: getWagerAmountValidationMessage(betAmountInput),
+          icon: "error",
+        });
+        return;
+      }
+
+      if (walletBalance < betAmount) {
+        await swal({
+          title: "Insufficient balance",
+          text: "Your wallet balance is lower than the wager amount.",
+          icon: "error",
+        });
+        return;
+      }
+
+      const confirmed = await swal({
+        title: "Create wager room?",
+        text: `${betAmount} will be reserved until a friend joins or the room is cancelled.`,
+        icon: "warning",
+        buttons: ["Cancel", "Reserve & Create"],
+      });
+      if (!confirmed) return;
+    }
+
+    try {
+      const response = await createRoom({
+        matchType,
+        totalPlayers: 2,
+        gameMode: resolvedMode,
+        initialColor,
+        betAmount: matchType === "wager" ? betAmount : undefined,
+      }).unwrap();
+      handlePlayWithFriends(
+        toSocketData(response.room, TYPES_ONLINE_GAMEPLAY.CREATE_ROOM),
+      );
+    } catch (error) {
+      await swal({
+        title: "Unable to create room",
+        text: getErrorMessage(error),
+        icon: "error",
+      });
+    }
+  };
+
+  const busy = isCreating || isJoining || isPreviewing;
+  const createDisabled = busy || (matchType === "wager" && !isWagerAmountReady);
 
   return (
-    <div className="page-with-friends-section">
-      <h2>Join a room</h2>
-      <form
-        onSubmit={handleSubmit}
-        className="page-with-friends-form glass-effect"
-      >
-        <input
-          className="page-with-friends-code"
-          type="tel"
-          placeholder="Room number"
-          required
-          onChange={handleRoomNumber}
-          value={roomNumber}
-        />
-        <button
-          disabled={!(roomNumber.length === ROOM_RANGE)}
-          className="button blue page-with-friends-join"
-          type="submit"
-        >
-          Join
-        </button>
-      </form>
-    </div>
-  );
-};
+    <PageWrapper leftOption={<BackButton />} rightOption={<ProfilePicture />}>
+      <div className="page-with-friends-scroll">
+        <Logo />
 
-/**
- * Para la creación de una nueva sala...
- * @param param0
- * @returns
- */
-const NewRoom = ({ handlePlayWithFriends }: PlayWithFriendsProps) => {
-  /**
-   * Guarda el color inicial del token con el que se iniciará,
-   * este color lo tendrá el jugador que creo la sala...
-   */
-  const [initialColor, setInitialColor] = useState<TColors>(
-    () => getValueFromCache("colorNewRoom", EColors.RED) as TColors
-  );
-
-  /**
-   * El número de jugadores que tendrá la sala, se obtiene el valor de
-   * localStorage, si no por defecto será dos (2)....
-   */
-  const [totalPlayers, setTotalPlayers] = useState<TTotalPlayers>(
-    () => getValueFromCache("totalNewRoom", 2) as TTotalPlayers
-  );
-
-  /**
-   * Guarda el total de usuarios seleccioandos, así como guardarlo en
-   * localStorage...
-   * @param total
-   */
-  const handleTotalPlayers = (total: TTotalPlayers) => {
-    setTotalPlayers(total);
-    savePropierties("totalNewRoom", total);
-  };
-
-  /**
-   * Guarda el color seleccionado del token y se guarda en localStorage...
-   * @param color
-   */
-  const handleColorToken = (color: TColors) => {
-    setInitialColor(color);
-    savePropierties("colorNewRoom", color);
-  };
-
-  /**
-   * Para la acción de crear la nueva sala...
-   */
-  const handleNewRoom = () => {
-    /**
-     * El rango a obtener será menos 1 ya que el último valor del rango estará reservado
-     * para el número de jugadores, esto con el fin de poder extraerlo después...
-     */
-    const roomRange = ROOM_RANGE - 1;
-    const baseRoom = randomNumber(
-      10 ** (roomRange - 1),
-      10 ** roomRange - 1
-    ).toString();
-
-    /**
-     * La nueva sala será el valor base aleatorio de la sala que se ha obtenido y se le
-     * añade el total de jugadores...
-     */
-    const newRoom = `${baseRoom}${totalPlayers}`;
-
-    handlePlayWithFriends({
-      type: TYPES_ONLINE_GAMEPLAY.CREATE_ROOM,
-      roomName: newRoom,
-      initialColor,
-      totalPlayers,
-    });
-  };
-
-  return (
-    <div className="page-with-friends-section">
-      <h2>Or Create a room</h2>
-      <div className="page-with-friends-new-room glass-effect">
-        <SelectNumberPlayers
-          value={totalPlayers}
-          numberPlayers={[2, 4]}
-          handleSelectTotal={handleTotalPlayers}
-        />
-        <div className="page-with-friends-new-config">
-          <SelectTokenColor
-            disabled={false}
-            color={initialColor}
-            handleColor={handleColorToken}
-          />
-          <button
-            className="button yellow page-with-friends-create"
-            onClick={handleNewRoom}
+        <div className="page-with-friends-section">
+          <h2>Play With Friends</h2>
+          <div
+            className="page-with-friends-new-room glass-effect"
+            style={{ padding: 15 }}
           >
-            <Icon type="play" fill="#8b5f00" />
-            <span>New room</span>
-          </button>
+            {/* NEW ▸ Free and Wager are visibly separate before room creation. */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 10,
+                marginBottom: 14,
+              }}
+            >
+              {(["free", "wager"] as const)
+                .filter((value) =>
+                  value === "free" ? freeEnabled : wagerEnabled,
+                )
+                .map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`button ${matchType === value ? "yellow" : "blue"}`}
+                    onClick={() => setMatchType(value)}
+                    style={{
+                      padding: 10,
+                      textTransform: "uppercase",
+                      fontWeight: 800,
+                    }}
+                  >
+                    {value === "free" ? "Free" : "Wager"}
+                  </button>
+                ))}
+            </div>
+
+            <p
+              style={{
+                color: "white",
+                textAlign: "center",
+                fontSize: 13,
+                marginBottom: 12,
+              }}
+            >
+              2 players ·{" "}
+              {matchType === "wager"
+                ? `${gameMode} · Server verified`
+                : `${gameMode} · No stake`}
+            </p>
+
+            {matchType === "wager" && (
+              <div className="mb-4 w-full">
+                {/* NEW ▸ Presets, visible manual input and rules match Quick Wager. */}
+                <WagerAmountPicker
+                  amountInput={betAmountInput}
+                  onAmountInputChange={setBetAmountInput}
+                  walletBalance={walletBalance}
+                  inputId="friends-wager-amount"
+                  showHeader={false}
+                />
+              </div>
+            )}
+
+            <div className="page-with-friends-new-config">
+              <SelectTokenColor
+                disabled={false}
+                color={initialColor}
+                handleColor={(color) => {
+                  setInitialColor(color);
+                  savePropierties("colorNewRoom", color);
+                }}
+              />
+              <button
+                type="button"
+                disabled={createDisabled}
+                className="button yellow page-with-friends-create"
+                onClick={handleCreate}
+              >
+                <Icon type="play" fill="#8b5f00" />
+                <span>{isCreating ? "Creating..." : "New room"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="page-with-friends-section">
+          <h2>Join a room</h2>
+          <form
+            onSubmit={handleJoin}
+            className="page-with-friends-form glass-effect"
+          >
+            <input
+              className="page-with-friends-code"
+              type="tel"
+              inputMode="numeric"
+              maxLength={ROOM_RANGE}
+              placeholder="5-digit code"
+              required
+              onChange={(event) => {
+                const value = event.target.value
+                  .replace(/\D/g, "")
+                  .slice(0, ROOM_RANGE);
+                setRoomNumber(value);
+                setPreview(null);
+              }}
+              value={roomNumber}
+            />
+            <button
+              disabled={busy || roomNumber.length !== ROOM_RANGE}
+              /*
+               * FIX ▸ Tailwind-only: JOIN button now fills the input row height.
+               * Existing global CSS remains untouched.
+               */
+              className="button blue page-with-friends-join !inline-flex !min-h-[48px] !self-stretch !items-center !justify-center !rounded-l-none !rounded-r-[10px] !px-3 !text-lg !font-black"
+              type="submit"
+            >
+              {isJoining ? "..." : "Join"}
+            </button>
+          </form>
+
+          {preview && (
+            <div
+              className="glass-effect"
+              style={{
+                color: "white",
+                marginTop: 10,
+                padding: 10,
+                textAlign: "center",
+                width: "100%",
+              }}
+            >
+              {preview.matchType === "wager"
+                ? `Wager · ${preview.betAmount} per player · Classic`
+                : `Free · ${preview.gameMode}`}
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 };
-
-const PlayWithFriends = (props: PlayWithFriendsProps) => (
-  <PageWrapper rightOption={<ProfilePicture />}>
-    <Logo />
-    <JoinRoom {...props} />
-    <NewRoom {...props} />
-  </PageWrapper>
-);
 
 export default PlayWithFriends;

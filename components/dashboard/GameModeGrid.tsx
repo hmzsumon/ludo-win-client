@@ -38,14 +38,15 @@ const modes: ModeCardProps[] = [
     href: "/online",
     variant: "friend",
     size: "small",
-    image: "/images/dashboard/two-players.png",
+    image: "/images/dashboard/play-wint-friends.png",
   },
   {
-    title: " Play Offline",
-    href: "/offline",
+    /* NEW ▸ Dashboard offline card is now the direct Friends room shortcut. */
+    title: "Play With Friends",
+    href: "/online?friends=1",
     variant: "team",
     size: "small",
-    image: "/images/dashboard/no-wifi.png",
+    image: "/images/dashboard/two-players.png",
   },
 ];
 
@@ -68,10 +69,10 @@ function ModeImageFallback({
   }
 
   if (variant === "friend") {
-    return <span className="text-[64px]">🎲</span>;
+    return <span className="text-[64px]">👥</span>;
   }
 
-  return <span className="text-[64px]">🎲</span>;
+  return <span className="text-[64px]">🤝</span>;
 }
 
 function getCardClass(

@@ -169,6 +169,8 @@ export enum SocketErrors {
   INVALID_USER = "INVALID_USER",
   UNAUTHENTICATED = "UNAUTHENTICATED",
   AUTHENTICATED = "AUTHENTICATED",
+  /* NEW ▸ Server cancelled an unrecoverable wager and refunded the stake. */
+  MATCH_CANCELLED_REFUNDED = "MATCH_CANCELLED_REFUNDED",
 }
 
 export const SOCKET_ERROR_MESSAGES: ISocketError = {
@@ -177,6 +179,8 @@ export const SOCKET_ERROR_MESSAGES: ISocketError = {
   INVALID_USER: "Invalid user",
   UNAUTHENTICATED: "User is not authenticated",
   AUTHENTICATED: "User already authenticated",
+  MATCH_CANCELLED_REFUNDED:
+    "The match was cancelled safely and your wager was refunded",
 };
 
 /* ────────── chat types ────────── */

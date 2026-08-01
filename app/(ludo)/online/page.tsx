@@ -5,6 +5,7 @@ import React from "react";
 interface OnlineProps {
   searchParams?: {
     mode?: string;
+    friends?: string;
   };
 }
 
@@ -14,7 +15,11 @@ const Online = ({ searchParams }: OnlineProps) => {
 
   return (
     <div>
-      <OnlinePage gameMode={gameMode} />
+      {/* NEW ▸ Dashboard shortcut opens Friends without an extra lobby click. */}
+      <OnlinePage
+        gameMode={gameMode}
+        initialFriends={searchParams?.friends === "1"}
+      />
     </div>
   );
 };

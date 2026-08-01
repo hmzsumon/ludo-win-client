@@ -103,11 +103,11 @@ function TypesModal({
   ];
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end"
+      className="lw-smart-overlay fixed inset-0 z-50 flex items-end"
       style={{ background: "rgba(0,0,0,0.7)" }}
     >
       <div
-        className="w-full rounded-t-3xl overflow-hidden"
+        className="lw-smart-sheet w-full rounded-t-3xl overflow-hidden"
         style={{
           background:
             "linear-gradient(180deg, rgba(55,8,80,0.99) 0%, rgba(20,4,31,1) 100%)",
@@ -184,11 +184,11 @@ function DateRangeModal({
   };
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end"
+      className="lw-smart-overlay fixed inset-0 z-50 flex items-end"
       style={{ background: "rgba(0,0,0,0.7)" }}
     >
       <div
-        className="w-full rounded-t-3xl overflow-hidden pb-8"
+        className="lw-smart-sheet w-full rounded-t-3xl overflow-hidden pb-8"
         style={{
           background:
             "linear-gradient(180deg, rgba(55,8,80,0.99) 0%, rgba(20,4,31,1) 100%)",

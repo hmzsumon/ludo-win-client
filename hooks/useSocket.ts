@@ -15,6 +15,7 @@ import type {
 } from "@/interfaces";
 import { apiSlice } from "@/redux/features/api/apiSlice";
 import {
+  useCancelLudoFriendRoomMutation,
   useCancelLudoWagerMutation,
   useReserveLudoWagerMutation,
 } from "@/redux/features/ludoWager/ludoWagerApi";
@@ -49,6 +50,7 @@ const useSocket = (connectionData: IDataSocket) => {
   const setRedirect = useShowMessageRedirect();
   const [reserveWager] = useReserveLudoWagerMutation();
   const [cancelWager] = useCancelLudoWagerMutation();
+  const [cancelFriendRoom] = useCancelLudoFriendRoomMutation();
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [dataRoomSocket, setDataRoomSocket] = useState<IDataRoomSocket | null>(
@@ -78,6 +80,8 @@ const useSocket = (connectionData: IDataSocket) => {
   const reservationIdRef = useRef<string>(connectionData.reservationId || "");
   const matchedRef = useRef(false);
   const socketRef = useRef<Socket | null>(null);
+  /* NEW ▸ Prevent callback + socket event from showing cancellation twice. */
+  const systemCancellationHandledRef = useRef(false);
 
   /* ────────── connectionData ref সর্বদা latest রাখুন ────────── */
   useEffect(() => {
@@ -98,11 +102,16 @@ const useSocket = (connectionData: IDataSocket) => {
      রাখা হয়েছে যাতে re-run না হয়।
   ──────────────────────────────────────────────────────────────── */
   const cancelWagerRef = useRef(cancelWager);
+  const cancelFriendRoomRef = useRef(cancelFriendRoom);
   const reserveWagerRef = useRef(reserveWager);
 
   useEffect(() => {
     cancelWagerRef.current = cancelWager;
   }, [cancelWager]);
+
+  useEffect(() => {
+    cancelFriendRoomRef.current = cancelFriendRoom;
+  }, [cancelFriendRoom]);
 
   useEffect(() => {
     reserveWagerRef.current = reserveWager;
@@ -127,6 +136,19 @@ const useSocket = (connectionData: IDataSocket) => {
     ──────────────────────────────────────────────────────────── */
     const cleanupReservation = async () => {
       const data = connectionDataRef.current;
+
+      /* NEW ▸ Cancelling a waiting friend room refunds every participant. */
+      if (data.friendMatchType && data.roomName) {
+        reservationIdRef.current = "";
+        try {
+          await cancelFriendRoomRef
+            .current({ roomCode: data.roomName })
+            .unwrap();
+        } catch {
+          /* A started/settled room correctly rejects cancellation. */
+        }
+        return;
+      }
 
       if (
         !reservationIdRef.current ||
@@ -291,9 +313,38 @@ const useSocket = (connectionData: IDataSocket) => {
                 }).then(() => window.location.reload());
               }
 
+              if (error === SocketErrors.MATCH_CANCELLED_REFUNDED) {
+                reservationIdRef.current = "";
+                matchedRef.current = false;
+                clearLudoActiveSocketSession();
+                dispatch(
+                  apiSlice.util.invalidateTags([{ type: "User", id: "ME" }]),
+                );
+
+                if (!systemCancellationHandledRef.current) {
+                  systemCancellationHandledRef.current = true;
+                  swal({
+                    title: "Match cancelled",
+                    text: SOCKET_ERROR_MESSAGES.MATCH_CANCELLED_REFUNDED,
+                    icon: "info",
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                  }).then(() => window.location.assign("/online"));
+                }
+                return;
+              }
+
               /* ────────── stale room/session হলে local resume cache clear ────────── */
               if (error === SocketErrors.INVALID_ROOM) {
                 clearLudoActiveSocketSession();
+                if (
+                  finalConnectionData.friendMatchType &&
+                  finalConnectionData.roomName
+                ) {
+                  void cancelFriendRoomRef.current({
+                    roomCode: finalConnectionData.roomName,
+                  });
+                }
                 reservationIdRef.current = "";
               }
 
@@ -336,12 +387,14 @@ const useSocket = (connectionData: IDataSocket) => {
               totalPlayers: dataRoom.totalPlayers,
               betAmount: dataRoom.betAmount,
               gameMode: dataRoom.gameMode,
+              friendMatchType: dataRoom.friendMatchType,
             });
 
             setDataOnlineGame({
               ...newDataOnlineGame,
               socket: newSocket as Socket,
               betAmount: dataRoom.betAmount,
+              friendMatchType: dataRoom.friendMatchType,
             });
           }
         };
@@ -356,12 +409,71 @@ const useSocket = (connectionData: IDataSocket) => {
           console.log("✅ Wager settled — reservation ref cleared");
         };
 
+        const handleFriendRoomCancelled = (payload: any) => {
+          reservationIdRef.current = "";
+          clearLudoActiveSocketSession();
+          swal({
+            title: "Friend room closed",
+            text: payload?.message || "The room was cancelled before start",
+            icon: "info",
+          }).then(() => window.location.reload());
+        };
+
+        const handleFriendActionRejected = (payload: any) => {
+          const recoverable = payload?.recoverable !== false;
+          swal({
+            title: recoverable ? "Game synchronized" : "Match paused",
+            text: recoverable
+              ? `${payload?.message || "A delayed or duplicate action was ignored"}. Your wager is safe and the server state remains active.`
+              : payload?.message ||
+                "The server paused this match while it restores a safe state",
+            icon: recoverable ? "info" : "warning",
+            timer: recoverable ? 1800 : undefined,
+            buttons: recoverable ? [] : undefined,
+          });
+        };
+
+        /*
+         * NEW ▸ A real server/engine/state failure is different from a normal
+         * rejected action. The server has already committed both refunds in a
+         * MongoDB transaction before this event is sent, so clear the stale
+         * game locally, refresh wallet data and return to the online lobby.
+         */
+        const handleWagerMatchCancelled = (payload: any) => {
+          if (systemCancellationHandledRef.current) return;
+          systemCancellationHandledRef.current = true;
+          reservationIdRef.current = "";
+          matchedRef.current = false;
+          clearLudoActiveSocketSession();
+          dispatch(apiSlice.util.invalidateTags([{ type: "User", id: "ME" }]));
+
+          setDataOnlineGame(null);
+          setDataRoomSocket(null);
+          newSocket?.disconnect();
+
+          const refundedAmount = Number(payload?.refundedAmount || 0);
+          const refundText = refundedAmount
+            ? ` ${refundedAmount} was returned to your balance.`
+            : " Your wager was returned to your balance.";
+
+          swal({
+            title: "Match cancelled & refunded",
+            text: `${payload?.message || "The server could not safely continue this match."}${refundText}`,
+            icon: "info",
+            closeOnClickOutside: false,
+            closeOnEsc: false,
+          }).then(() => window.location.assign("/online"));
+        };
+
         /* ────────── bind socket listeners ────────── */
         newSocket.on("connect", handleDebugConnect);
         newSocket.on("connect", handleConnect);
         newSocket.on("connect_error", handleDebugConnectError);
         newSocket.on("UPDATE_OPPONENT", handleOpponentUpdate);
         newSocket.on("WAGER_SETTLED", handleWagerSettled);
+        newSocket.on("FRIEND_ROOM_CANCELLED", handleFriendRoomCancelled);
+        newSocket.on("FRIEND_ACTION_REJECTED", handleFriendActionRejected);
+        newSocket.on("WAGER_MATCH_CANCELLED", handleWagerMatchCancelled);
         newSocket.on("disconnect", handleDebugDisconnect);
       } catch (error: any) {
         /* ────────────────────────────────────────────────────────────
@@ -372,22 +484,26 @@ const useSocket = (connectionData: IDataSocket) => {
         reservationIdRef.current = "";
         clearLudoActiveSocketSession();
 
+        /*
+         * BUG FIX ▸ API errorHandler `{ error: message }` পাঠায়। আগে শুধু
+         * `data.message` পড়ায় আসল 409 কারণ লুকিয়ে generic message দেখাত।
+         */
         const errorMessage =
+          error?.data?.error ||
           error?.data?.message ||
           error?.message ||
           "Unable to start wager match";
 
-        console.error("❌ Socket boot error:", errorMessage);
-
-        swal({
-          title: "Match setup failed",
-          text: errorMessage,
-          icon: "error",
+        console.error("❌ Socket boot error:", {
+          status: error?.status,
+          message: errorMessage,
+          response: error?.data,
         });
 
+        /* একই error modal একবার দেখিয়ে lobby-তে ফেরত পাঠান। */
         setRedirect({
           message: {
-            title: "Unable to start wager match",
+            title: errorMessage,
             icon: "error",
             timer: 4000,
           },

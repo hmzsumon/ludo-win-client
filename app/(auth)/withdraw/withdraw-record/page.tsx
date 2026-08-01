@@ -108,11 +108,11 @@ function TypesModal({
   ];
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end"
+      className="lw-smart-overlay fixed inset-0 z-50 flex items-end"
       style={{ background: "rgba(0,0,0,0.7)" }}
     >
       <div
-        className="w-full rounded-t-3xl overflow-hidden"
+        className="lw-smart-sheet w-full rounded-t-3xl overflow-hidden"
         style={{
           background:
             "linear-gradient(145deg, rgba(255,255,255,0.22), rgba(5,83,190,0.30))",
@@ -188,11 +188,11 @@ function DateRangeModal({
   };
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end"
+      className="lw-smart-overlay fixed inset-0 z-50 flex items-end"
       style={{ background: "rgba(0,0,0,0.7)" }}
     >
       <div
-        className="w-full rounded-t-3xl overflow-hidden pb-8"
+        className="lw-smart-sheet w-full rounded-t-3xl overflow-hidden pb-8"
         style={{
           background:
             "linear-gradient(145deg, rgba(255,255,255,0.22), rgba(5,83,190,0.30))",
@@ -296,11 +296,11 @@ function CancelWithdrawModal({
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center px-4"
+      className="lw-smart-overlay fixed inset-0 z-[70] flex items-center justify-center px-4"
       style={{ background: "rgba(0,0,0,0.78)", backdropFilter: "blur(8px)" }}
     >
       <div
-        className="w-full max-w-[360px] overflow-hidden rounded-[28px]"
+        className="lw-smart-surface w-full max-w-[360px] overflow-hidden rounded-[28px]"
         style={{
           background:
             "linear-gradient(145deg, rgba(255,255,255,0.22), rgba(5,83,190,0.30))",

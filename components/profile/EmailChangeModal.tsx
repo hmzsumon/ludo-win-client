@@ -23,12 +23,12 @@ export default function EmailChangeModal({
       {/* ── Backdrop ── */}
       <div
         onClick={onClose}
-        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+        className="lw-smart-overlay fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
       />
 
       {/* ── Modal ── */}
       <div
-        className="fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[340px] rounded-2xl overflow-hidden"
+        className="lw-smart-surface fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[340px] rounded-2xl overflow-hidden"
         style={{
           background: "rgba(255,255,255,0.97)",
           boxShadow: "0 20px 60px rgba(0,0,0,0.5)",

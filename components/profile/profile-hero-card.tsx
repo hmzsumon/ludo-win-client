@@ -89,8 +89,8 @@ const AvatarPickerModal = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-[#003777]/45 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-[24px] border border-white/45 bg-white/35 p-4 shadow-2xl backdrop-blur-xl">
+    <div className="lw-smart-overlay fixed inset-0 z-[999] flex items-center justify-center bg-[#003777]/45 p-4 backdrop-blur-sm">
+      <div className="lw-smart-surface w-full max-w-md rounded-[24px] border border-white/45 bg-white/35 p-4 shadow-2xl backdrop-blur-xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-[18px] font-black text-[#073d95]">
             Choose Avatar

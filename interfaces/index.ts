@@ -209,6 +209,10 @@ export interface IDataPlayWithFriends {
   roomName: string;
   totalPlayers: TTotalPlayers;
   initialColor?: TColors;
+  friendMatchType?: "free" | "wager";
+  gameMode?: TGameMode;
+  betAmount?: number;
+  reservationId?: string;
 }
 
 /* ────────── socket auth payload ────────── */
@@ -230,6 +234,9 @@ export interface IDataSocket {
   gameMode?: TGameMode;
   betAmount?: number;
   reservationId?: string;
+  /** NEW: Server-created Friends room. */
+  friendMatchType?: "free" | "wager";
+  isServerAuthoritative?: boolean;
 }
 
 /* ────────── socket room users ────────── */
@@ -255,6 +262,8 @@ export interface IDataRoom {
   betAmount?: number;
   feePercent?: number;
   botMode?: TOfflineBotMode;
+  friendMatchType?: "free" | "wager";
+  isServerAuthoritative?: boolean;
 }
 
 /* ────────── online game props ────────── */
@@ -270,6 +279,21 @@ export interface IDataOnline {
   currentUserId?: string;
   betAmount?: number;
   botMode?: TOfflineBotMode;
+  friendMatchType?: "free" | "wager";
+  isServerAuthoritative?: boolean;
+}
+
+export interface ILudoFriendRoomPreview {
+  roomCode: string;
+  matchType: "free" | "wager";
+  gameMode: TGameMode;
+  totalPlayers: 2;
+  betAmount: number;
+  initialColor: TColors;
+  status: "waiting" | "matched" | "started";
+  joinedPlayers: number;
+  reservationId?: string;
+  expiresAt: string;
 }
 
 /* ────────── ui room ordering ────────── */
