@@ -1,10 +1,17 @@
 import Script from "next/script";
 
-const META_PIXEL_ID =
+const PRIMARY_META_PIXEL_ID =
   process.env.NEXT_PUBLIC_META_PIXEL_ID || "1721680429146841";
 
+// Keep the existing Pixel and initialize the new LudoWin Website Pixel too.
+const ADDITIONAL_META_PIXEL_IDS = ["1012738528422953"];
+
+const META_PIXEL_IDS = Array.from(
+  new Set([PRIMARY_META_PIXEL_ID, ...ADDITIONAL_META_PIXEL_IDS]),
+);
+
 export default function MetaPixel() {
-  if (!META_PIXEL_ID) return null;
+  if (META_PIXEL_IDS.length === 0) return null;
 
   return (
     <>
@@ -17,18 +24,22 @@ export default function MetaPixel() {
           n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;
           s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
           (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-          fbq('init', '${META_PIXEL_ID}');
+          ${META_PIXEL_IDS.map((pixelId) => `fbq('init', '${pixelId}');`).join("\n          ")}
           fbq('track', 'PageView', { page_type: 'main_app' });
         `}
       </Script>
       <noscript>
-        <img
-          height="1"
-          width="1"
-          style={{ display: "none" }}
-          src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
-          alt=""
-        />
+        {META_PIXEL_IDS.map((pixelId) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={pixelId}
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`}
+            alt=""
+          />
+        ))}
       </noscript>
     </>
   );
