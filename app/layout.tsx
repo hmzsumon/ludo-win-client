@@ -1,5 +1,6 @@
 import DisableZoom from "@/components/DisableZoom";
 import MaintenanceGate from "@/components/MaintenanceGate";
+import AppTelemetry from "@/components/analytics/AppTelemetry";
 import AttributionCapture from "@/components/marketing/attribution-capture";
 import MetaPixel from "@/components/marketing/meta-pixel";
 import PublicSupportButton from "@/components/support/PublicSupportButton";
@@ -150,6 +151,7 @@ export default function RootLayout({
         <DisableZoom />
         <MetaPixel />
         <AttributionCapture />
+        <AppTelemetry />
 
         <StoreProvider>
           <SocketProvider>

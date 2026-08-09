@@ -1,5 +1,6 @@
 "use client";
 
+import { getMarketingAttribution } from "@/utils/marketingAttribution";
 import { useEffect, useMemo, useState } from "react";
 import { FaAndroid, FaDownload, FaExternalLinkAlt } from "react-icons/fa";
 
@@ -11,16 +12,28 @@ type Props = {
   host?: string;
   twaQueryKey?: string;
   twaQueryValue?: string;
+  targetAppVersion?: string;
+};
+
+const DOWNLOAD_ID_KEY = "ludowin_apk_downloader_id_v1";
+
+const newOpaqueId = () => {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `download_${Date.now()}_${Math.random().toString(36).slice(2, 18)}`;
+  }
 };
 
 export default function ApkDownloadCard({
   apkUrl = "/apk/ludo-win.apk",
   appName = "Ludo Win",
-  packageName = "com.ludoparty.app",
+  packageName = "app.vercel.ludowinapp.twa",
   storageKey,
-  host = "www.ludoparty.live",
+  host = "ludowinapp.vercel.app",
   twaQueryKey = "src",
   twaQueryValue = "twa",
+  targetAppVersion = process.env.NEXT_PUBLIC_APK_VERSION || "2",
 }: Props) {
   const key = useMemo(
     () => storageKey ?? `apk_installed_${packageName || "ludo-win"}`,
@@ -80,6 +93,47 @@ export default function ApkDownloadCard({
     }, 2200);
   };
 
+  const recordDownload = () => {
+    let downloaderId = "";
+    try {
+      downloaderId = localStorage.getItem(DOWNLOAD_ID_KEY) || newOpaqueId();
+      localStorage.setItem(DOWNLOAD_ID_KEY, downloaderId);
+    } catch {
+      downloaderId = newOpaqueId();
+    }
+
+    const attribution = getMarketingAttribution();
+    const payload = JSON.stringify({
+      eventId: newOpaqueId(),
+      downloaderId,
+      fileName: "ludo-win.apk",
+      targetAppVersion,
+      visitorId: attribution?.visitorId || "",
+      sessionId: attribution?.sessionId || "",
+      source: attribution?.source || "direct",
+      campaignId: attribution?.campaignId || "",
+      campaignName: attribution?.campaignName || "",
+    });
+
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(
+          "/api/v1/app-analytics/download",
+          new Blob([payload], { type: "application/json" }),
+        );
+        return;
+      }
+    } catch {}
+
+    void fetch("/api/v1/app-analytics/download", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: payload,
+      keepalive: true,
+    }).catch(() => undefined);
+  };
+
   if (hidden) return null;
 
   return (
@@ -105,6 +159,7 @@ export default function ApkDownloadCard({
             <a
               href={apkUrl}
               download="ludo-win.apk"
+              onClick={recordDownload}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-yellow-300 to-fuchsia-300 px-3 py-2 text-xs font-black text-[#2b0737] shadow-md transition hover:scale-[1.01] active:scale-[0.98]"
             >
               <FaDownload />
