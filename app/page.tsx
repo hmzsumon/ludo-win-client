@@ -1,3 +1,4 @@
+import ApkDownloadCard from "@/components/ApkDownloadCard";
 import Logo from "@/components/branding/logo";
 import Link from "next/link";
 
@@ -23,7 +24,7 @@ export default function PublicHomePage(): JSX.Element {
         <div className="scale-100 sm:scale-100 ls-float">
           <Logo />
         </div>
-        <div className="mt-10">
+        <div className="mt-8">
           <h1 className="text-base  font-black text-center uppercase italic leading-[0.95] tracking-[-0.03em]">
             <span className="text-white"></span>{" "}
             <span className="brand-highlight-text">
@@ -33,7 +34,11 @@ export default function PublicHomePage(): JSX.Element {
           </h1>
         </div>
 
-        <div className="mt-14 flex flex-col gap-5">
+        <div>
+          <ApkDownloadCard />
+        </div>
+
+        <div className="mt-4 flex flex-col gap-5">
           <Link href="/offline">
             <button
               type="submit"
