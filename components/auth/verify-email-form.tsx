@@ -42,9 +42,13 @@ export default function VerifyEmailForm(): JSX.Element {
       const result = await verify({ identifier, code }).unwrap();
       toast.success(result.message);
       if (result.welcomeBonusGranted === false) {
-        toast(
-          "Account verified. Welcome bonus was already used on this device.",
-        );
+        const message =
+          result.welcomeBonusReasonCode === "SAME_DEVICE_ALREADY_USED"
+            ? "Account verified. This device already received a welcome bonus for another account."
+            : result.welcomeBonusReasonCode === "DEVICE_ID_MISSING"
+              ? "Account verified, but the device could not be verified for the welcome bonus. Please contact support."
+              : "Account verified. Welcome bonus needs admin review; please contact support.";
+        toast(message);
       }
       trackMetaEvent("CompleteRegistration", {
         content_name: "LudoWin verified registration",

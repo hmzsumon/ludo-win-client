@@ -88,7 +88,7 @@ export const authApi = apiSlice.injectEndpoints({
         countryName: string;
         password: string;
         partnerCode?: string;
-        deviceFingerprint: string;
+        deviceId: string;
         marketingAttribution?: MarketingAttribution;
       }
     >({
@@ -106,6 +106,9 @@ export const authApi = apiSlice.injectEndpoints({
         success: boolean;
         message: string;
         welcomeBonusGranted?: boolean;
+        welcomeBonusStatus?: "pending" | "granted" | "denied" | "failed";
+        welcomeBonusReasonCode?: string;
+        welcomeBonusReason?: string;
       },
       {
         identifier: string;

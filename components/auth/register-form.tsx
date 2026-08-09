@@ -5,7 +5,7 @@ import AuthInput from "@/components/auth/auth-input";
 import Logo from "@/components/branding/logo";
 import { Country } from "@/components/profile/CountrySelectDrawer";
 import { useRegisterUserMutation } from "@/redux/features/auth/authApi";
-import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
+import { getRegistrationDeviceId } from "@/utils/deviceFingerprint";
 import {
   getMarketingAttribution,
   trackMetaEvent,
@@ -69,7 +69,7 @@ export default function RegisterForm(): JSX.Element {
         countryName: country.name,
         password: data.password,
         partnerCode: data.partnerCode.trim() || undefined,
-        deviceFingerprint: getDeviceFingerprint(),
+        deviceId: getRegistrationDeviceId(),
         marketingAttribution: getMarketingAttribution(),
       }).unwrap();
 
