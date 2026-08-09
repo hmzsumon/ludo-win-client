@@ -33,7 +33,7 @@ export default function ApkDownloadCard({
   host = "ludowinapp.vercel.app",
   twaQueryKey = "src",
   twaQueryValue = "twa",
-  targetAppVersion = process.env.NEXT_PUBLIC_APK_VERSION || "2",
+  targetAppVersion = process.env.NEXT_PUBLIC_APK_VERSION || "3",
 }: Props) {
   const key = useMemo(
     () => storageKey ?? `apk_installed_${packageName || "ludo-win"}`,
