@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { TAWK_OPEN_EVENT } from "./tawk-chat";
+import { applyPendingSupportContext, TAWK_OPEN_EVENT } from "./tawk-chat";
 
 /*
  * NEW ▸ Public widget identifiers supplied by tawk.to.
@@ -29,6 +29,7 @@ export default function TawkToWidget() {
       }
 
       window.__LUDOWIN_TAWK_OPEN_PENDING__ = false;
+      applyPendingSupportContext(currentApi);
       currentApi.showWidget?.();
       currentApi.maximize();
     };

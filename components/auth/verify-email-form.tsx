@@ -1,15 +1,16 @@
 "use client";
 
 import Logo from "@/components/branding/logo";
+import { openSupportChat } from "@/components/support/tawk-chat";
 import {
   useResendRegistrationCodeMutation,
   useVerifyRegistrationMutation,
 } from "@/redux/features/auth/authApi";
 import { trackMetaEvent } from "@/utils/marketingAttribution";
-import { CircleAlert, Mail, MessageSquareText } from "lucide-react";
+import { CircleAlert, Headphones, Mail, MessageSquareText } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 
 const getError = (error: any) =>
@@ -18,18 +19,43 @@ const getError = (error: any) =>
   error?.message ||
   "Something went wrong";
 
+const getSixDigitCode = (value: string | null) => {
+  const digits = String(value || "").replace(/\D/g, "");
+  return digits.length === 6 ? digits : "";
+};
+
 export default function VerifyEmailForm(): JSX.Element {
   const router = useRouter();
   const params = useSearchParams();
   const identifier = params.get("identifier") || params.get("email") || "";
   const channel = (params.get("channel") || "EMAIL").toUpperCase();
   const isSms = channel === "SMS";
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const isGatewayLink = params.get("source") === "gateway";
+  const prefilledCode = getSixDigitCode(params.get("code"));
+  const [hasPrefilledCode] = useState(Boolean(prefilledCode));
+  const [otp, setOtp] = useState(() =>
+    prefilledCode ? prefilledCode.split("") : ["", "", "", "", "", ""],
+  );
   const [error, setError] = useState("");
   const refs = useRef<Array<HTMLInputElement | null>>([]);
   const [verify, { isLoading }] = useVerifyRegistrationMutation();
   const [resend, { isLoading: isResending }] =
     useResendRegistrationCodeMutation();
+
+  useEffect(() => {
+    if (!hasPrefilledCode || typeof window === "undefined") return;
+
+    // Keep the code in component state, but remove it from the visible URL so
+    // it is not left in browser history or copied accidentally.
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("code")) return;
+    url.searchParams.delete("code");
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+  }, [hasPrefilledCode]);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -70,6 +96,19 @@ export default function VerifyEmailForm(): JSX.Element {
     }
   };
 
+  const openVerificationSupport = () => {
+    openSupportChat({
+      topic: "verification-code",
+      identifier,
+      channel,
+      message: error
+        ? `Verification help requested: ${error}`
+        : hasPrefilledCode
+          ? "Verification link opened, but account verification help is needed."
+          : "Verification code was not received or is not working.",
+    });
+  };
+
   return (
     <div className="flex flex-1 flex-col items-center">
       <div className="scale-90">
@@ -102,7 +141,11 @@ export default function VerifyEmailForm(): JSX.Element {
         <div className="mt-4 flex gap-2 rounded-xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-emerald-200">
           <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <p className="text-xs leading-5">
-            Enter the 6-digit code. The code expires in 5 minutes.
+            {hasPrefilledCode
+              ? isGatewayLink
+                ? "Your verification code is filled automatically. It remains valid until your account is verified or a newer code is generated."
+                : "Your verification code is filled automatically."
+              : "Enter the 6-digit code. The code expires in 5 minutes."}
           </p>
         </div>
 
@@ -114,6 +157,7 @@ export default function VerifyEmailForm(): JSX.Element {
                 refs.current[index] = node;
               }}
               value={digit}
+              readOnly={hasPrefilledCode}
               inputMode="numeric"
               maxLength={1}
               onChange={(e) => {
@@ -128,7 +172,7 @@ export default function VerifyEmailForm(): JSX.Element {
                 if (e.key === "Backspace" && !otp[index])
                   refs.current[index - 1]?.focus();
               }}
-              className={`h-11 w-11 rounded-xl border bg-white/5 text-center text-lg font-black text-white outline-none ${error ? "border-red-500" : "border-white/15 focus:border-cyan-400"}`}
+              className={`h-11 w-11 rounded-xl border bg-white/5 text-center text-lg font-black text-white outline-none ${error ? "border-red-500" : hasPrefilledCode ? "border-emerald-400/70" : "border-white/15 focus:border-cyan-400"}`}
             />
           ))}
         </div>
@@ -137,14 +181,30 @@ export default function VerifyEmailForm(): JSX.Element {
           <p className="mt-2 text-xs font-bold text-red-400">{error}</p>
         ) : null}
 
-        <button
-          type="button"
-          onClick={resendCode}
-          disabled={isResending}
-          className="mx-auto mt-5 block font-bold text-yellow-400 underline disabled:opacity-50"
-        >
-          {isResending ? "Sending..." : "Get a new code"}
-        </button>
+        <div className="mt-5 flex items-center justify-between gap-3">
+          {!hasPrefilledCode ? (
+            <button
+              type="button"
+              onClick={resendCode}
+              disabled={isResending}
+              className="font-bold text-yellow-400 underline disabled:opacity-50"
+            >
+              {isResending ? "Sending..." : "Get a new code"}
+            </button>
+          ) : (
+            <span aria-hidden="true" />
+          )}
+
+          <button
+            type="button"
+            onClick={openVerificationSupport}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-cyan-300 underline decoration-cyan-300/50 underline-offset-4 transition hover:text-cyan-200"
+            aria-label="Get verification support"
+          >
+            <Headphones className="h-4 w-4" aria-hidden="true" />
+            Get Support
+          </button>
+        </div>
 
         <button
           type="submit"
