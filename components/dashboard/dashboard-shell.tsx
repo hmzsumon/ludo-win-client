@@ -5,6 +5,7 @@ import ApkDownloadCard from "../ApkDownloadCard";
 import AccountVerificationModal from "./AccountVerificationModal";
 import DashboardHeader from "./dashboard-header";
 import GameModeGrid from "./GameModeGrid";
+import VerifyAccountButton from "./VerifyAccountButton";
 
 const DashboardShell = () => {
   return (
@@ -60,6 +61,9 @@ const DashboardShell = () => {
           <GameModeGrid />
 
           <div className="w-full max-w-md mx-auto space-y-3">
+            {/* ────────── Section: Unverified user verification CTA ────────── */}
+            <VerifyAccountButton />
+
             <Link href="/deposit" className="block w-full">
               <button
                 type="submit"
