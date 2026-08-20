@@ -2,7 +2,7 @@
 
 // ✅ AccountSection.tsx
 // Smart account information card
-// - email change => support modal
+// - email verification status read only (verification form page-এর উপরে)
 // - phone change => support modal
 // - phone not exists => link modal
 // - password change => password modal
@@ -13,7 +13,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import AddFieldModal from "./AddFieldModal";
-import EmailChangeModal from "./EmailChangeModal";
 import PasswordChangeModal from "./PasswordChangeModal";
 import PhoneChangeModal from "./PhoneChangeModal";
 import ProfileInfoRow from "./ProfileInfoRow";
@@ -32,7 +31,6 @@ export default function AccountSection({
   const router = useRouter();
 
   /* ────────── Modal states for account actions ────────── */
-  const [showEmailModal, setShowEmailModal] = useState(false);
   const [showPhoneSupportModal, setShowPhoneSupportModal] = useState(false);
   const [showPhoneLinkModal, setShowPhoneLinkModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -88,12 +86,15 @@ export default function AccountSection({
           showDivider
         />
 
-        {/* Email row */}
+        {/* Email row: add/verify action উপরের verification section-এ */}
         <ProfileInfoRow
           label="Email"
-          value={profile.email || undefined}
-          actionType="change"
-          onActionClick={() => setShowEmailModal(true)}
+          value={
+            profile.emailVerified
+              ? `${profile.email} · Verified`
+              : "Not verified"
+          }
+          staticValue
           showDivider
         />
 
@@ -129,13 +130,6 @@ export default function AccountSection({
           showDivider={false}
         />
       </div>
-
-      {/* ────────── Section: Email change support modal ────────── */}
-      <EmailChangeModal
-        open={showEmailModal}
-        onClose={() => setShowEmailModal(false)}
-        onContactSupport={() => router.push("/support")}
-      />
 
       {/* ────────── Section: Phone change support modal ────────── */}
       <PhoneChangeModal

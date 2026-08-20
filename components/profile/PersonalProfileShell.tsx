@@ -7,16 +7,19 @@
 // - Every visible section is commented for easy editing
 
 import {
+  IUpdateProfilePayload,
   useGetPersonalProfileQuery,
   useLinkPhoneMutation,
   useUpdatePersonalProfileMutation,
 } from "@/redux/features/profile/personalProfileApi";
-import { ArrowLeft, Pencil, Sparkles, UserRound } from "lucide-react";
+import { ArrowLeft, Pencil, Share2, Sparkles, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { toast } from "react-hot-toast";
 import AccountSection from "./Accountsection";
 import PersonalInfoSection from "./PersonalInfoSection";
+import ProfileVerificationSection from "./ProfileVerificationSection";
+import SocialLinksSection from "./SocialLinksSection";
 
 export default function PersonalProfileShell() {
   const router = useRouter();
@@ -28,11 +31,7 @@ export default function PersonalProfileShell() {
   const [linkPhone, { isLoading: isLinkingPhone }] = useLinkPhoneMutation();
 
   /* ────────── Handler: update editable profile fields ────────── */
-  const handleUpdateProfile = async (payload: {
-    countryCode?: string;
-    countryName?: string;
-    city?: string;
-  }) => {
+  const handleUpdateProfile = async (payload: IUpdateProfilePayload) => {
     const result = await updateProfile(payload).unwrap();
     return result;
   };
@@ -129,7 +128,8 @@ export default function PersonalProfileShell() {
           </div>
         </div>
 
-        {/* ────────── Section: Profile hero card ────────── */}
+        {/* ────────── Section: Progress + email verification (first) ────────── */}
+        <ProfileVerificationSection profile={profile} />
 
         {/* ────────── Section: Edit helper banner ────────── */}
         <button
@@ -147,7 +147,7 @@ export default function PersonalProfileShell() {
               Complete your profile
             </span>
             <span className="block text-xs font-semibold text-slate-500">
-              Add country, city, phone and keep your account updated
+              Add your identity document, country, city and optional socials
             </span>
           </span>
         </button>
@@ -174,6 +174,20 @@ export default function PersonalProfileShell() {
             subtitle="Country, city and display details"
           />
           <PersonalInfoSection
+            profile={profile}
+            onUpdateProfile={handleUpdateProfile}
+            isUpdating={isUpdating}
+          />
+        </section>
+
+        {/* ────────── Section: Optional social contact card ────────── */}
+        <section className="mt-5">
+          <SectionTitle
+            icon={<Share2 className="h-4 w-4" />}
+            title="Social Profiles"
+            subtitle="Optional — WhatsApp, Telegram and Facebook"
+          />
+          <SocialLinksSection
             profile={profile}
             onUpdateProfile={handleUpdateProfile}
             isUpdating={isUpdating}

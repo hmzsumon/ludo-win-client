@@ -73,15 +73,9 @@ export const authApi = apiSlice.injectEndpoints({
     /* ────────── Register User ────────── */
 
     registerUser: builder.mutation<
-      {
-        success: boolean;
-        message: string;
-        verificationChannel: "SMS" | "EMAIL";
-        identifier: string;
-      },
+      IUser,
       {
         name: string;
-        email?: string;
         localNumber: string;
         countryCode: string;
         countryIso: string;
@@ -97,6 +91,20 @@ export const authApi = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
+
+      /* ────────── Registration success = immediate login ──────────
+         API থেকে token পেলেই login-এর মতো Redux auth state update হবে।
+      ───────────────────────────────────────────────────────────── */
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+
+          saveAccessToken(result?.data?.token || null);
+          dispatch(setUser(result.data));
+        } catch (error) {
+          console.log(error);
+        }
+      },
     }),
 
     /* ────────── Verify Registration ────────── */

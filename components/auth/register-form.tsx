@@ -20,7 +20,6 @@ const BANGLADESH: Country = { code: "+880", name: "Bangladesh", iso: "BD" };
 
 type FormValues = {
   fullName: string;
-  email: string;
   mobileNumber: string;
   partnerCode: string;
   password: string;
@@ -47,7 +46,7 @@ export default function RegisterForm(): JSX.Element {
     watch,
     formState: { errors },
   } = useForm<FormValues>({
-    defaultValues: { partnerCode: referral, mobileNumber: "", email: "" },
+    defaultValues: { partnerCode: referral, mobileNumber: "" },
   });
 
   useEffect(() => {
@@ -56,13 +55,11 @@ export default function RegisterForm(): JSX.Element {
 
   const password = watch("password");
   const mobileNumber = watch("mobileNumber");
-  const emailRequired = country.iso !== "BD";
 
   const onSubmit = async (data: FormValues) => {
     try {
-      const result = await registerUser({
+      await registerUser({
         name: data.fullName.trim(),
-        email: data.email.trim().toLowerCase() || undefined,
         localNumber: data.mobileNumber,
         countryCode: country.code,
         countryIso: country.iso,
@@ -75,12 +72,22 @@ export default function RegisterForm(): JSX.Element {
 
       trackMetaEvent("Lead", {
         content_name: "LudoWin registration",
-        verification_channel: result.verificationChannel,
+        registration_method: "mobile_without_verification",
       });
-      toast.success(result.message);
-      router.push(
-        `/verify-email?identifier=${encodeURIComponent(result.identifier)}&channel=${result.verificationChannel}`,
-      );
+
+      /* ────────── Dashboard welcome modal flag ──────────
+         শুধু নতুন registration-এর পর dashboard-এ verification offer দেখাবে।
+      ─────────────────────────────────────────────────── */
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem(
+          "ludowin_show_account_verification",
+          "true",
+        );
+      }
+
+      toast.success("Account created successfully!");
+      router.replace("/dashboard");
+      router.refresh();
     } catch (error) {
       toast.error(apiError(error));
     }
@@ -135,28 +142,6 @@ export default function RegisterForm(): JSX.Element {
             {...register("mobileNumber", {
               required: "Mobile number is required",
               minLength: { value: 6, message: "Enter a valid mobile number" },
-            })}
-          />
-
-          <FieldLabel
-            text={emailRequired ? "✉️ Email Address" : "✉️ Email Address "}
-          />
-          <AuthInput
-            type="email"
-            placeholder={
-              emailRequired
-                ? "Code will be sent to this email"
-                : "Enter your email"
-            }
-            error={errors.email?.message}
-            {...register("email", {
-              required: emailRequired
-                ? "Email is required outside Bangladesh"
-                : false,
-              pattern: {
-                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: "Enter a valid email",
-              },
             })}
           />
 

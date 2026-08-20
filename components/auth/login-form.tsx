@@ -56,11 +56,6 @@ export default function LoginForm(): JSX.Element {
     } catch (error: any) {
       const message =
         error?.data?.error || error?.data?.message || "Login failed";
-      if (error?.status === 403 && error?.data?.identifier) {
-        router.push(
-          `/verify-email?identifier=${encodeURIComponent(error.data.identifier)}&channel=${error.data.verificationChannel}`,
-        );
-      }
       toast.error(message);
     }
   };
