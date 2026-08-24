@@ -5,6 +5,7 @@ import ApkDownloadCard from "../ApkDownloadCard";
 import AccountVerificationModal from "./AccountVerificationModal";
 import DashboardHeader from "./dashboard-header";
 import GameModeGrid from "./GameModeGrid";
+import GiftBoxModal from "./GiftBoxModal";
 import VerifyAccountButton from "./VerifyAccountButton";
 
 const DashboardShell = () => {
@@ -12,6 +13,9 @@ const DashboardShell = () => {
     <main className="relative min-h-screen w-full overflow-hidden text-white md:min-h-[880px] md:rounded-[30px] md:border md:border-white/10 md:shadow-[0_25px_90px_rgba(0,0,0,0.55)] ">
       {/* ────────── Section: New registration verification modal ────────── */}
       <AccountVerificationModal />
+
+      {/* ────────── Section: Daily login gift box ────────── */}
+      <GiftBoxModal />
 
       {/* ── Ludo Star Deep Purple Background ── */}
       <div className="relative w-full  overflow-hidden px-4  md:min-h-[880px] md:rounded-[30px] pb-10 ">

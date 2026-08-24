@@ -39,6 +39,8 @@ export const apiSlice = createApi({
     "StakingLogs",
     "SpotWallets",
     "AgentPaymentMethods",
+    "GiftBox",
+    "AgentApplication",
   ],
   endpoints: (builder) => ({}),
 });
