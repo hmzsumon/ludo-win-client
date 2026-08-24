@@ -8,16 +8,23 @@ import { usePathname } from "next/navigation";
 type NavItem =
   | {
       label: string;
-      icon: string;
+      icon?: string; // PNG path (rendered via next/image)
+      emoji?: string; // fallback for items without a drawn PNG icon
       href: string;
       type: "link";
     }
   | {
       label: string;
-      icon: string;
+      icon?: string;
+      emoji?: string;
       type: "support";
     };
 
+/* ────────── ⚠️ order = visual order (5 slots) ──────────
+   Support ও Profile জায়গা বদল করেছে — Support এখন শেষ (আগে Profile
+   ছিল), আর মাঝখানের (আগে Support-এর) জায়গায় নতুন "Promotion" বাটন।
+   Profile আলাদাভাবে dashboard header থেকেই accessible থাকে।
+────────────────────────────────────────────── */
 const navItems: NavItem[] = [
   {
     label: "Home",
@@ -32,9 +39,10 @@ const navItems: NavItem[] = [
     type: "link",
   },
   {
-    label: "Support",
-    icon: "/icons/support.png",
-    type: "support",
+    label: "Promotion",
+    emoji: "🔥",
+    href: "/promotion",
+    type: "link",
   },
   {
     label: "Referral",
@@ -42,12 +50,10 @@ const navItems: NavItem[] = [
     href: "/invite",
     type: "link",
   },
-
   {
-    label: "Profile",
-    icon: "/icons/profile.png",
-    href: "/profile",
-    type: "link",
+    label: "Support",
+    icon: "/icons/support.png",
+    type: "support",
   },
 ];
 
@@ -137,21 +143,36 @@ const BottomNav = () => {
                     "drop-shadow(0 2px 1px rgba(0,0,0,0.55)) drop-shadow(0 0 2px rgba(255,255,255,0.18))",
                 }}
               >
-                <Image
-                  src={item.icon}
-                  alt={item.label}
-                  width={34}
-                  height={34}
-                  priority
-                  className="object-contain"
-                  style={{
-                    width: isActive ? "36px" : "32px",
-                    height: isActive ? "36px" : "32px",
-                    transform: isActive
-                      ? "translateY(-1px) scale(1.04)"
-                      : "translateY(0)",
-                  }}
-                />
+                {item.icon ? (
+                  <Image
+                    src={item.icon}
+                    alt={item.label}
+                    width={34}
+                    height={34}
+                    priority
+                    className="object-contain"
+                    style={{
+                      width: isActive ? "36px" : "32px",
+                      height: isActive ? "36px" : "32px",
+                      transform: isActive
+                        ? "translateY(-1px) scale(1.04)"
+                        : "translateY(0)",
+                    }}
+                  />
+                ) : (
+                  <span
+                    aria-hidden
+                    className="leading-none"
+                    style={{
+                      fontSize: isActive ? "30px" : "26px",
+                      transform: isActive
+                        ? "translateY(-1px) scale(1.04)"
+                        : "translateY(0)",
+                    }}
+                  >
+                    {item.emoji}
+                  </span>
+                )}
               </div>
 
               {/* Text */}
