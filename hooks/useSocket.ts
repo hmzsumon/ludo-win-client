@@ -83,6 +83,19 @@ const useSocket = (connectionData: IDataSocket) => {
   /* NEW ▸ Prevent callback + socket event from showing cancellation twice. */
   const systemCancellationHandledRef = useRef(false);
 
+  /* ────────────────────────────────────────────────────────────────
+     🔧 NETWORK SWITCH FIX: room-scoped rejoin payload.
+
+     Once a match is live, every socket reconnect MUST re-enter the same
+     room through JOIN_ROOM instead of re-running matchmaking. Without
+     this, a network change (WiFi ↔ mobile data) re-sends the original
+     JOIN_EXISTING_ROOM payload; the server rejects it because the
+     reservation is already "matched", the player never rejoins the live
+     room, and they are left with a stuck "active wager match" that
+     blocks every new match until the 45-minute TTL expires.
+  ──────────────────────────────────────────────────────────────── */
+  const rejoinPayloadRef = useRef<IDataSocket | null>(null);
+
   /* ────────── connectionData ref সর্বদা latest রাখুন ────────── */
   useEffect(() => {
     connectionDataRef.current = connectionData;
@@ -120,6 +133,7 @@ const useSocket = (connectionData: IDataSocket) => {
   useEffect(() => {
     let mounted = true;
     let newSocket: Socket | null = null;
+    let detachNetworkListeners: (() => void) | null = null;
 
     /* ────────────────────────────────────────────────────────────
        🔧 BUG FIX #2 (core): cleanup reservation সবসময় চলবে।
@@ -267,6 +281,12 @@ const useSocket = (connectionData: IDataSocket) => {
           transports: ["websocket", "polling"],
           autoConnect: true,
           reconnection: true,
+          /* NEW ▸ Recover fast and indefinitely across WiFi ↔ mobile-data
+           * switches so a live match is never abandoned on a brief outage. */
+          reconnectionAttempts: Infinity,
+          reconnectionDelay: 500,
+          reconnectionDelayMax: 4000,
+          timeout: 10000,
           auth: {
             token: accessToken,
           },
@@ -292,9 +312,16 @@ const useSocket = (connectionData: IDataSocket) => {
 
         /* ────────── socket connected — send NEW_USER payload ────────── */
         const handleConnect = () => {
+          /*
+           * NEW ▸ After the match is live, a reconnect must rejoin the SAME
+           * room via JOIN_ROOM. The first connect (rejoinPayloadRef empty)
+           * still runs the original matchmaking request unchanged.
+           */
+          const emitPayload = rejoinPayloadRef.current || finalConnectionData;
+
           newSocket?.emit(
             "NEW_USER",
-            finalConnectionData,
+            emitPayload,
             (error?: TSocketErrors | null) => {
               if (!error) return;
 
@@ -316,6 +343,7 @@ const useSocket = (connectionData: IDataSocket) => {
               if (error === SocketErrors.MATCH_CANCELLED_REFUNDED) {
                 reservationIdRef.current = "";
                 matchedRef.current = false;
+                rejoinPayloadRef.current = null;
                 clearLudoActiveSocketSession();
                 dispatch(
                   apiSlice.util.invalidateTags([{ type: "User", id: "ME" }]),
@@ -346,6 +374,13 @@ const useSocket = (connectionData: IDataSocket) => {
                   });
                 }
                 reservationIdRef.current = "";
+                /*
+                 * NEW ▸ The live room is truly gone (server restart, or the
+                 * disconnect grace already settled it). Drop the rejoin payload
+                 * so the next connect does not loop on a dead room; the stale
+                 * reservation is already settled/released, so the lobby is free.
+                 */
+                rejoinPayloadRef.current = null;
               }
 
               setRedirect({
@@ -380,7 +415,7 @@ const useSocket = (connectionData: IDataSocket) => {
               dataRoom,
             );
 
-            saveLudoActiveSocketSession({
+            const activeSession = {
               ...connectionDataRef.current,
               type: TYPES_ONLINE_GAMEPLAY.JOIN_ROOM,
               roomName: dataRoom.roomName,
@@ -388,7 +423,22 @@ const useSocket = (connectionData: IDataSocket) => {
               betAmount: dataRoom.betAmount,
               gameMode: dataRoom.gameMode,
               friendMatchType: dataRoom.friendMatchType,
-            });
+            };
+
+            saveLudoActiveSocketSession(activeSession);
+
+            /*
+             * 🔧 NETWORK SWITCH FIX: from now on, any socket reconnect
+             * re-enters this exact room (server reconnect path handles the
+             * "matched" reservation and clears the disconnect grace timer)
+             * instead of firing a fresh matchmaking request.
+             */
+            rejoinPayloadRef.current = {
+              ...activeSession,
+              reservationId:
+                reservationIdRef.current ||
+                connectionDataRef.current.reservationId,
+            };
 
             setDataOnlineGame({
               ...newDataOnlineGame,
@@ -405,6 +455,8 @@ const useSocket = (connectionData: IDataSocket) => {
 
           /* settled হলে reservation id clear করুন */
           reservationIdRef.current = "";
+          /* NEW ▸ Match is over — stop rejoining this room on reconnect. */
+          rejoinPayloadRef.current = null;
 
           console.log("✅ Wager settled — reservation ref cleared");
         };
@@ -444,6 +496,7 @@ const useSocket = (connectionData: IDataSocket) => {
           systemCancellationHandledRef.current = true;
           reservationIdRef.current = "";
           matchedRef.current = false;
+          rejoinPayloadRef.current = null;
           clearLudoActiveSocketSession();
           dispatch(apiSlice.util.invalidateTags([{ type: "User", id: "ME" }]));
 
@@ -475,6 +528,46 @@ const useSocket = (connectionData: IDataSocket) => {
         newSocket.on("FRIEND_ACTION_REJECTED", handleFriendActionRejected);
         newSocket.on("WAGER_MATCH_CANCELLED", handleWagerMatchCancelled);
         newSocket.on("disconnect", handleDebugDisconnect);
+
+        /* ────────────────────────────────────────────────────────────
+           🔧 NETWORK SWITCH FIX: force an immediate reconnect.
+
+           A WiFi ↔ mobile-data switch never fires page unload, and the
+           socket ping-timeout can take ~20s to notice the dead link.
+           Reconnecting the moment the device is back online (or the app
+           returns to the foreground) gets the player rejoined well
+           within the server's disconnect grace window, so the live
+           wager match is never abandoned.
+        ──────────────────────────────────────────────────────────── */
+        const forceReconnectIfNeeded = () => {
+          if (!newSocket || newSocket.connected) return;
+          if (typeof navigator !== "undefined" && navigator.onLine === false) {
+            return;
+          }
+          newSocket.connect();
+        };
+
+        const handleNetworkOnline = () => forceReconnectIfNeeded();
+        const handleVisibilityChange = () => {
+          if (
+            typeof document !== "undefined" &&
+            document.visibilityState === "visible"
+          ) {
+            forceReconnectIfNeeded();
+          }
+        };
+
+        window.addEventListener("online", handleNetworkOnline);
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+
+        detachNetworkListeners = () => {
+          window.removeEventListener("online", handleNetworkOnline);
+          document.removeEventListener(
+            "visibilitychange",
+            handleVisibilityChange,
+          );
+          detachNetworkListeners = null;
+        };
       } catch (error: any) {
         /* ────────────────────────────────────────────────────────────
            🔧 BUG FIX #2 (error path): reserve fail হলে
@@ -516,6 +609,10 @@ const useSocket = (connectionData: IDataSocket) => {
     /* ────────── cleanup on unmount ────────── */
     return () => {
       mounted = false;
+
+      if (detachNetworkListeners) {
+        detachNetworkListeners();
+      }
 
       if (newSocket) {
         newSocket.disconnect();
