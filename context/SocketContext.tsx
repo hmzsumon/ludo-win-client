@@ -79,8 +79,15 @@ export const SocketContextProvider = ({
 
     /* ────────── create socket instance ────────── */
     const newSocket = io(socketUrl, {
-      transports: ["websocket"],
+      /* NEW ▸ Allow polling fallback + tuned reconnection so the notification
+       * socket survives WiFi ↔ mobile-data switches instead of staying dead. */
+      transports: ["websocket", "polling"],
       withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 4000,
+      timeout: 10000,
       auth: {
         token: accessToken,
       },
