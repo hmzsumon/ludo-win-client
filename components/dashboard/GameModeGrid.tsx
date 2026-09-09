@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import * as Dialog from "@radix-ui/react-dialog";
 
 type ModeCardProps = {
   title: string;
@@ -34,11 +35,11 @@ const modes: ModeCardProps[] = [
     image: "/images/dashboard/globe.png",
   },
   {
-    title: "2 Players",
-    href: "/online",
+    title: "Aviator",
+    href: "/aviator",
     variant: "friend",
     size: "small",
-    image: "/images/dashboard/play-wint-friends.png",
+    image: "/images/aviator/aviator-card.png",
   },
   {
     /* NEW ▸ Dashboard offline card is now the direct Friends room shortcut. */
@@ -105,6 +106,28 @@ function getCardClass(
 }
 
 function ModeCard({ title, href, variant, size, image }: ModeCardProps) {
+  if (title === "Aviator") return (
+    <Dialog.Root>
+      <div>
+        <Dialog.Trigger className={`${getCardClass(variant, size)} w-full`} aria-label="Open Aviator">
+          <Image src={image!} alt="Aviator" fill sizes="160px" className="object-cover" />
+        </Dialog.Trigger>
+        <h3 className="mt-3 text-center text-sm font-black text-white">Aviator</h3>
+      </div>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-[10000] bg-black/70" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-[10001] w-[calc(100%-32px)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 text-[#333] shadow-xl">
+          <Dialog.Close aria-label="Close game options" className="absolute right-3 top-2 text-2xl">×</Dialog.Close>
+          <div className="mb-5 flex items-center gap-3">
+            <Image src={image!} alt="Aviator" width={112} height={112} className="h-28 w-28 rounded-xl border-2 border-red-600 object-cover" />
+            <div><Dialog.Title className="font-bold">Aviator</Dialog.Title><Dialog.Description className="text-sm">Choose your game mode</Dialog.Description></div>
+          </div>
+          <Link href={href} className="mb-2 block rounded-xl bg-[#1098eb] py-2 text-center font-bold text-white">Play</Link>
+          <Link href="/aviator/fun" className="block rounded-xl border border-[#1098eb] py-2 text-center font-bold text-[#1098eb]">Free Trial</Link>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
   const isLarge = size === "large";
   const radiusClass = isLarge ? "rounded-[22px]" : "rounded-[16px]";
 

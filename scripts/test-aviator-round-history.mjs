@@ -1,0 +1,22 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import ts from 'typescript';
+import assert from 'node:assert/strict';
+const module={exports:{}};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('components/aviator/roundHistory.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{module,exports:module.exports});
+const merge=module.exports.mergeRoundHistory;
+const row=(id,x=2)=>({roundId:`${id}-test`,crashPoint:x});
+let history=merge([], [row(100),row(99)]);
+assert.equal(history.length,2);
+// A live result arrives before the join-history response finishes.
+history=merge([row(101)],history);
+assert.equal(history[0].roundId,'101-test');
+history=merge(history,[row(101),row(100),row(99)]);
+assert.equal(history.length,3);
+assert.equal(history.filter(r=>r.crashPoint===2).length,3);
+history=merge(history,Array.from({length:120},(_,i)=>row(i)));
+assert.equal(history.length,100);
+assert.equal(history[0].roundId,'119-test');
+assert.equal(history[99].roundId,'20-test');
+assert.equal(merge([], [row(1,NaN), row(2,0), row(3,1)]).length,1);
+console.log('PASS: initial history, live/load race, reconnect deduplication, repeated multipliers, latest-100 limit and invalid result filtering');
