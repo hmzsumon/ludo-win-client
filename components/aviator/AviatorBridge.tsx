@@ -7,6 +7,7 @@ import { io, type Socket } from "socket.io-client";
 import socketUrl from "@/config/socketUrl";
 import { useLoadUserQuery } from "@/redux/features/auth/authApi";
 import AviatorHeader from "./sections/AviatorHeader";
+import AviatorMenu from "./menu/AviatorMenu";
 import AviatorNoticeProvider from "./sections/AviatorNotice";
 import BetPanel from "./sections/BetPanel";
 import BetsTable from "./sections/BetsTable";
@@ -156,6 +157,7 @@ export default function AviatorBridge() {
       <AviatorNoticeProvider><div className="min-h-dvh w-full bg-[#0b0c0d]">
         <AviatorHeader
           balance={balance}
+          menu={<AviatorMenu frameRef={frameRef} game={game} name={data?.user?.customerId || data?.user?.name || "Player"} avatar={data?.user?.avatar} />}
           onClose={() => router.push("/dashboard")}
         />
         <RoundHistory history={visibleHistory} emptyMessage={historyStatus} />

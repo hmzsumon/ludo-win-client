@@ -10,6 +10,7 @@ import BetPanel from "./sections/BetPanel";
 import BetsTable from "./sections/BetsTable";
 import FlightFrame from "./sections/FlightFrame";
 import RoundHistory from "./sections/RoundHistory";
+import AviatorMenu from "./menu/AviatorMenu";
 
 const STORAGE_KEY = "ludowin:aviator:fun:v1";
 const noop = () => {};
@@ -59,7 +60,8 @@ export default function FunAviator() {
   return (
     <main className="fixed inset-0 z-[2147483647] overflow-y-auto bg-[#0b0c0d] font-sans text-[#ddd]">
       <AviatorNoticeProvider>
-        <AviatorHeader balance={balance} funMode onClose={() => router.push("/dashboard")} />
+        <AviatorHeader balance={balance} funMode onClose={() => router.push("/dashboard")}
+          menu={<AviatorMenu frameRef={frameRef} game={game} name="Demo User" demoBets={records.flatMap(round => round.bets.filter(bet => !bet.isBot).map(bet => ({ _id: bet.id, createdAt: round.time, amount: bet.amount, payout: bet.payout, status: bet.status, cashoutMultiplier: bet.cashoutMultiplier, crashPoint: round.crashPoint })))} />} />
         <RoundHistory history={records.filter(r => r.crashPoint > 0).map(r => r.crashPoint)} />
         <div className="mx-2 rounded-t-[24px] border border-amber-400 bg-[#b77800] py-1 text-center text-xl font-bold text-white">FUN MODE</div>
         <p className="px-3 py-1 text-center text-xs text-amber-300">Demo User · Fun balance only · No real money or withdrawals</p>

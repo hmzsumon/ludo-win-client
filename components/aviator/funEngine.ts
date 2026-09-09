@@ -29,7 +29,7 @@ export class FunEngine implements BetTransport {
       isBot: true, autoAt: money(1.1 + this.random() * 6),
     }));
     this.crashAt = Math.min(50, Math.max(1, money(0.97 / Math.max(0.001, 1 - this.random()))));
-    this.game = { ...EMPTY_AVIATOR_GAME, roundId: `FUN-${now}`, startsAt: now + 6000, bets: this.bets };
+    this.game = { ...EMPTY_AVIATOR_GAME, maxMultiplier: 50, roundId: `FUN-${now}`, startsAt: now + 6000, bets: this.bets };
   }
   tick(now = Date.now()) {
     if (this.game.phase === "WAITING" && now >= this.game.startsAt) {

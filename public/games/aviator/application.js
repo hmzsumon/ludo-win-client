@@ -51,6 +51,11 @@ System.register([], function (_export, _context) {
               }
             }).then(function () {
               return cc.game.run();
+            }).then(function () {
+              // Keep custom audio controls outside the generated game bundle.
+              return System.import('./audio-settings.js').then(function (audio) {
+                audio.installAudioSettings(cc);
+              });
             });
           }
         }]);
