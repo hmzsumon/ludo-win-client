@@ -1,0 +1,51 @@
+import ts from 'typescript';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+let now = Date.now(); const TestDate = class extends Date { static now() { return now; } }; const cache = {};
+function load(name) {
+  if (cache[name]) return cache[name];
+  const source = fs.readFileSync(new URL(`../components/aviator/${name}.ts`, import.meta.url), 'utf8');
+  const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
+  const module = { exports: {} };
+  vm.runInNewContext(js, { module, exports: module.exports, require: p => load(p.replace('./', '')), Date: TestDate, Math });
+  return cache[name] = module.exports;
+}
+const { FunEngine } = load('funEngine');
+const demo = new FunEngine(() => {}, undefined, () => 0.8);
+const action = (event, payload) => { let result; demo.emit(event, payload, r => result = r); return result; };
+assert.equal(demo.balance, 50000);
+assert.equal(action('AVIATOR_BET', {slot:1, amount:100}).success, true);
+assert.equal(demo.balance, 49900);
+assert.equal(action('AVIATOR_BET', {slot:1, amount:100}).success, false);
+assert.equal(action('AVIATOR_CANCEL_BET', {slot:1}).success, true);
+assert.equal(demo.balance, 50000);
+action('AVIATOR_BET', {slot:1, amount:100});
+action('AVIATOR_BET', {slot:2, amount:200});
+assert.equal(demo.balance, 49700);
+assert.equal(demo.save().balance, 50000);
+assert.equal(demo.save().records[0].bets.find(b => b.slot === 2).status, 'CANCELLED');
+now = demo.game.startsAt + 4000; demo.tick();
+assert.equal(action('AVIATOR_CANCEL_BET', {slot:2}).success, false);
+assert.equal(action('AVIATOR_CASHOUT', {slot:1}).success, true);
+assert.equal(action('AVIATOR_CASHOUT', {slot:1}).success, false);
+assert.equal(demo.balance >= 49800, true);
+now = demo.game.startsAt + 60000; demo.tick();
+assert.equal(demo.game.phase, 'CRASHED');
+assert.equal(demo.records.length, 1);
+assert.equal(demo.records[0].bets.find(b => b.slot === 2).status, 'LOST');
+assert.equal(action('AVIATOR_CASHOUT', {slot:2}).success, false);
+now += 4000; demo.tick(); assert.equal(demo.game.phase, 'WAITING'); assert.equal(demo.game.bets.some(b => !b.isBot), false);
+const restored = new FunEngine(() => {}, demo.save());
+assert.equal(restored.balance, demo.balance);
+assert.equal(restored.records.length, 1);
+const poor = new FunEngine(() => {}, { balance: 5, records: [] });
+let denied;
+poor.emit('AVIATOR_BET', {slot:1, amount:10}, r => denied = r);
+assert.equal(denied.success, false);
+assert.equal(poor.balance, 5);
+for (const amount of [NaN, Infinity, -1, 0, 10001]) {
+  poor.emit('AVIATOR_BET', {slot:1, amount}, r => denied = r);
+  assert.equal(denied.success, false);
+}
+console.log('PASS: initial balance, two slots, duplicate bet/cashout rejection, cancellation, cashout, loss, history, restore, insufficient balance and invalid amounts');
