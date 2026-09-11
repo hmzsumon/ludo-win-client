@@ -8,6 +8,7 @@ import socketUrl from "@/config/socketUrl";
 import { useLoadUserQuery } from "@/redux/features/auth/authApi";
 import AviatorHeader from "./sections/AviatorHeader";
 import AviatorMenu from "./menu/AviatorMenu";
+import { scheduleParticipantReveal } from "./participantReveal";
 import AviatorNoticeProvider from "./sections/AviatorNotice";
 import BetPanel from "./sections/BetPanel";
 import BetsTable from "./sections/BetsTable";
@@ -109,16 +110,20 @@ export default function AviatorBridge() {
   }, [sendToGame]);
 
   /* ────────── Bot participant একে একে live counter-এ যোগ হয় ────────── */
-  useEffect(() => setRevealedBotCount(0), [game.roundId]);
+  useEffect(() => {
+    // Mid-flight join/reconnect shows the received roster immediately, without
+    // starting a waiting animation. Only a new round resets the reveal count.
+    setRevealedBotCount(game.phase === "WAITING" && Date.now() < game.startsAt
+      ? 0 : game.bets.filter(bet => bet.isBot).length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game.roundId]);
   const botCount = useMemo(() => game.bets.filter((bet) => bet.isBot).length, [game.bets]);
   useEffect(() => {
-    if (revealedBotCount >= botCount) return;
-    const timer = window.setTimeout(
-      () => setRevealedBotCount((count) => Math.min(botCount, count + 1)),
-      60 + Math.floor(Math.random() * 81),
+    return scheduleParticipantReveal(
+      game.phase, game.startsAt, revealedBotCount, botCount,
+      () => setRevealedBotCount(count => Math.min(botCount, count + 1)),
     );
-    return () => window.clearTimeout(timer);
-  }, [botCount, revealedBotCount]);
+  }, [botCount, revealedBotCount, game.phase, game.startsAt, game.roundId]);
   const liveDisplayBets = useMemo(() => {
     let visibleBots = 0;
     return game.bets.filter((bet) => !bet.isBot || ++visibleBots <= revealedBotCount);
