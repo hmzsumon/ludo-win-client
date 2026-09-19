@@ -65,7 +65,7 @@ export default function BetsTable({
                 }}
               />
               <span className="truncate">
-                {bet.player.replace(/\s·\sBOT$/, "")}
+                {bet.player.replace(/\s·\s$/, "")}
               </span>
             </span>
             <span className="text-right">{bet.amount.toFixed(2)}</span>
