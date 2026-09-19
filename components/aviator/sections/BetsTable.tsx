@@ -64,6 +64,9 @@ export default function BetsTable({
                   event.currentTarget.src = "/ludo/avatar/default.png";
                 }}
               />
+              <span className="truncate">
+                {bet.player.replace(/\s*(?:·\s*)?bot$/i, "")}
+              </span>
             </span>
             <span className="text-right">{bet.amount.toFixed(2)}</span>
             <span className="text-right">
