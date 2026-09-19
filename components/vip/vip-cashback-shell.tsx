@@ -110,7 +110,7 @@ const VipCashbackShell = () => {
       const res = await claimMyVipCashback(pendingCashback._id).unwrap();
 
       setClaimSuccessMessage(
-        `Claim successful. 💎${res.data.claimedAmount.toLocaleString()} added to m_balance. 1x turnover required.`,
+        `Claim successful. 💎${res.data.claimedAmount.toLocaleString()} added to m_balance. Turnover required: 💎${res.data.turnoverRequired.toLocaleString()}.`,
       );
 
       await refetch();
@@ -245,7 +245,7 @@ const VipCashbackShell = () => {
                       style={{ background: "rgba(255,255,255,0.04)" }}
                     >
                       <p className="text-[10px] text-white/35 font-semibold uppercase">
-                        1x Turnover
+                        {info?.turnoverMultiplier ?? 1}x Turnover
                       </p>
                       <p className="mt-1 text-[13px] font-black text-yellow-300">
                         💎 {pendingCashback.turnoverRequired.toLocaleString()}

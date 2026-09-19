@@ -11,6 +11,7 @@ const DailyBonus = () => {
   const [claimDailyBonus, { isLoading: claiming }] = useClaimDailyBonusMutation();
 
   const info = data?.data;
+  if (info?.enabled === false) return null;
   if (!isLoading && !info?.canClaim && !info?.alreadyClaimed) return null;
 
   const handleClaim = async () => {
@@ -48,7 +49,7 @@ const DailyBonus = () => {
           </p>
           {!isLoading && info?.canClaim ? (
             <p className="mt-1 text-[10px] text-white/50">
-              Deposit below {info.lowDepositThreshold}: 💎{info.lowReward} • {">="} {info.lowDepositThreshold}: 💎{info.highReward}
+              {info.turnoverMultiplier}x bonus turnover • Deposit below {info.lowDepositThreshold}: 💎{info.lowReward} • {">="} {info.lowDepositThreshold}: 💎{info.highReward}
             </p>
           ) : null}
         </div>

@@ -62,7 +62,7 @@ export const PROMOTIONS: PromotionItem[] = [
       "1st deposit → +100% bonus",
       "2nd deposit → +50% bonus",
       "3rd deposit → +25% bonus",
-      "Bonus diamonds credit instantly and unlock after 1x turnover.",
+      "Bonus diamonds credit instantly. Turnover follows the current bonus rules.",
     ],
     ctaLabel: "Deposit Now",
     ctaHref: "/deposit",

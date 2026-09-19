@@ -29,6 +29,8 @@ export interface IVipPendingCashback {
 }
 
 export interface IVipCashbackInfo {
+  enabled: boolean;
+  turnoverMultiplier: number;
   currentRank: {
     rank: string;
     cashback: number;

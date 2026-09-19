@@ -12,6 +12,7 @@ export type DepositPromoInfoRes = {
   data: {
     tiers: PromotionTier[];
     sponsorTiers: PromotionTier[];
+    enabled: boolean;
     turnoverMultiplier: number;
     bonusTakenCount: number;
     nextBonusDepositNumber: number;
@@ -32,6 +33,7 @@ export type DailyBonusStatusRes = {
     claimedAmount: number;
     canClaim: boolean;
     claimedAt: string | null;
+    enabled: boolean;
     turnoverMultiplier: number;
     lowDepositThreshold: number;
     lowReward: number;

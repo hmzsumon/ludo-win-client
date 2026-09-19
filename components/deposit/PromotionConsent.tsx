@@ -67,7 +67,7 @@ export default function PromotionConsent({
 
   const turnoverRequired = useMemo(() => {
     if (!amount || value !== "opt_in") return 0;
-    return (amount + bonusAmount) * turnoverMultiplier;
+    return amount + bonusAmount * turnoverMultiplier;
   }, [value, amount, bonusAmount, turnoverMultiplier]);
 
   const showEligibility = nextBonusPercent > 0;
@@ -181,7 +181,7 @@ export default function PromotionConsent({
                   Bonus Rules
                 </div>
                 <div className="rounded-full bg-pink-100 px-2.5 py-1 text-[11px] font-black text-[#c2186a]">
-                  1x Turnover
+                  {turnoverMultiplier}x Bonus Turnover
                 </div>
               </div>
 
@@ -210,7 +210,7 @@ export default function PromotionConsent({
               <div className="mt-3 rounded-2xl bg-[#7d174b]/8 p-3 text-[12px] font-semibold leading-5 text-[#8b4568]">
                 Bonus applies only when you choose{" "}
                 <b>Participate in Bonus Program</b>. Every bonus deposit
-                requires <b>1x turnover</b> on <b>deposit + bonus</b>.
+                requires <b>1x on deposit</b> plus <b>{turnoverMultiplier}x on bonus</b>.
               </div>
             </div>
           )}
