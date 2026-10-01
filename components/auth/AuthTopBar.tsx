@@ -17,13 +17,15 @@ function DiamondBalancePill({
   amount = 0,
   onAdd,
 }: {
-  amount?: number;
+  amount?: number | string;
   onAdd?: () => void;
 }) {
-  const formatAmount = (value: number) => {
+  const formatAmount = (amount: number | string) => {
+    const parsed = Number(amount);
+    const value = Number.isFinite(parsed) ? parsed : 0;
     if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
     if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
-    return value.toString();
+    return value.toFixed(2);
   };
 
   return (

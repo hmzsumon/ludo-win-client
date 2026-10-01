@@ -45,6 +45,9 @@ export default function AviatorBridge() {
   const [tab, setTab] = useState<AviatorBetTab>("All Bets");
   const [previousBets, setPreviousBets] = useState<AviatorBet[]>([]);
   const [revealedBotCount, setRevealedBotCount] = useState(0);
+  const latestGame = useRef(game);
+  const latestDisplayBets = useRef<AviatorBet[]>([]);
+  const lastCanvasState = useRef("");
   const { data, refetch } = useLoadUserQuery();
   const refreshWallet = useCallback(() => void refetch(), [refetch]);
 
@@ -77,21 +80,28 @@ export default function AviatorBridge() {
       setHistoryStatus("No completed rounds yet.");
     });
     client.on("AVIATOR_SNAPSHOT", (next: AviatorSnapshot) => {
+      latestGame.current = next;
       setGame((current) => {
         if (current.roundId && current.roundId !== next.roundId) {
           setPreviousBets(current.bets || []);
         }
         return next;
       });
-      sendToGame("ROUND_STATE", {
-        phase: next.phase,
-        roundId: next.roundId,
-        roundNumber: next.roundId,
-        multiplier: next.multiplier,
-        bettingEndsAt: next.startsAt,
-      });
+      const stateKey = `${next.roundId}:${next.phase}`;
+      if (lastCanvasState.current !== stateKey) {
+        sendToGame("ROUND_STATE", {
+          phase: next.phase,
+          roundId: next.roundId,
+          roundNumber: next.roundId,
+          multiplier: next.multiplier,
+          bettingEndsAt: next.startsAt,
+        });
+        lastCanvasState.current = stateKey;
+      }
+      sendToGame("ROUND_TICK", { multiplier: next.multiplier });
     });
     client.on("AVIATOR_TICK", (payload) => {
+      latestGame.current = { ...latestGame.current, multiplier: payload.multiplier };
       setGame((current) => ({ ...current, multiplier: payload.multiplier }));
       sendToGame("ROUND_TICK", payload);
     });
@@ -139,6 +149,50 @@ export default function AviatorBridge() {
       (bet) => !bet.isBot || ++visibleBots <= revealedBotCount,
     );
   }, [game.bets, revealedBotCount]);
+  latestDisplayBets.current = liveDisplayBets;
+
+  // The socket can deliver a snapshot before Cocos finishes loading. Replay
+  // the current server state whenever the canvas becomes ready (or reloads).
+  useEffect(() => {
+    const onReady = (event: MessageEvent) => {
+      if (
+        event.origin !== window.location.origin ||
+        event.source !== frameRef.current?.contentWindow ||
+        event.data?.source !== "AVIATOR_COCOS" ||
+        event.data?.type !== "COCOS_READY"
+      ) return;
+      const current = latestGame.current;
+      if (!current.roundId) return;
+      lastCanvasState.current = `${current.roundId}:${current.phase}`;
+      sendToGame("ROUND_STATE", {
+        phase: current.phase,
+        roundId: current.roundId,
+        roundNumber: current.roundId,
+        multiplier: current.multiplier,
+        bettingEndsAt: current.startsAt,
+      });
+      sendToGame("ROUND_TICK", { multiplier: current.multiplier });
+      if (current.phase === "CRASHED") {
+        sendToGame("ROUND_CRASHED", {
+          roundId: current.roundId,
+          roundNumber: current.roundId,
+          crashPoint: current.multiplier,
+        });
+      }
+      sendToGame("LIVE_BETS", latestDisplayBets.current.map((bet) => ({
+        betId: bet.id,
+        userId: bet.id,
+        name: bet.player,
+        stake: bet.amount,
+        status: bet.status === "PLACED" ? "PENDING" : bet.status,
+        cashoutMultiplier: bet.cashoutMultiplier || null,
+        payout: bet.payout || null,
+        avatarUrl: bet.avatarUrl || "/ludo/avatar/default.png",
+      })));
+    };
+    window.addEventListener("message", onReady);
+    return () => window.removeEventListener("message", onReady);
+  }, [sendToGame]);
   useEffect(() => {
     sendToGame(
       "LIVE_BETS",
