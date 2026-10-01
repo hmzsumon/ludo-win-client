@@ -69,6 +69,20 @@ export default function AviatorBridge() {
       auth: { token: getSocketToken() },
     });
     setSocket(client);
+    let lastLiveEventAt = Date.now();
+    const requestCurrentRound = () => {
+      if (client.connected) client.emit("AVIATOR_JOIN");
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") requestCurrentRound();
+    };
+    window.addEventListener("focus", requestCurrentRound);
+    window.addEventListener("pageshow", requestCurrentRound);
+    document.addEventListener("visibilitychange", onVisible);
+    const syncTimer = window.setInterval(() => {
+      // Recover missed round transitions after a suspended tab or connection.
+      if (Date.now() - lastLiveEventAt > 5_000) requestCurrentRound();
+    }, 5_000);
 
     client.on("connect", () => client.emit("AVIATOR_JOIN"));
     client.on("AVIATOR_HISTORY", (payload) => {
@@ -80,6 +94,7 @@ export default function AviatorBridge() {
       setHistoryStatus("No completed rounds yet.");
     });
     client.on("AVIATOR_SNAPSHOT", (next: AviatorSnapshot) => {
+      lastLiveEventAt = Date.now();
       latestGame.current = next;
       setGame((current) => {
         if (current.roundId && current.roundId !== next.roundId) {
@@ -101,11 +116,27 @@ export default function AviatorBridge() {
       sendToGame("ROUND_TICK", { multiplier: next.multiplier });
     });
     client.on("AVIATOR_TICK", (payload) => {
-      latestGame.current = { ...latestGame.current, multiplier: payload.multiplier };
-      setGame((current) => ({ ...current, multiplier: payload.multiplier }));
+      lastLiveEventAt = Date.now();
+      const current = latestGame.current;
+      // A tick is authoritative evidence of a running round. If its initial
+      // snapshot was missed, request the roster and resume the canvas now.
+      const roundId = payload.roundId || current.roundId;
+      if (roundId !== current.roundId || current.phase !== "RUNNING") {
+        requestCurrentRound();
+        sendToGame("ROUND_STATE", {
+          phase: "RUNNING", roundId, roundNumber: roundId,
+          multiplier: payload.multiplier, bettingEndsAt: current.startsAt,
+        });
+        lastCanvasState.current = `${roundId}:RUNNING`;
+      }
+      latestGame.current = { ...current, roundId, phase: "RUNNING", multiplier: payload.multiplier };
+      setGame((current) => ({ ...current, roundId, phase: "RUNNING", multiplier: payload.multiplier }));
       sendToGame("ROUND_TICK", payload);
     });
     client.on("AVIATOR_CRASHED", (payload) => {
+      lastLiveEventAt = Date.now();
+      latestGame.current = { ...latestGame.current, phase: "CRASHED", multiplier: payload.crashPoint };
+      setGame((current) => ({ ...current, phase: "CRASHED", multiplier: payload.crashPoint }));
       setHistory((current) => mergeRoundHistory(current, [payload]));
       sendToGame("ROUND_CRASHED", {
         ...payload,
@@ -114,6 +145,10 @@ export default function AviatorBridge() {
     });
 
     return () => {
+      window.clearInterval(syncTimer);
+      window.removeEventListener("focus", requestCurrentRound);
+      window.removeEventListener("pageshow", requestCurrentRound);
+      document.removeEventListener("visibilitychange", onVisible);
       client.disconnect();
       setSocket(null);
     };

@@ -4,6 +4,8 @@ import assert from "node:assert/strict";
 import ts from "typescript";
 
 const effects = [], refs = [], messages = [], listeners = {}, socketHandlers = {};
+const requests = [];
+let checkStale;
 const frame = { postMessage: (data) => messages.push(data) };
 const react = {
   useRef: (value) => { const ref = { current: refs.length ? value : { contentWindow: frame } }; refs.push(ref); return ref; },
@@ -19,12 +21,13 @@ const source = ts.transpileModule(fs.readFileSync("components/aviator/AviatorBri
 const exports = {};
 vm.runInNewContext(source, {
   exports, React: react,
-  window: { location: { origin: "https://game.example" }, addEventListener: (name, fn) => { listeners[name] = fn; }, removeEventListener() {} },
+  window: { location: { origin: "https://game.example" }, addEventListener: (name, fn) => { listeners[name] = fn; }, removeEventListener() {}, setInterval: (fn) => { checkStale = fn; return 1; }, clearInterval() {} },
+  document: { visibilityState: "visible", addEventListener() {}, removeEventListener() {} },
   localStorage: { getItem: () => null },
   require: (name) => {
     if (name === "react") return react;
     if (name === "next/navigation") return { useRouter: () => ({}) };
-    if (name === "socket.io-client") return { io: () => ({ on: (name, fn) => { socketHandlers[name] = fn; }, emit() {}, disconnect() {} }) };
+    if (name === "socket.io-client") return { io: () => ({ connected: true, on: (name, fn) => { socketHandlers[name] = fn; }, emit: (name) => requests.push(name), disconnect() {} }) };
     if (name.includes("authApi")) return { useLoadUserQuery: () => ({ refetch() {} }) };
     if (name === "./types") return { EMPTY_AVIATOR_GAME: { roundId: "", phase: "WAITING", bets: [] } };
     if (name === "./participantReveal") return { scheduleParticipantReveal() {} };
@@ -33,6 +36,11 @@ vm.runInNewContext(source, {
 });
 exports.default();
 effects.forEach(fn => fn());
+listeners.focus();
+listeners.pageshow();
+assert.deepEqual(requests, ["AVIATOR_JOIN", "AVIATOR_JOIN"]);
+checkStale();
+assert.equal(requests.length, 2, "fresh connections should not poll");
 const snapshot = { roundId: "live-1", phase: "RUNNING", multiplier: 2, startsAt: 100, bets: [] };
 socketHandlers.AVIATOR_SNAPSHOT(snapshot);
 messages.length = 0;
@@ -55,3 +63,14 @@ messages.length = 0;
 listeners.message(ready);
 assert.deepEqual(messages.map(m => m.type), ["ROUND_STATE", "ROUND_TICK", "ROUND_CRASHED", "LIVE_BETS"]);
 console.log("PASS: delayed canvas/reload synchronization, trusted ready messages, latest tick/crash replay, and no reset on bet snapshots");
+messages.length = 0;
+socketHandlers.AVIATOR_TICK({ roundId: "live-2", multiplier: 1.25 });
+assert.equal(messages[0].type, "ROUND_STATE");
+assert.equal(messages[0].payload.phase, "RUNNING");
+assert.equal(messages[0].payload.roundId, "live-2");
+socketHandlers.AVIATOR_CRASHED({ roundId: "live-2", crashPoint: 1.5 });
+messages.length = 0;
+listeners.message(ready);
+assert.equal(messages[0].payload.phase, "CRASHED");
+assert.equal(messages[0].payload.multiplier, 1.5);
+console.log("PASS: missed RUNNING snapshot recovery and crash synchronization on re-entry");
