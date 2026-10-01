@@ -82,6 +82,7 @@ export type CashWithdrawAgentOption = {
 };
 
 export default function WithdrawForm({
+  feePercent = 0,
   min = 500,
   max = 25000,
   available,
@@ -91,6 +92,7 @@ export default function WithdrawForm({
   cashAgentsLoading = false,
   onSubmit,
 }: {
+  feePercent?: number;
   min?: number;
   max?: number;
   available: number;
@@ -182,6 +184,7 @@ export default function WithdrawForm({
 
   return (
     <div className="space-y-4 p-4">
+      <p className="text-sm text-white/70">Withdrawal fee: {feePercent}% · Fee 💎{(n * feePercent / 100).toFixed(2)} · Net 💎{(n * (1 - feePercent / 100)).toFixed(2)}</p>
       {/* ── Notice ── */}
       <div
         className="flex items-start gap-2.5 rounded-xl px-3.5 py-3"

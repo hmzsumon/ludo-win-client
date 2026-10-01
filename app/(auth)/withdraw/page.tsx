@@ -16,6 +16,7 @@ import WalletTabs, {
 } from "@/components/withdraw/WalletTabs";
 import { useGetUserPaymentMethodsQuery } from "@/redux/features/auth/authApi";
 import {
+  useGetWithdrawSettingsQuery,
   useCreateWithdrawRequestMutation,
   useGetCashWithdrawAgentsQuery,
 } from "@/redux/features/withdraw/withdrawApi";
@@ -190,7 +191,11 @@ export default function WithdrawPage() {
     providerWallets.find((w) => w.id === selectedId) || null;
 
   /* ────────── Provider Wise Withdraw Limit Config ────────── */
+  const { data: withdrawalSettings, isError: settingsError } = useGetWithdrawSettingsQuery(undefined, { refetchOnFocus: true, refetchOnMountOrArgChange: true });
   const withdrawLimits = useMemo(() => {
+    const key = ["binance", "crypto"].includes(provider) ? "usdt" : provider === "cash" ? "cash" : "mobile";
+    const policy = withdrawalSettings?.policies?.find((item: any) => item.key === key);
+    if (policy) return { min: policy.minAmount, max: policy.maxAmount ?? Infinity, maxLabel: policy.maxAmount === null ? "Unlimited" : formatBDT(policy.maxAmount) };
     if (provider === "binance" || provider === "crypto") {
       return {
         min: 1000,
@@ -212,7 +217,7 @@ export default function WithdrawPage() {
       max: 25000,
       maxLabel: formatBDT(25000),
     };
-  }, [provider]);
+  }, [provider, withdrawalSettings]);
 
   // handleSubmit আপডেট
   const handleSubmit = async (
@@ -460,12 +465,14 @@ export default function WithdrawPage() {
           /> */}
 
           <div className="rounded-2xl overflow-hidden" style={PANEL}>
+            {!withdrawalSettings && <p className="p-4 text-sm">{settingsError ? "Unable to load withdrawal settings. Please refresh to retry." : "Loading withdrawal settings…"}</p>}
             <WithdrawForm
+              feePercent={withdrawalSettings?.policies?.find((item: any) => item.key === (["binance", "crypto"].includes(provider) ? "usdt" : provider === "cash" ? "cash" : "mobile"))?.feePercent ?? 0}
               min={withdrawLimits.min}
               max={withdrawLimits.max}
               available={available}
               provider={provider}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !withdrawalSettings}
               cashAgents={cashAgents}
               cashAgentsLoading={isCashAgentsLoading}
               onSubmit={handleSubmit}

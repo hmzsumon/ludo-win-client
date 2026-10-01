@@ -59,7 +59,7 @@ export default function FunAviator() {
   const rows = tab === "Previous" ? records[0]?.bets || [] : tab === "Top" ? [...records.flatMap(r => r.bets), ...game.bets].filter(b => b.status === "CASHED_OUT").sort((a, b) => b.payout - a.payout).slice(0, 100) : game.bets;
   return (
     <main className="fixed inset-0 z-[2147483647] overflow-y-auto bg-[#0b0c0d] font-sans text-[#ddd]">
-      <AviatorNoticeProvider>
+      <AviatorNoticeProvider><div className="mx-auto min-h-dvh w-full max-w-[480px]">
         <AviatorHeader balance={balance} funMode onClose={() => router.push("/dashboard")}
           menu={<AviatorMenu frameRef={frameRef} game={game} name="Demo User" demoBets={records.flatMap(round => round.bets.filter(bet => !bet.isBot).map(bet => ({ _id: bet.id, createdAt: round.time, amount: bet.amount, payout: bet.payout, status: bet.status, cashoutMultiplier: bet.cashoutMultiplier, crashPoint: round.crashPoint })))} />} />
         <RoundHistory history={records.filter(r => r.crashPoint > 0).map(r => r.crashPoint)} />
@@ -81,7 +81,7 @@ export default function FunAviator() {
             </div>))}
           </div>
         </section>
-      </AviatorNoticeProvider>
+      </div></AviatorNoticeProvider>
     </main>
   );
 }

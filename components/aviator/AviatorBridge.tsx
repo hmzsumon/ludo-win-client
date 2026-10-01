@@ -262,7 +262,7 @@ export default function AviatorBridge() {
   return (
     <main className="fixed inset-0 z-[2147483647] overflow-y-auto bg-[#090a0b] font-sans text-[#ddd] [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
       <AviatorNoticeProvider>
-        <div className="min-h-dvh w-full bg-[#0b0c0d]">
+        <div className="mx-auto min-h-dvh w-full max-w-[480px] bg-[#0b0c0d]">
           <AviatorHeader
             balance={balance}
             menu={

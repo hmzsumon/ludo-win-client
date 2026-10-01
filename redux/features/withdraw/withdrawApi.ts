@@ -90,6 +90,7 @@ export type CashWithdrawAgent = {
 
 export const withdrawApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    getWithdrawSettings: builder.query<any, void>({ query: () => "/withdraw/settings", keepUnusedDataFor: 0 }),
     // create new withdraw request
     createWithdrawRequest: builder.mutation<
       CreateWithdrawRequestResponse,
@@ -154,6 +155,7 @@ export const withdrawApi = apiSlice.injectEndpoints({
 });
 
 export const {
+  useGetWithdrawSettingsQuery,
   useCreateWithdrawRequestMutation,
   useCancelMyWithdrawRequestMutation,
   useGetMyWithdrawRequestsQuery,
