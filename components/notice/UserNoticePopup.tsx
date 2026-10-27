@@ -7,11 +7,13 @@ import {
 } from "@/redux/features/notifications/notificationApi";
 import { Bell, Check, Megaphone, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 
 /* ────────── component ────────── */
 export default function UserNoticePopup() {
   const [hiddenIds, setHiddenIds] = useState<string[]>([]);
+  const pathname = usePathname();
 
   /* ────────── unread notice pull ──────────
      Admin notice category announcement হিসেবে save হয়।
@@ -32,7 +34,7 @@ export default function UserNoticePopup() {
   }, [data, hiddenIds]);
 
   const notice = notices[0];
-  if (!notice?._id) return null;
+  if (!notice?._id || pathname.startsWith("/notices")) return null;
 
   const closeLocal = () => {
     setHiddenIds((prev) => [...prev, String(notice._id)]);
@@ -62,23 +64,23 @@ export default function UserNoticePopup() {
               </span>
             </div>
 
+            <Link href={`/notices/${encodeURIComponent(notice._id)}`} className="block rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-yellow-300">
             <h3 className="line-clamp-2 text-base font-black leading-5">
               {notice.title || "Admin Notice"}
             </h3>
             <p className="mt-2 line-clamp-4 text-sm leading-5 text-white/75">
               {notice.message || "-"}
             </p>
+            </Link>
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
-              {notice.url ? (
                 <Link
-                  href={notice.url}
-                  onClick={markAsRead}
+                  href={`/notices/${encodeURIComponent(notice._id)}`}
                   className="inline-flex items-center gap-1 rounded-full bg-yellow-300 px-3 py-1.5 text-xs font-black text-[#2d0a42] transition hover:bg-yellow-200"
                 >
-                  Open
+                  Read more →
                 </Link>
-              ) : null}
+                <Link href="/notices" className="px-2 py-1.5 text-xs font-bold text-yellow-100 underline underline-offset-4">All notices</Link>
 
               <button
                 type="button"

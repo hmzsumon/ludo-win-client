@@ -3,6 +3,14 @@ import { apiSlice } from "../api/apiSlice";
 /* ────────── notification api ────────── */
 export const notificationApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    getMyNotices: builder.query<any, number>({
+      query: (skip = 0) => `/my-notifications?category=announcement&limit=20&skip=${skip}`,
+      providesTags: ["Notifications"],
+    }),
+    getMyNotification: builder.query<any, string>({
+      query: (id) => `/notification/${encodeURIComponent(id)}`,
+      providesTags: ["Notifications"],
+    }),
     /* ────────── my unread list ────────── */
     getMyUnreadNotifications: builder.query<any, void>({
       query: () => "/my-unread-notifications?limit=50&skip=0",
@@ -21,7 +29,7 @@ export const notificationApi = apiSlice.injectEndpoints({
         url: `/notification/${id}`,
         method: "PUT",
       }),
-      invalidatesTags: ["MyUnreadNotifications", "MyUnreadNotificationsCount"],
+      invalidatesTags: ["MyUnreadNotifications", "MyUnreadNotificationsCount", "Notifications"],
     }),
 
     /* ────────── delete one notification ────────── */
@@ -30,7 +38,7 @@ export const notificationApi = apiSlice.injectEndpoints({
         url: `/notification/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["MyUnreadNotifications", "MyUnreadNotificationsCount"],
+      invalidatesTags: ["MyUnreadNotifications", "MyUnreadNotificationsCount", "Notifications"],
     }),
 
     /* ────────── admin list ────────── */
@@ -55,6 +63,8 @@ export const notificationApi = apiSlice.injectEndpoints({
 });
 
 export const {
+  useGetMyNoticesQuery,
+  useGetMyNotificationQuery,
   useGetMyUnreadNotificationsQuery,
   useGetMyUnreadNotificationsCountQuery,
   useUpdateNotificationMutation,

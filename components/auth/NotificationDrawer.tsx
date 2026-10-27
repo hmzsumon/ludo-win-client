@@ -7,6 +7,7 @@ import {
   useUpdateNotificationMutation,
 } from "@/redux/features/notifications/notificationApi";
 import { Bell, Check, Trash2, X } from "lucide-react";
+import Link from "next/link";
 
 export default function NotificationDrawer({
   open,
@@ -93,10 +94,11 @@ export default function NotificationDrawer({
           </div>
 
           <div className="mt-4 h-px w-full bg-[linear-gradient(90deg,transparent,rgba(255,215,0,0.45),transparent)]" />
+          <Link href="/notices" onClick={onClose} className="mt-3 inline-flex text-sm font-bold text-yellow-200 underline underline-offset-4">View all notices →</Link>
         </div>
 
         {/* Body */}
-        <div className="relative h-[calc(100%-92px)] overflow-y-auto p-3 text-sm text-neutral-200">
+        <div className="relative h-[calc(100%-160px)] overflow-y-auto p-3 text-sm text-neutral-200">
           {isFetching ? (
             <div className="flex min-h-[220px] items-center justify-center">
               <div className="rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
@@ -134,6 +136,7 @@ export default function NotificationDrawer({
                   <div className="absolute -right-10 -top-10 h-20 w-20 rounded-full bg-fuchsia-400/10 blur-2xl transition duration-500 group-hover:bg-fuchsia-300/15" />
 
                   <div className="pl-2">
+                    <Link href={`/notices/${encodeURIComponent(n._id)}`} onClick={onClose} className="block rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-yellow-300">
                     <div className="flex items-start justify-between gap-3">
                       <h3 className="line-clamp-1 text-[14px] font-black leading-5 text-white">
                         {n.title}
@@ -143,6 +146,8 @@ export default function NotificationDrawer({
                     <p className="mt-1 line-clamp-2 text-[12.5px] leading-5 text-white/70">
                       {n.message}
                     </p>
+                    <span className="mt-2 inline-block text-xs font-bold text-yellow-200">Read more →</span>
+                    </Link>
 
                     <div className="mt-3 flex items-center gap-2">
                       <button
