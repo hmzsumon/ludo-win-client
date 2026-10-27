@@ -4,6 +4,8 @@ import { useGetMyNotificationQuery, useUpdateNotificationMutation } from "@/redu
 import { ArrowLeft, ExternalLink, Megaphone } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import NoticeMessage from "@/components/notice/NoticeMessage";
+import { getNoticeLink } from "@/utils/noticeLinks";
 
 export default function NoticeDetailPage({ params }: { params: { id: string } }) {
   const { currentData: data, isLoading, isFetching, isError, error, refetch } = useGetMyNotificationQuery(params.id);
@@ -18,9 +20,7 @@ export default function NoticeDetailPage({ params }: { params: { id: string } })
     }
   }, [notice, params.id, markRead]);
 
-  // Only allow web links or local paths for the optional admin-provided action.
-  const url = typeof notice?.url === "string" ? notice.url.trim() : "";
-  const safeUrl = /^(https?:\/\/|\/(?!\/))/i.test(url) && !/[\\\u0000-\u0020]/.test(url) ? url : "";
+  const safeUrl = getNoticeLink(notice?.url);
   const notFound = error && "status" in error && error.status === 404;
 
   return (
@@ -40,8 +40,8 @@ export default function NoticeDetailPage({ params }: { params: { id: string } })
             {notice.createdAt && <time dateTime={notice.createdAt} className="mt-4 block text-sm text-white/60">{new Date(notice.createdAt).toLocaleString("en-BD")}</time>}
           </header>
           <div className="p-6 sm:p-8">
-            <div className="whitespace-pre-wrap text-base leading-8 text-white/90 [overflow-wrap:anywhere]">{notice.message}</div>
-            {safeUrl && <a href={safeUrl} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-yellow-300 px-5 py-3 text-sm font-bold text-purple-950 hover:bg-yellow-200">Open related link<ExternalLink size={16} /></a>}
+            <div className="whitespace-pre-wrap text-base leading-8 text-white/90 [overflow-wrap:anywhere]"><NoticeMessage message={notice.message || ""} /></div>
+            {safeUrl && <a href={safeUrl} className="mt-8 inline-flex items-center gap-2 rounded-xl bg-yellow-300 px-5 py-3 text-sm font-bold text-purple-950 hover:bg-yellow-200">Open related link<ExternalLink size={16} /></a>}
           </div>
         </article>
       )}

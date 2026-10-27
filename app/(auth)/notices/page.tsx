@@ -4,6 +4,7 @@ import { useGetMyNoticesQuery } from "@/redux/features/notifications/notificatio
 import { ArrowLeft, ArrowRight, Megaphone } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import NoticeMessage from "@/components/notice/NoticeMessage";
 
 export default function NoticesPage() {
   const [skip, setSkip] = useState(0);
@@ -27,15 +28,15 @@ export default function NoticesPage() {
         <ul className="space-y-3">
           {notices.map((notice: any) => (
             <li key={notice._id ?? notice.id}>
-              <Link href={`/notices/${encodeURIComponent(notice._id ?? notice.id)}`} className="block rounded-2xl border border-white/15 bg-purple-950/60 p-5 transition hover:border-yellow-300/50 hover:bg-purple-900/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-yellow-300">
+              <div className="block rounded-2xl border border-white/15 bg-purple-950/60 p-5 transition hover:border-yellow-300/50 hover:bg-purple-900/60">
                 <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-white/60">
                   {!notice.is_read && <span className="rounded-full bg-yellow-300/15 px-2.5 py-1 font-bold text-yellow-200">New</span>}
                   {notice.createdAt && <time dateTime={notice.createdAt}>{new Date(notice.createdAt).toLocaleDateString("en-BD")}</time>}
                 </div>
-                <h2 className="break-words text-lg font-bold">{notice.title || "Notice"}</h2>
-                <p className="mt-2 line-clamp-2 break-words text-sm leading-6 text-white/70">{notice.message}</p>
-                <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-yellow-200">Read more <ArrowRight size={16} /></span>
-              </Link>
+                <Link href={`/notices/${encodeURIComponent(notice._id ?? notice.id)}`} className="block rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-yellow-300"><h2 className="break-words text-lg font-bold">{notice.title || "Notice"}</h2></Link>
+                <p className="mt-2 line-clamp-2 break-words text-sm leading-6 text-white/70"><NoticeMessage message={notice.message || ""} /></p>
+                <Link href={`/notices/${encodeURIComponent(notice._id ?? notice.id)}`} className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-yellow-200">Read more <ArrowRight size={16} /></Link>
+              </div>
             </li>
           ))}
         </ul>

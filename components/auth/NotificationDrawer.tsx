@@ -8,6 +8,8 @@ import {
 } from "@/redux/features/notifications/notificationApi";
 import { Bell, Check, Trash2, X } from "lucide-react";
 import Link from "next/link";
+import NoticeMessage from "@/components/notice/NoticeMessage";
+import { getNoticeLink } from "@/utils/noticeLinks";
 
 export default function NotificationDrawer({
   open,
@@ -142,14 +144,17 @@ export default function NotificationDrawer({
                         {n.title}
                       </h3>
                     </div>
+                    </Link>
 
                     <p className="mt-1 line-clamp-2 text-[12.5px] leading-5 text-white/70">
-                      {n.message}
+                      <NoticeMessage message={n.message || ""} />
                     </p>
+                    <Link href={`/notices/${encodeURIComponent(n._id)}`} onClick={onClose}>
                     <span className="mt-2 inline-block text-xs font-bold text-yellow-200">Read more →</span>
                     </Link>
 
                     <div className="mt-3 flex items-center gap-2">
+                      {getNoticeLink(n.url) && <a href={getNoticeLink(n.url)} className="rounded-full bg-yellow-300 px-3 py-1.5 text-[11px] font-bold text-purple-950">Open link →</a>}
                       <button
                         onClick={() => markRead(n._id)}
                         className="inline-flex items-center gap-1 rounded-full border border-yellow-300/20 bg-yellow-400/10 px-3 py-1.5 text-[11px] font-bold text-yellow-200 transition hover:bg-yellow-400/20"
